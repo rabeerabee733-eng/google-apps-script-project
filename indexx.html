@@ -3,55 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <title>مشروع Google Apps Script</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      direction: rtl;
+      text-align: right;
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin: 8px 0 4px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>مرحبًا بك في مشروعي على Google Apps Script 👋</h1>
-  <p>هذا المشروع مرفوع على GitHub ومربوط مع Google Apps Script.</p>
-  <p>
-    يمكن تعديل هذه الصفحة من ملف <code>index.html</code> في المستودع.
-  </p>
+  <h1>نموذج طلب – متصل بـ Google Sheets</h1>
+  <p>هذا النموذج موجود على GitHub ويُرسل البيانات إلى Google Apps Script ثم إلى Google Sheets.</p>
+
+  <!-- النموذج -->
+  <form id="orderForm">
+    <label for="name">الاسم</label>
+    <input id="name" name="name" type="text" required>
+
+    <label for="phone">الهاتف الأساسي</label>
+    <input id="phone" name="phone" type="tel" required>
+
+    <label for="altPhone">هاتف بديل (اختياري)</label>
+    <input id="altPhone" name="altPhone" type="tel">
+
+    <label for="governorate">المحافظة</label>
+    <input id="governorate" name="governorate" type="text">
+
+    <label for="district">اللواء</label>
+    <input id="district" name="district" type="text">
+
+    <label for="address">العنوان التفصيلي</label>
+    <textarea id="address" name="address" rows="3"></textarea>
+
+    <label>
+      <input id="cod" name="cod" type="checkbox">
+      الدفع عند الاستلام
+    </label>
+
+    <label for="itemsCount">عدد المنتجات</label>
+    <input id="itemsCount" name="itemsCount" type="number" min="0" value="0">
+
+    <label for="productsTotal">مجموع المنتجات (دنانير)</label>
+    <input id="productsTotal" name="productsTotal" type="number" min="0" step="0.01" value="0">
+
+    <label for="deliveryFee">رسوم التوصيل (دنانير)</label>
+    <input id="deliveryFee" name="deliveryFee" type="number" min="0" step="0.01" value="0">
+
+    <label for="grandTotal">الإجمالي الكلي (دنانير)</label>
+    <input id="grandTotal" name="grandTotal" type="number" min="0" step="0.01" value="0">
+
+    <label for="notes">ملاحظات (اختياري)</label>
+    <textarea id="notes" name="notes" rows="3"></textarea>
+
+    <button type="submit">إرسال الطلب</button>
+  </form>
+
+  <script>
+    // رابط الـ Web App من Apps Script
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxrYKw1R-J3q84O6SSBU94fBjk7w-kKHJFpR-64Se_XFkAGodZjkW1WWyjrVl8SroiY/exec';
+
+    async function sendOrder(order) {
+      try {
+        await fetch(WEB_APP_URL, {
+          method: 'POST',
+          mode: 'no-cors', // يسمح بإرسال الطلب بدون مشاكل CORS
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(order)
+        });
+
+        alert('تم إرسال طلبك بنجاح ✅');
+      } catch (err) {
+        console.error(err);
+        alert('حدث خطأ أثناء إرسال الطلب ❌');
+      }
+    }
+
+    // نربط الكود بالنموذج بعد تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('orderForm');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // جمع بيانات الطلب من الحقول
+        const order = {
+          name: document.getElementById('name').value,
+          phone: document.getElementById('phone').value,
+          altPhone: document.getElementById('altPhone').value,
+          governorate: document.getElementById('governorate').value,
+          district: document.getElementById('district').value,
+          address: document.getElementById('address').value,
+          cod: document.getElementById('cod').checked,
+          notes: document.getElementById('notes').value,
+          itemsCount: Number(document.getElementById('itemsCount').value) || 0,
+          productsTotal: Number(document.getElementById('productsTotal').value) || 0,
+          deliveryFee: Number(document.getElementById('deliveryFee').value) || 0,
+          grandTotal: Number(document.getElementById('grandTotal').value) || 0,
+          // حالياً لا نرسل تفاصيل المنتجات (items) – يمكنك إضافتها لاحقاً
+          items: []
+        };
+
+        sendOrder(order);
+        form.reset(); // تنظيف النموذج بعد الإرسال (اختياري)
+      });
+    });
+  </script>
 </body>
 </html>
-<script>
-  // ضعِ هنا رابط الـ Web App الذي نسختِه من Apps Script
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxrYKw1R-J3q84O6SSBU94fBjk7w-kKHJFpR-64Se_XFkAGodZjkW1WWyjrVl8SroiY/exec';
-
-  async function sendOrder(order) {
-    try {
-      await fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors', // مهم حتى يرسل الطلب بدون مشاكل CORS
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(order)
-      });
-
-      // حتى لو ما نقدر نقرأ الرد بسبب no-cors، الطلب يُرسَل ويُحفَظ في الشيت
-      alert('تم إرسال طلبك بنجاح ✅');
-    } catch (err) {
-      console.error(err);
-      alert('حدث خطأ أثناء إرسال الطلب ❌');
-    }
-  }
-
-  // مثال على ربطها بالفورم:
-  document.getElementById('orderForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    // اجمعي بيانات الطلب من الحقول
-    const order = {
-      name: document.getElementById('name').value,
-      phone: document.getElementById('phone').value,
-      altPhone: document.getElementById('altPhone').value,
-      governorate: document.getElementById('governorate').value,
-      district: document.getElementById('district').value,
-      address: document.getElementById('address').value,
-      cod: document.getElementById('cod').checked,
-      notes: document.getElementById('notes').value,
-      // … وباقي الحقول (items, deliveryFee, grandTotal, إلخ)
-    };
-
-    sendOrder(order);
-  });
-</script>
