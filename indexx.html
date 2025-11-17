@@ -80,12 +80,12 @@
   <div id="result"></div>
 
   <script>
-    // رابط الـ Web App الجديد من Apps Script (exec)
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsfBycmOWlZW6GvTsHd7kQy1eXldG1FDZN84GS9aiaxIzsuawLGpygOxVk-BwQspMh/exec';
+    // رابط الـ Web App الجديد (exec)
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsfBycmOWlZW6GvTsHd7kQy1eXldG1FDZN84GS9aiaxIzsuawLGpygOxVk-BwQspMh/exec';
 
     async function sendOrder(order) {
       try {
-        // نرسل البيانات كـ x-www-form-urlencoded في بارامتر اسمه data
+        // نرسل البيانات في بارامتر اسمه data لتفهمه doPost
         const body = 'data=' + encodeURIComponent(JSON.stringify(order));
 
         const response = await fetch(WEB_APP_URL, {
@@ -112,14 +112,12 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsfBycmOWlZW6GvTsH
       }
     }
 
-    // نربط الكود بالنموذج بعد تحميل الصفحة
     window.addEventListener('DOMContentLoaded', function () {
       const form = document.getElementById('orderForm');
 
       form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        // جمع بيانات الطلب من الحقول
         const order = {
           name: document.getElementById('name').value,
           phone: document.getElementById('phone').value,
@@ -133,11 +131,11 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsfBycmOWlZW6GvTsH
           productsTotal: Number(document.getElementById('productsTotal').value) || 0,
           deliveryFee: Number(document.getElementById('deliveryFee').value) || 0,
           grandTotal: Number(document.getElementById('grandTotal').value) || 0,
-          items: [] // يمكن ملؤها لاحقًا بتفاصيل المنتجات
+          items: []
         };
 
         sendOrder(order);
-        form.reset(); // تنظيف النموذج بعد الإرسال (اختياري)
+        form.reset();
       });
     });
   </script>
