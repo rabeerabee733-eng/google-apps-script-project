@@ -12,3 +12,46 @@
   </p>
 </body>
 </html>
+<script>
+  // ضعِ هنا رابط الـ Web App الذي نسختِه من Apps Script
+  const WEB_APP_URL = 'https://script.google.com/macros/s/XXXXXXXXXXXX/exec';
+
+  async function sendOrder(order) {
+    try {
+      await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors', // مهم حتى يرسل الطلب بدون مشاكل CORS
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(order)
+      });
+
+      // حتى لو ما نقدر نقرأ الرد بسبب no-cors، الطلب يُرسَل ويُحفَظ في الشيت
+      alert('تم إرسال طلبك بنجاح ✅');
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء إرسال الطلب ❌');
+    }
+  }
+
+  // مثال على ربطها بالفورم:
+  document.getElementById('orderForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    // اجمعي بيانات الطلب من الحقول
+    const order = {
+      name: document.getElementById('name').value,
+      phone: document.getElementById('phone').value,
+      altPhone: document.getElementById('altPhone').value,
+      governorate: document.getElementById('governorate').value,
+      district: document.getElementById('district').value,
+      address: document.getElementById('address').value,
+      cod: document.getElementById('cod').checked,
+      notes: document.getElementById('notes').value,
+      // … وباقي الحقول (items, deliveryFee, grandTotal, إلخ)
+    };
+
+    sendOrder(order);
+  });
+</script>
