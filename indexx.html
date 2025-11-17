@@ -24,6 +24,10 @@
       padding: 8px 16px;
       cursor: pointer;
     }
+    #result {
+      margin-top: 16px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -73,25 +77,38 @@
     <button type="submit">إرسال الطلب</button>
   </form>
 
+  <div id="result"></div>
+
   <script>
-    // رابط الـ Web App من Apps Script
-    const WEB_APP_URL = 'https://script.google.com/macros/library/d/19FSfpXkCUg3M48UByfbzGyqBCTVYHfG5As1rSJ0v8KQyEXrLSiP373Ex/28';
+    // رابط الـ Web App الجديد من Apps Script (exec)
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsfBycmOWlZW6GvTsHd7kQy1eXldG1FDZN84GS9aiaxIzsuawLGpygOxVk-BwQspMh/exec';
 
     async function sendOrder(order) {
       try {
-        await fetch(WEB_APP_URL, {
+        // نرسل البيانات كـ x-www-form-urlencoded في بارامتر اسمه data
+        const body = 'data=' + encodeURIComponent(JSON.stringify(order));
+
+        const response = await fetch(WEB_APP_URL, {
           method: 'POST',
-          mode: 'no-cors', // يسمح بإرسال الطلب بدون مشاكل CORS
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
           },
-          body: JSON.stringify(order)
+          body: body
         });
 
-        alert('تم إرسال طلبك بنجاح ✅');
+        const result = await response.json();
+
+        if (result.success) {
+          const div = document.getElementById('result');
+          div.textContent = 'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber;
+          alert('تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber);
+        } else {
+          console.error(result.error);
+          alert('حدث خطأ أثناء حفظ الطلب في الشيت ❌');
+        }
       } catch (err) {
         console.error(err);
-        alert('حدث خطأ أثناء إرسال الطلب ❌');
+        alert('تعذر الاتصال بخادم Google Apps Script ❌');
       }
     }
 
@@ -116,8 +133,7 @@
           productsTotal: Number(document.getElementById('productsTotal').value) || 0,
           deliveryFee: Number(document.getElementById('deliveryFee').value) || 0,
           grandTotal: Number(document.getElementById('grandTotal').value) || 0,
-          // حالياً لا نرسل تفاصيل المنتجات (items) – يمكنك إضافتها لاحقاً
-          items: []
+          items: [] // يمكن ملؤها لاحقًا بتفاصيل المنتجات
         };
 
         sendOrder(order);
