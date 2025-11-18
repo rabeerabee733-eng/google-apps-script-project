@@ -46,7 +46,6 @@
   <h1>نموذج طلب متصل بـ Google Sheets</h1>
   <p>هذا النموذج موجود على GitHub ويُرسل البيانات إلى Google Apps Script ثم إلى Google Sheets.</p>
 
-  <!-- النموذج -->
   <form id="orderForm">
     <label for="name">الاسم</label>
     <input id="name" name="name" type="text" required>
@@ -66,39 +65,18 @@
     <label for="address">العنوان التفصيلي</label>
     <textarea id="address" name="address" rows="3"></textarea>
 
-    <label>
-      <input id="cod" name="cod" type="checkbox">
-      الدفع عند الاستلام
-    </label>
-
-    <label for="itemsCount">عدد المنتجات</label>
-    <input id="itemsCount" name="itemsCount" type="number" min="0" value="0">
-
-    <label for="productsTotal">مجموع المنتجات (دنانير)</label>
-    <input id="productsTotal" name="productsTotal" type="number" min="0" step="0.01" value="0">
-
-    <label for="deliveryFee">رسوم التوصيل (دنانير)</label>
-    <input id="deliveryFee" name="deliveryFee" type="number" min="0" step="0.01" value="0">
-
-    <label for="grandTotal">الإجمالي الكلي (دنانير)</label>
-    <input id="grandTotal" name="grandTotal" type="number" min="0" step="0.01" value="0">
-
-    <label for="notes">ملاحظات (اختياري)</label>
-    <textarea id="notes" name="notes" rows="3"></textarea>
-
     <button type="submit">إرسال الطلب</button>
   </form>
 
   <div id="result"></div>
 
   <script>
-    // رابط Web App (exec) من Google Apps Script
+    // رابط Web App (exec) من Apps Script
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxsfBycmOWlZW6GvTsHd7kQy1eXldG1FDZN84GS9aiaxIzsuawLGpygOxVk-BwQspMh/exec';
 
     // إرسال الطلب إلى Apps Script
     async function sendOrder(order) {
       try {
-        // نرسل البيانات في بارامتر اسمه data ليقرأه doPost
         const body = 'data=' + encodeURIComponent(JSON.stringify(order));
 
         const response = await fetch(WEB_APP_URL, {
@@ -138,14 +116,7 @@
           altPhone: document.getElementById('altPhone').value,
           governorate: document.getElementById('governorate').value,
           district: document.getElementById('district').value,
-          address: document.getElementById('address').value,
-          cod: document.getElementById('cod').checked,
-          notes: document.getElementById('notes').value,
-          itemsCount: Number(document.getElementById('itemsCount').value) || 0,
-          productsTotal: Number(document.getElementById('productsTotal').value) || 0,
-          deliveryFee: Number(document.getElementById('deliveryFee').value) || 0,
-          grandTotal: Number(document.getElementById('grandTotal').value) || 0,
-          items: [] // يمكنك لاحقاً إضافة تفاصيل المنتجات هنا
+          address: document.getElementById('address').value
         };
 
         sendOrder(order);
