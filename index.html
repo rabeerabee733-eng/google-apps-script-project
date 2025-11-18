@@ -1,132 +1,94 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-  <meta charset="UTF-8" />
-  <title>نموذج طلب – Google Apps Script + GitHub</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      direction: rtl;
-      text-align: right;
-      padding: 20px;
-      background: #f5f5ff;
-    }
-    h1 {
-      color: #4b2aad;
-    }
-    label {
-      display: block;
-      margin: 8px 0 4px;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 6px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    button {
-      margin-top: 12px;
-      padding: 8px 16px;
-      cursor: pointer;
-      border-radius: 6px;
-      border: none;
-      background: #6c4dff;
-      color: #fff;
-      font-weight: 600;
-    }
-    #result {
-      margin-top: 16px;
-      font-weight: bold;
-      color: #0b8a26;
-    }
-  </style>
-</head>
-<body>
-  <h1>نموذج طلب متصل بـ Google Sheets</h1>
-  <p>هذا النموذج موجود على GitHub ويُرسل البيانات إلى Google Apps Script ثم إلى Google Sheets.</p>
+/***********************
+ * ضبط ملف Google Sheets
+ ***********************/
+var SHEET_ID = '1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w';
 
-  <form id="orderForm">
-    <label for="name">الاسم</label>
-    <input id="name" name="name" type="text" required>
+/***********************
+ * doGet (للاختبار فقط)
+ ***********************/
+function doGet(e) {
+  return ContentService.createTextOutput('OK');
+}
 
-    <label for="phone">الهاتف الأساسي</label>
-    <input id="phone" name="phone" type="tel" required>
+/****************************************
+ * حفظ الطلب في Google Sheets
+ ****************************************/
+function saveOrder(order) {
+  order = order || {};
 
-    <label for="altPhone">هاتف بديل (اختياري)</label>
-    <input id="altPhone" name="altPhone" type="tel">
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheets()[0];
 
-    <label for="governorate">المحافظة</label>
-    <input id="governorate" name="governorate" type="text">
-
-    <label for="district">اللواء</label>
-    <input id="district" name="district" type="text">
-
-    <label for="address">العنوان التفصيلي</label>
-    <textarea id="address" name="address" rows="3"></textarea>
-
-    <button type="submit">إرسال الطلب</button>
-  </form>
-
-  <div id="result"></div>
-
-  <script>
-    // رابط Web App (exec) من Apps Script
-    const WEB_APP_URL =
-      'https://script.google.com/macros/s/AKfycbxsfBycmOWlZW6GvTsHd7kQy1eXldG1FDZN84GS9aiaxIzsuawLGpygOxVk-BwQspMh/exec';
-
-    // إرسال الطلب إلى Apps Script
-    async function sendOrder(order) {
-      try {
-        const body = 'data=' + encodeURIComponent(JSON.stringify(order));
-
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-          },
-          body: body
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          const div = document.getElementById('result');
-          div.textContent =
-            'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber;
-          alert(
-            'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber
-          );
-        } else {
-          console.error(result.error);
-          alert('حدث خطأ أثناء حفظ الطلب في الشيت ❌');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('تعذر الاتصال بخادم Google Apps Script ❌');
-      }
+    // إنشاء عناوين الأعمدة إذا كان الشيت فارغاً
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        'الرقم',
+        'التاريخ والوقت',
+        'الاسم',
+        'الهاتف الأساسي',
+        'هاتف بديل',
+        'المحافظة',
+        'اللواء',
+        'العنوان التفصيلي'
+      ]);
     }
 
-    // ربط النموذج بالدالة
-    window.addEventListener('DOMContentLoaded', function () {
-      const form = document.getElementById('orderForm');
+    var orderNumber = sheet.getLastRow(); // رقم الطلب
 
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
+    sheet.appendRow([
+      orderNumber,
+      new Date(),
+      order.name || '',
+      order.phone || '',
+      order.altPhone || '',
+      order.governorate || '',
+      order.district || '',
+      order.address || ''
+    ]);
 
-        const order = {
-          name: document.getElementById('name').value,
-          phone: document.getElementById('phone').value,
-          altPhone: document.getElementById('altPhone').value,
-          governorate: document.getElementById('governorate').value,
-          district: document.getElementById('district').value,
-          address: document.getElementById('address').value
-        };
+    return orderNumber;
 
-        sendOrder(order);
-        form.reset();
-      });
-    });
-  </script>
-</body>
-</html>
+  } catch (err) {
+    Logger.log(err);
+    throw err;
+  }
+}
+
+/****************************************
+ * doPost – تستقبل الطلب من GitHub
+ ****************************************/
+function doPost(e) {
+  var result;
+
+  try {
+    var dataString = '';
+
+    if (e && e.parameter && e.parameter.data) {
+      dataString = e.parameter.data;
+    } else if (e && e.postData && e.postData.contents) {
+      dataString = e.postData.contents;
+    } else {
+      throw new Error('No data found in request');
+    }
+
+    var order = JSON.parse(dataString);
+    var orderNumber = saveOrder(order);
+
+    result = {
+      success: true,
+      orderNumber: orderNumber
+    };
+
+  } catch (err) {
+    Logger.log(err);
+    result = {
+      success: false,
+      error: err.toString()
+    };
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
