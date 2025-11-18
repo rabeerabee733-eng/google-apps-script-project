@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <title>نموذج طلب – Google Apps Script + GitHub</title>
+  <title>نموذج طلب متصل بـ Google Sheets</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -10,8 +10,6 @@
       text-align: right;
       padding: 20px;
       background: #f5f5ff;
-      max-width: 600px;
-      margin: 0 auto;
     }
     h1 {
       color: #4b2aad;
@@ -19,146 +17,95 @@
     label {
       display: block;
       margin: 8px 0 4px;
-      font-weight: 600;
     }
     input, textarea {
       width: 100%;
-      padding: 10px;
+      padding: 6px;
       box-sizing: border-box;
-      border-radius: 6px;
+      border-radius: 4px;
       border: 1px solid #ccc;
-      font-size: 16px;
     }
     button {
-      margin-top: 16px;
-      padding: 12px 24px;
+      margin-top: 12px;
+      padding: 8px 16px;
       cursor: pointer;
       border-radius: 6px;
       border: none;
       background: #6c4dff;
       color: #fff;
       font-weight: 600;
-      font-size: 16px;
-      width: 100%;
-    }
-    button:hover {
-      background: #5a3fe0;
-    }
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
     }
     #result {
       margin-top: 16px;
-      padding: 12px;
-      border-radius: 6px;
       font-weight: bold;
-      text-align: center;
-    }
-    .success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .form-group {
-      margin-bottom: 16px;
+      color: #0b8a26;
     }
   </style>
 </head>
 <body>
   <h1>نموذج طلب متصل بـ Google Sheets</h1>
-  <p>هذا النموذج يُرسل البيانات إلى Google Apps Script ثم إلى Google Sheets.</p>
+  <p>هذا النموذج موجود على GitHub ويُرسل البيانات إلى Google Apps Script ثم إلى Google Sheets.</p>
 
   <form id="orderForm">
-    <div class="form-group">
-      <label for="name">الاسم *</label>
-      <input id="name" name="name" type="text" required>
-    </div>
+    <label for="name">الاسم</label>
+    <input id="name" name="name" type="text" required>
 
-    <div class="form-group">
-      <label for="phone">الهاتف الأساسي *</label>
-      <input id="phone" name="phone" type="tel" required>
-    </div>
+    <label for="phone">الهاتف الأساسي</label>
+    <input id="phone" name="phone" type="tel" required>
 
-    <div class="form-group">
-      <label for="altPhone">هاتف بديل (اختياري)</label>
-      <input id="altPhone" name="altPhone" type="tel">
-    </div>
+    <label for="altPhone">هاتف بديل (اختياري)</label>
+    <input id="altPhone" name="altPhone" type="tel">
 
-    <div class="form-group">
-      <label for="governorate">المحافظة</label>
-      <input id="governorate" name="governorate" type="text">
-    </div>
+    <label for="governorate">المحافظة</label>
+    <input id="governorate" name="governorate" type="text">
 
-    <div class="form-group">
-      <label for="district">اللواء</label>
-      <input id="district" name="district" type="text">
-    </div>
+    <label for="district">اللواء</label>
+    <input id="district" name="district" type="text">
 
-    <div class="form-group">
-      <label for="address">العنوان التفصيلي</label>
-      <textarea id="address" name="address" rows="3"></textarea>
-    </div>
+    <label for="address">العنوان التفصيلي</label>
+    <textarea id="address" name="address" rows="3"></textarea>
 
-    <button type="submit" id="submitBtn">إرسال الطلب</button>
+    <button type="submit">إرسال الطلب</button>
   </form>
 
   <div id="result"></div>
 
   <script>
-    // 🔄 استبدل هذا الرابط برابط Web App الخاص بك بعد النشر
-    const WEB_APP_URL = 'https://docs.google.com/spreadsheets/d/19SHvY5VE77pG9a5E4JUivabIpx7C12S5dE-3yt-ZoLo/edit?usp=drive_link';
+    // 1) ضعي هنا رابط Web App (exec) من Apps Script
+    const WEB_APP_URL =
+      'https://script.google.com/macros/s/AKfycbxsfBycmOWlZW6GvTsHd7kQy1eXldG1FDZN84GS9aiaxIzsuawLGpygOxVk-BwQspMh/exec';
 
-    // إرسال الطلب إلى Apps Script
+    // 2) إرسال الطلب إلى Apps Script كـ JSON
     async function sendOrder(order) {
-      const submitBtn = document.getElementById('submitBtn');
-      const resultDiv = document.getElementById('result');
-      
       try {
-        // تعطيل الزر أثناء الإرسال
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'جاري الإرسال...';
-        resultDiv.textContent = '';
-        
-        // إرسال البيانات كـ JSON مباشر
         const response = await fetch(WEB_APP_URL, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json'   // نرسل JSON صافي
           },
-          body: JSON.stringify(order)
+          body: JSON.stringify(order)            // نحول object إلى JSON
         });
 
         const result = await response.json();
 
         if (result.success) {
-          resultDiv.textContent = 'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber;
-          resultDiv.className = 'success';
-          alert('تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber);
+          const div = document.getElementById('result');
+          div.textContent =
+            'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber;
+          alert(
+            'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber
+          );
         } else {
-          resultDiv.textContent = 'حدث خطأ: ' + (result.error || 'غير معروف');
-          resultDiv.className = 'error';
-          console.error('Error:', result);
-          alert('حدث خطأ أثناء حفظ الطلب في الشيت ❌');
+          console.error(result.error);
+          alert('حدث خطأ أثناء حفظ الطلب في الشيت ❌\n' + result.error);
         }
       } catch (err) {
-        resultDiv.textContent = 'تعذر الاتصال بخادم Google Apps Script ❌';
-        resultDiv.className = 'error';
-        console.error('Network Error:', err);
+        console.error(err);
         alert('تعذر الاتصال بخادم Google Apps Script ❌');
-      } finally {
-        // إعادة تفعيل الزر
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'إرسال الطلب';
       }
     }
 
-    // ربط النموذج بالدالة
+    // 3) جمع بيانات النموذج واستدعاء sendOrder
     window.addEventListener('DOMContentLoaded', function () {
       const form = document.getElementById('orderForm');
 
@@ -166,34 +113,18 @@
         e.preventDefault();
 
         const order = {
-          name: document.getElementById('name').value.trim(),
-          phone: document.getElementById('phone').value.trim(),
-          altPhone: document.getElementById('altPhone').value.trim(),
-          governorate: document.getElementById('governorate').value.trim(),
-          district: document.getElementById('district').value.trim(),
-          address: document.getElementById('address').value.trim()
+          name:        document.getElementById('name').value,
+          phone:       document.getElementById('phone').value,
+          altPhone:    document.getElementById('altPhone').value,
+          governorate: document.getElementById('governorate').value,
+          district:    document.getElementById('district').value,
+          address:     document.getElementById('address').value
         };
 
-        // التحقق من الحقول المطلوبة
-        if (!order.name || !order.phone) {
-          alert('الرجاء ملء الحقول المطلوبة (الاسم والهاتف)');
-          return;
-        }
-
         sendOrder(order);
+        form.reset();
       });
     });
-
-    // دالة لاختبار الاتصال (اختيارية)
-    async function testConnection() {
-      try {
-        const response = await fetch(WEB_APP_URL.replace('/exec', '/dev') + '?test=true');
-        const result = await response.json();
-        console.log('Connection test:', result);
-      } catch (err) {
-        console.error('Connection test failed:', err);
-      }
-    }
   </script>
 </body>
 </html>
