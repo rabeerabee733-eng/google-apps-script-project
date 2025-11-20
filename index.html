@@ -1,130 +1,34 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>نموذج طلب متصل بـ Google Sheets</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      direction: rtl;
-      text-align: right;
-      padding: 20px;
-      background: #f5f5ff;
-    }
-    h1 {
-      color: #4b2aad;
-    }
-    label {
-      display: block;
-      margin: 8px 0 4px;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 6px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    button {
-      margin-top: 12px;
-      padding: 8px 16px;
-      cursor: pointer;
-      border-radius: 6px;
-      border: none;
-      background: #6c4dff;
-      color: #fff;
-      font-weight: 600;
-    }
-    #result {
-      margin-top: 16px;
-      font-weight: bold;
-      color: #0b8a26;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التحضير الإلكتروني</title>
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Tajawal", sans-serif;
+  background: #f4f4fc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+iframe {
+  width: 100%;
+  height: 100vh;
+  border: none;
+}
+</style>
+
 </head>
 <body>
-  <h1>نموذج طلب متصل بـ Google Sheets</h1>
-  <p>هذا النموذج موجود على GitHub ويُرسل البيانات إلى Google Apps Script ثم إلى Google Sheets.</p>
 
-  <form id="orderForm">
-    <label for="name">الاسم</label>
-    <input id="name" name="name" type="text" required>
+<!-- ضع رابط تطبيق الويب (exec) هنا -->
+<iframe src="https://script.google.com/macros/s/AKfycbxFxwHE8rTf-I49kk-dXLeucmu7p7xTT5P20VguH6kL8VGaIXNLDVChrIGN7eVrTxm_Jw/exec"></iframe>
 
-    <label for="phone">الهاتف الأساسي</label>
-    <input id="phone" name="phone" type="tel" required>
-
-    <label for="altPhone">هاتف بديل (اختياري)</label>
-    <input id="altPhone" name="altPhone" type="tel">
-
-    <label for="governorate">المحافظة</label>
-    <input id="governorate" name="governorate" type="text">
-
-    <label for="district">اللواء</label>
-    <input id="district" name="district" type="text">
-
-    <label for="address">العنوان التفصيلي</label>
-    <textarea id="address" name="address" rows="3"></textarea>
-
-    <button type="submit">إرسال الطلب</button>
-  </form>
-
-  <div id="result"></div>
-
-  <script>
-    // 1) ضعي هنا رابط Web App (exec) من Apps Script
-    const WEB_APP_URL =
-      'https://script.google.com/macros/s/AKfycbxFxwHE8rTf-I49kk-dXLeucmu7p7xTT5P20VguH6kL8VGaIXNLDVChrIGN7eVrTxm_Jw/exec';
-
-    // 2) إرسال الطلب إلى Apps Script كـ JSON
-    async function sendOrder(order) {
-      try {
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'   // نرسل JSON صافي
-          },
-          body: JSON.stringify(order)            // نحول object إلى JSON
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          const div = document.getElementById('result');
-          div.textContent =
-            'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber;
-          alert(
-            'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber
-          );
-        } else {
-          console.error(result.error);
-          alert('حدث خطأ أثناء حفظ الطلب في الشيت ❌\n' + result.error);
-        }
-      } catch (err) {
-        console.error(err);
-        alert('تعذر الاتصال بخادم Google Apps Script ❌');
-      }
-    }
-
-    // 3) جمع بيانات النموذج واستدعاء sendOrder
-    window.addEventListener('DOMContentLoaded', function () {
-      const form = document.getElementById('orderForm');
-
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const order = {
-          name:        document.getElementById('name').value,
-          phone:       document.getElementById('phone').value,
-          altPhone:    document.getElementById('altPhone').value,
-          governorate: document.getElementById('governorate').value,
-          district:    document.getElementById('district').value,
-          address:     document.getElementById('address').value
-        };
-
-        sendOrder(order);
-        form.reset();
-      });
-    });
-  </script>
 </body>
 </html>
