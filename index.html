@@ -1,67 +1,63 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>التحضير الإلكتروني</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 🔁 تحويل تلقائي إلى نموذج Apps Script -->
+  <meta http-equiv="refresh" content="0;url=https://script.google.com/macros/s/AKfycbxmqKZCbdLXqs3kK-poPQhr1CFBaoWYM1HChg4vaeFf2Z9YUURut6iIQEkgwXdmSk5v/exec" />
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html, body {
-      height: 100%;
-      width: 100%;
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      background: #f4f4fc;
-    }
-
     body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
+      background: #f5f0ff;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      color: #333;
     }
-
-    .frame-wrapper {
-      flex: 1;
-      width: 100%;
-      height: 100%;
-      border: none;
-      overflow: hidden;
+    .box {
+      background: #ffffff;
+      padding: 20px 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      max-width: 360px;
     }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #6a35ff;
+      margin-bottom: 8px;
     }
-
-    .fallback-link {
-      position: fixed;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.7);
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 13px;
+    a {
+      color: #6a35ff;
       text-decoration: none;
+      font-weight: 600;
     }
   </style>
+
+  <script>
+    // كود احتياطي: في حال لم يعمل meta refresh
+    (function () {
+      var target = "https://script.google.com/macros/s/AKfycbxmqKZCbdLXqs3kK-poPQhr1CFBaoWYM1HChg4vaeFf2Z9YUURut6iIQEkgwXdmSk5v/exec";
+      setTimeout(function () {
+        window.location.href = target;
+      }, 200);
+    })();
+  </script>
 </head>
 <body>
-
-  <!-- هنا نحمّل صفحة Google Apps Script كاملة داخل iframe -->
-  <div class="frame-wrapper">
-    <iframe
-      src="https://script.google.com/macros/s/AKfycbwW9rdlUjbys4s02BbW1nUhZfiXukoQeTLset9PTXDHVQ8IGXC8QPEo5e1kQ3GYBMzAXA/exec"
-      allowfullscreen
-      loading="lazy">
-    </iframe>
+  <div class="box">
+    <div class="title">التحضير الإلكتروني</div>
+    <p>يتم تحويلك الآن إلى نموذج الطلب...</p>
+    <p>إذا لم يتم التحويل تلقائياً، اضغط على الرابط التالي:</p>
+    <p>
+      <a href="https://script.google.com/macros/s/AKfycbxmqKZCbdLXqs3kK-poPQhr1CFBaoWYM1HChg4vaeFf2Z9YUURut6iIQEkgwXdmSk5v/exec">
+        فتح نموذج التحضير الإلكتروني
+      </a>
+    </p>
   </div>
-
-  </body>
+</body>
 </html>
