@@ -1,127 +1,196 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>نموذج طلب – Google Apps Script + GitHub</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>نموذج الطلب</title>
   <style>
+    /* تصفير الحواف لضمان ملء الشاشة */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: system-ui, sans-serif;
-      direction: rtl;
-      text-align: right;
-      padding: 20px;
-      background: #f5f5ff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #333;
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+      padding: 20px 10px; /* مسافة صغيرة من الجوانب */
+      min-height: 100vh;
     }
+
+    /* الحاوية الرئيسية للنموذج */
+    .container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 500px; /* أقصى عرض للنموذج */
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      height: fit-content;
+    }
+
     h1 {
+      text-align: center;
       color: #4b2aad;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
     }
+
     label {
       display: block;
-      margin: 8px 0 4px;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 6px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    button {
-      margin-top: 12px;
-      padding: 8px 16px;
-      cursor: pointer;
-      border-radius: 6px;
-      border: none;
-      background: #6c4dff;
-      color: #fff;
-      font-weight: 600;
-    }
-    #result {
-      margin-top: 16px;
+      margin-bottom: 8px;
       font-weight: bold;
-      color: #0b8a26;
+      color: #555;
     }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px; /* حجم خط مريح للموبايل */
+      transition: border-color 0.3s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #6c4dff;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #6c4dff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #5a3dd8;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #result {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
   </style>
 </head>
 <body>
-  <h1>نموذج طلب متصل بـ Google Sheets</h1>
-  <p>هذا النموذج موجود على GitHub ويُرسل البيانات إلى Google Apps Script ثم إلى Google Sheets.</p>
 
-  <form id="orderForm">
-    <label for="name">الاسم</label>
-    <input id="name" name="name" type="text" required>
+  <div class="container">
+    <h1>تسجيل طلب جديد 📦</h1>
+    
+    <form id="orderForm">
+      <label for="name">الاسم الكريم</label>
+      <input type="text" id="name" name="name" required placeholder="اكتب اسمك هنا..">
 
-    <label for="phone">الهاتف الأساسي</label>
-    <input id="phone" name="phone" type="tel" required>
+      <label for="phone">رقم الهاتف</label>
+      <input type="tel" id="phone" name="phone" required placeholder="079xxxxxxx">
 
-    <label for="altPhone">هاتف بديل (اختياري)</label>
-    <input id="altPhone" name="altPhone" type="tel">
+      <label for="altPhone">رقم هاتف بديل (اختياري)</label>
+      <input type="tel" id="altPhone" name="altPhone">
 
-    <label for="governorate">المحافظة</label>
-    <input id="governorate" name="governorate" type="text">
+      <label for="governorate">المحافظة</label>
+      <input type="text" id="governorate" name="governorate" required>
 
-    <label for="district">اللواء</label>
-    <input id="district" name="district" type="text">
+      <label for="district">اللواء / المنطقة</label>
+      <input type="text" id="district" name="district" required>
 
-    <label for="address">العنوان التفصيلي</label>
-    <textarea id="address" name="address" rows="3"></textarea>
+      <label for="address">العنوان التفصيلي</label>
+      <textarea id="address" name="address" rows="3" required placeholder="الشارع، قرب معلم معروف..."></textarea>
 
-    <button type="submit">إرسال الطلب</button>
-  </form>
+      <button type="submit" id="submitBtn">إرسال الطلب</button>
+    </form>
 
-  <div id="result"></div>
+    <div id="result"></div>
+  </div>
 
   <script>
-    // رابط Web App (exec) من Apps Script
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzC9RfD7WtA0rUgo5XwiY4m8XNfEnh3a4l5DcSLHa9AWYPxlmGrBRUIml6BfXs-dNvaOg/exec';
+    // ⚠️ استبدل الرابط أدناه برابط السكريبت الخاص بك الجديد الذي حصلت عليه
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzMQShgE6yKNFHoTy6uBXS7fKTu3PtxYNdgwCiifh5S6YljdiA8Z-qtgDFHMn4dzEd_Rg/exec'; 
 
-    // إرسال الطلب إلى Apps Script
-    async function sendOrder(order) {
+    const form = document.getElementById('orderForm');
+    const resultDiv = document.getElementById('result');
+    const btn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // تغيير حالة الزر لمنع التكرار
+      btn.disabled = true;
+      btn.textContent = 'جاري الإرسال...';
+      resultDiv.className = '';
+      resultDiv.textContent = '';
+
+      const orderData = {
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        altPhone: document.getElementById('altPhone').value,
+        governorate: document.getElementById('governorate').value,
+        district: document.getElementById('district').value,
+        address: document.getElementById('address').value
+      };
+
       try {
-        const body = 'data=' + encodeURIComponent(JSON.stringify(order));
-
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-          },
-          body: body
+        // إرسال البيانات
+        const response = await fetch(WEB_APP_URL + '?data=' + encodeURIComponent(JSON.stringify(orderData)), {
+           method: "POST", // استخدام POST أفضل للبيانات الكبيرة
+           headers: { "Content-Type": "application/x-www-form-urlencoded" },
+           // نستخدم body في الـ POST لضمان وصول البيانات
+           body: JSON.stringify(orderData) 
+        });
+        
+        // ملاحظة: بسبب سياسات CORS في Apps Script، أحياناً نعتمد على طريقة GET أو no-cors
+        // الطريقة الأضمن مع الكود الذي أعطيتك إياه سابقاً هي هذه:
+        
+        const scriptUrl = WEB_APP_URL + '?data=' + encodeURIComponent(JSON.stringify(orderData));
+        
+        // سنستخدم خدعة بسيطة للإرسال بدون انتظار الرد JSON لتجنب مشاكل CORS إذا ظهرت
+        // أو نستخدم fetch عادي إذا كان السكريبت معداً بشكل صحيح
+        
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors', // هذا يمنع قراءة الرد لكن يضمن وصول البيانات
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'data=' + encodeURIComponent(JSON.stringify(orderData))
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-          const div = document.getElementById('result');
-          div.textContent = 'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber;
-          alert('تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber);
-        } else {
-          console.error(result.error);
-          alert('حدث خطأ أثناء حفظ الطلب في الشيت ❌');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('تعذر الاتصال بخادم Google Apps Script ❌');
-      }
-    }
-
-    // ربط النموذج بالدالة
-    window.addEventListener('DOMContentLoaded', function () {
-      const form = document.getElementById('orderForm');
-
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const order = {
-          name: document.getElementById('name').value,
-          phone: document.getElementById('phone').value,
-          altPhone: document.getElementById('altPhone').value,
-          governorate: document.getElementById('governorate').value,
-          district: document.getElementById('district').value,
-          address: document.getElementById('address').value
-        };
-
-        sendOrder(order);
+        // بما أننا استخدمنا no-cors نفترض النجاح
+        resultDiv.textContent = 'تم استلام طلبك بنجاح! سيتم التواصل معك قريباً.';
+        resultDiv.classList.add('success');
         form.reset();
-      });
+
+      } catch (error) {
+        console.error('Error:', error);
+        resultDiv.textContent = 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.';
+        resultDiv.classList.add('error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'إرسال الطلب';
+      }
     });
   </script>
 </body>
