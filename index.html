@@ -11,7 +11,6 @@
         content="لطلب التحضير الالكتروني وحقيبة المعلم مع خدمة التوصيل لجميع محافظات المملكة عبر نموذج التحضير الإلكتروني." />
   <meta property="og:image"
         content="https://drive.google.com/uc?export=view&id=1jPTrC1FZ8uhvvgOolN1dT0gDE53Wcakk" />
-  <!-- غيّر الرابط التالي عند الرفع على GitHub Pages -->
   <meta property="og:url"
         content="https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/" />
   <meta property="og:type" content="website" />
@@ -751,8 +750,7 @@
   </div>
 
   <script>
-    // ضع رابط Web App الخاص بـ Google Apps Script هنا:
-    // مثال: const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx....../exec";
+    // 🔗 رابط الـ Web App الخاص بك
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykJn0SDsCCvtLI7iYgWaFvvc-k1kY-7zBoWPlv95m0fuqeOG79pjWYMcnL-Iw2RNSggw/exec";
 
     var WHATSAPP_NUMBER = "0798382004";
@@ -1185,8 +1183,7 @@
         btn.textContent = "جاري الإرسال...";
       }
 
-      // إذا لم تضف رابط Apps Script بعد، سيتم عرض الرقم "محلي" فقط بدون حفظ في جوجل شيتس
-      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "YOUR_SCRIPT_URL_HERE") {
+      if (!APPS_SCRIPT_URL) {
         fillConfirmScreen("محلي");
         showScreen("confirm");
         if (btn) {
@@ -1205,26 +1202,23 @@
           body: JSON.stringify(order)
         });
 
-        // نتوقع أن يرجع Apps Script JSON يحتوي على رقم الطلب مثلاً { "orderNumber": 123 }
         let orderNumber = "غير متوفر";
 
         if (response.ok) {
-          try {
-            const data = await response.json();
-            if (data && (data.orderNumber || data.id)) {
-              orderNumber = data.orderNumber || data.id;
-            }
-          } catch (e) {
-            console.warn("تعذر قراءة JSON من الاستجابة:", e);
+          const text = await response.text();
+          console.log("Server raw response:", text);
+          const num = parseInt(text, 10);
+          if (!isNaN(num) && num > 0) {
+            orderNumber = num;
           }
         } else {
-          console.error("Response not OK:", response.status, response.statusText);
+          console.log("Response not OK:", response.status, response.statusText);
         }
 
         fillConfirmScreen(orderNumber);
         showScreen("confirm");
       } catch (err) {
-        console.error(err);
+        console.error("Fetch error:", err);
         showError("حدث خطأ أثناء حفظ الطلب في Google Sheets أو الاتصال بالخادم. يرجى المحاولة لاحقاً.");
         fillConfirmScreen("غير متوفر");
         showScreen("confirm");
