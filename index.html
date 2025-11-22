@@ -1,39 +1,128 @@
-<script>
-  const APPS_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbyOyBrjJ_pP7XhS1aL6LTFaLQZI6IrbXGALEtee4kIqLJjeH9bDClR5w0X02apuHJwptg/exec";
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>نموذج طلب – Google Apps Script + GitHub</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      direction: rtl;
+      text-align: right;
+      padding: 20px;
+      background: #f5f5ff;
+    }
+    h1 {
+      color: #4b2aad;
+    }
+    label {
+      display: block;
+      margin: 8px 0 4px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 6px;
+      box-sizing: border-box;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+      background: #6c4dff;
+      color: #fff;
+      font-weight: 600;
+    }
+    #result {
+      margin-top: 16px;
+      font-weight: bold;
+      color: #0b8a26;
+    }
+  </style>
+</head>
+<body>
+  <h1>نموذج طلب متصل بـ Google Sheets</h1>
+  <p>هذا النموذج موجود على GitHub ويُرسل البيانات إلى Google Apps Script ثم إلى Google Sheets.</p>
 
-  var lastOrder = null;
+  <form id="orderForm">
+    <label for="name">الاسم</label>
+    <input id="name" name="name" type="text" required>
 
-  function onSubmitClick() {
-    var order = collectOrderData();
-    lastOrder = order;
+    <label for="phone">الهاتف الأساسي</label>
+    <input id="phone" name="phone" type="tel" required>
 
-    fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(order)
-    })
-    .then(res => res.json())
-    .then(data => {
-      fillConfirmScreen(data.orderNumber);
-      showScreen("confirm");
+    <label for="altPhone">هاتف بديل (اختياري)</label>
+    <input id="altPhone" name="altPhone" type="tel">
 
-      setTimeout(function () {
-        openWhatsApp(data.orderNumber);
-      }, 4000);
-    })
-    .catch(err => {
-      alert("لم يتم إرسال الطلب!");
-      fillConfirmScreen("غير متوفر");
-      showScreen("confirm");
+    <label for="governorate">المحافظة</label>
+    <input id="governorate" name="governorate" type="text">
+
+    <label for="district">اللواء</label>
+    <input id="district" name="district" type="text">
+
+    <label for="address">العنوان التفصيلي</label>
+    <textarea id="address" name="address" rows="3"></textarea>
+
+    <button type="submit">إرسال الطلب</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    // رابط Web App (exec) من Apps Script
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzC9RfD7WtA0rUgo5XwiY4m8XNfEnh3a4l5DcSLHa9AWYPxlmGrBRUIml6BfXs-dNvaOg/exec';
+
+    // إرسال الطلب إلى Apps Script
+    async function sendOrder(order) {
+      try {
+        const body = 'data=' + encodeURIComponent(JSON.stringify(order));
+
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body: body
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const div = document.getElementById('result');
+          div.textContent = 'تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber;
+          alert('تم استلام طلبك بنجاح ✅ رقم الطلب: ' + result.orderNumber);
+        } else {
+          console.error(result.error);
+          alert('حدث خطأ أثناء حفظ الطلب في الشيت ❌');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('تعذر الاتصال بخادم Google Apps Script ❌');
+      }
+    }
+
+    // ربط النموذج بالدالة
+    window.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('orderForm');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const order = {
+          name: document.getElementById('name').value,
+          phone: document.getElementById('phone').value,
+          altPhone: document.getElementById('altPhone').value,
+          governorate: document.getElementById('governorate').value,
+          district: document.getElementById('district').value,
+          address: document.getElementById('address').value
+        };
+
+        sendOrder(order);
+        form.reset();
+      });
     });
-  }
-
-  function openWhatsApp(orderNumber) {
-    var phone = "962798382004";
-    var message = "تم استلام طلبي رقم: " + orderNumber;
-    window.location.href =
-      "https://api.whatsapp.com/send?phone=" + phone +
-      "&text=" + encodeURIComponent(message);
-  }
-</script>
+  </script>
+</body>
+</html>
