@@ -699,8 +699,8 @@
           <label for="altPhone">رقم هاتف بديل (اختياري)</label>
           <input id="altPhone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
 
-          <label for="notes" style="margin-top: 10px;">ملاحظات إضافية</label>
-          <textarea id="notes" placeholder="اكتب أي ملاحظة متعلقة بالطلب"></textarea>
+          <label for="notes" style="margin-top: 10px;">ملاحظات إضافية (حقل إجباري)</label>
+          <textarea id="notes" placeholder="اكتب أي ملاحظة متعلقة بالطلب (مثال: التحضير مجلد/ورق، وقت مناسب للتوصيل...)"></textarea>
         </div>
 
         <!-- 4) ملخص الطلب -->
@@ -984,14 +984,16 @@
       var n = document.getElementById("name");
       var p = document.getElementById("phone");
       var a = document.getElementById("address");
+      var notesEl = document.getElementById("notes");
       var valid = true;
 
       if (!n.value.trim()) { n.classList.add("required-error"); valid = false; }
       if (!p.value.trim()) { p.classList.add("required-error"); valid = false; }
       if (!a.value.trim()) { a.classList.add("required-error"); valid = false; }
+      if (!notesEl.value.trim()) { notesEl.classList.add("required-error"); valid = false; }
 
       if (!valid) {
-        showError("الرجاء تعبئة الحقول المطلوبة (الاسم، الهاتف، العنوان)");
+        showError("الرجاء تعبئة الحقول المطلوبة (الاسم، الهاتف، العنوان، الملاحظات الإضافية)");
         return false;
       }
 
