@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>التحضير الإلكتروني | حجز وتحضير الدروس</title>
 
-  <!-- لضبط العرض على شاشة الهاتف -->
+  <!-- مهم جداً للموبايل -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
@@ -12,11 +12,10 @@
         content="نموذج حجز التحضير الإلكتروني والحقائب التعليمية مع خدمة التوصيل لجميع محافظات الأردن." />
   <meta name="theme-color" content="#6a35ff" />
 
-  <!-- خط عربي حديث -->
+  <!-- خط Tajawal من جوجل -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap"
-        rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -150,21 +149,10 @@
       border: 1px solid rgba(255, 255, 255, 0.8);
     }
 
-    .card-1 {
-      background: linear-gradient(135deg, #fdf7ff, #f2e9ff);
-    }
-
-    .card-2 {
-      background: linear-gradient(135deg, #fff9f0, #ffe9c7);
-    }
-
-    .card-3 {
-      background: linear-gradient(135deg, #f0fffb, #d6fff0);
-    }
-
-    .card-4 {
-      background: linear-gradient(135deg, #f0f6ff, #d8e6ff);
-    }
+    .card-1 { background: linear-gradient(135deg, #fdf7ff, #f2e9ff); }
+    .card-2 { background: linear-gradient(135deg, #fff9f0, #ffe9c7); }
+    .card-3 { background: linear-gradient(135deg, #f0fffb, #d6fff0); }
+    .card-4 { background: linear-gradient(135deg, #f0f6ff, #d8e6ff); }
 
     .section-title {
       display: flex;
@@ -276,10 +264,7 @@
       line-height: 1.4;
       outline: none;
       background: #fcfbff;
-      transition:
-        border-color 0.15s ease,
-        box-shadow 0.15s ease,
-        background 0.15s ease;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
 
     input:focus,
@@ -311,10 +296,7 @@
       margin-top: 10px;
       cursor: pointer;
       font-weight: 600;
-      transition:
-        transform 0.1s ease,
-        box-shadow 0.1s ease,
-        background 0.1s ease;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
     }
 
     .btn-primary {
@@ -442,12 +424,7 @@
     .tl-line {
       width: 2px;
       flex: 1;
-      background: linear-gradient(
-        to bottom,
-        #d0cbee 0,
-        #d0cbee 50%,
-        transparent 100%
-      );
+      background: linear-gradient(to bottom, #d0cbee 0, #d0cbee 50%, transparent 100%);
       margin-bottom: 12px;
     }
 
@@ -476,14 +453,8 @@
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .support-note {
@@ -546,17 +517,9 @@
     }
 
     @media (max-width: 400px) {
-      main {
-        padding: 12px 10px 16px;
-      }
-
-      .card {
-        padding: 14px 10px;
-      }
-
-      .product-name {
-        flex-basis: 60%;
-      }
+      main { padding: 12px 10px 16px; }
+      .card { padding: 14px 10px; }
+      .product-name { flex-basis: 60%; }
     }
   </style>
 </head>
@@ -564,22 +527,19 @@
   <div class="app">
     <header>
       <div class="logo-wrapper">
-        <img
-          id="logo-img"
-          src="https://drive.google.com/uc?export=view&id=1jPTrC1FZ8uhvvgOolN1dT0gDE53Wcakk"
-          alt="شعار التحضير الإلكتروني">
+        <img id="logo-img"
+             src="https://drive.google.com/uc?export=view&id=1jPTrC1FZ8uhvvgOolN1dT0gDE53Wcakk"
+             alt="شعار التحضير الإلكتروني">
         <div class="logo-fallback" id="logo-fallback">📚</div>
         <div class="logo-title">التحضير الإلكتروني</div>
-        <div class="logo-subtitle">
-          حجز التحضير والحقائب التعليمية مع خدمة توصيل لجميع المحافظات
-        </div>
+        <div class="logo-subtitle">حجز التحضير والحقائب التعليمية مع خدمة توصيل لجميع المحافظات</div>
       </div>
     </header>
 
     <main>
-      <!-- شاشة النموذج -->
+      <!-- شاشة النموذج الرئيسي -->
       <section id="screen-main" class="screen active">
-        <!-- اختيار المنتجات -->
+        <!-- 1) اختيار المنتجات -->
         <div class="card card-1">
           <div class="section-title">
             <span class="badge">1</span>
@@ -589,8 +549,7 @@
 
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">🎒</span>
-              حقيبة الصف الأول (10 دنانير)
+              <span class="product-name-icon">🎒</span> حقيبة الصف الأول (10 دنانير)
             </span>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -601,8 +560,7 @@
 
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">🎒</span>
-              حقيبة الصف الثاني (10 دنانير)
+              <span class="product-name-icon">🎒</span> حقيبة الصف الثاني (10 دنانير)
             </span>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -613,8 +571,7 @@
 
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">🎒</span>
-              حقيبة الصف الثالث (10 دنانير)
+              <span class="product-name-icon">🎒</span> حقيبة الصف الثالث (10 دنانير)
             </span>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -625,8 +582,7 @@
 
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">📚</span>
-              تحضير فقط صف أول (7 دنانير)
+              <span class="product-name-icon">📚</span> تحضير فقط صف أول (7 دنانير)
             </span>
             <div class="qty-control" data-price="7">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -637,8 +593,7 @@
 
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">📚</span>
-              تحضير فقط صف ثاني (7 دنانير)
+              <span class="product-name-icon">📚</span> تحضير فقط صف ثاني (7 دنانير)
             </span>
             <div class="qty-control" data-price="7">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -649,8 +604,7 @@
 
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">📚</span>
-              تحضير فقط صف ثالث (7 دنانير)
+              <span class="product-name-icon">📚</span> تحضير فقط صف ثالث (7 دنانير)
             </span>
             <div class="qty-control" data-price="7">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -661,8 +615,7 @@
 
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">💡</span>
-              حقيبة التعلم النشط (10 دنانير)
+              <span class="product-name-icon">💡</span> حقيبة التعلم النشط (10 دنانير)
             </span>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -673,8 +626,7 @@
 
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">🔠</span>
-              بطاقات الحروف (13 دينار)
+              <span class="product-name-icon">🔠</span> بطاقات الحروف (13 دينار)
             </span>
             <div class="qty-control" data-price="13">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -685,8 +637,7 @@
 
           <div class="row product-row" style="margin-bottom:0;">
             <span class="product-name">
-              <span class="product-name-icon">🔢</span>
-              بطاقات الأرقام (7 دنانير)
+              <span class="product-name-icon">🔢</span> بطاقات الأرقام (7 دنانير)
             </span>
             <div class="qty-control" data-price="7">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
@@ -696,7 +647,7 @@
           </div>
         </div>
 
-        <!-- معلومات التوصيل -->
+        <!-- 2) معلومات التوصيل -->
         <div class="card card-2">
           <div class="section-title">
             <span class="badge">2</span>
@@ -731,7 +682,7 @@
                     placeholder="العنوان التفصيلي (مثال: اسم الحي، الشارع، رقم البناية)"></textarea>
         </div>
 
-        <!-- معلومات الاتصال -->
+        <!-- 3) معلومات الاتصال -->
         <div class="card card-3">
           <div class="section-title">
             <span class="badge">3</span>
@@ -743,18 +694,16 @@
           <input id="name" type="text" placeholder="الاسم الكامل" />
 
           <label for="phone">رقم الهاتف الأساسي</label>
-          <input id="phone" type="tel" placeholder="07XXXXXXXX"
-                 oninput="enforceNumeric(this)" />
+          <input id="phone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
 
           <label for="altPhone">رقم هاتف بديل (اختياري)</label>
-          <input id="altPhone" type="tel" placeholder="07XXXXXXXX"
-                 oninput="enforceNumeric(this)" />
+          <input id="altPhone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
 
           <label for="notes" style="margin-top: 10px;">ملاحظات إضافية</label>
           <textarea id="notes" placeholder="اكتب أي ملاحظة متعلقة بالطلب"></textarea>
         </div>
 
-        <!-- ملخص الطلب -->
+        <!-- 4) ملخص الطلب -->
         <div class="card card-4">
           <div class="section-title">
             <span class="badge">4</span>
@@ -789,13 +738,11 @@
           </p>
         </div>
 
-        <!-- صندوق الأخطاء -->
         <div id="error-box" class="error-box hidden">
           <span class="error-icon">⚠️</span>
           <span id="error-text"></span>
         </div>
 
-        <!-- زر الإرسال -->
         <button class="btn-primary" id="btn-submit" onclick="onSubmitClick()">
           📨 إرسال الطلب
         </button>
@@ -836,19 +783,22 @@
             ✏️ لتعديل الطلب لاحقاً، راسلنا عبر واتساب مع ذكر رقم الطلب.
           </p>
 
-          <button class="btn-primary" style="margin-top: 10px;"
-                  onclick="sendWhatsAppFromConfirm()">
+          <button class="btn-primary" style="margin-top: 10px;" onclick="sendWhatsAppFromConfirm()">
             💬 إرسال الطلب عبر واتساب الآن
           </button>
 
           <div class="btn-row" style="margin-top: 14px;">
-            <button class="btn-secondary" onclick="location.reload()">➕ طلب جديد</button>
-            <button class="btn-primary" onclick="showScreen('track')">🔍 متابعة الطلب</button>
+            <button class="btn-secondary" onclick="location.reload()">
+              ➕ طلب جديد
+            </button>
+            <button class="btn-primary" onclick="showScreen('track')">
+              🔍 متابعة الطلب
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- شاشة تتبع الطلب -->
+      <!-- شاشة متابعة الطلب -->
       <section id="screen-track" class="screen">
         <div class="card">
           <div class="section-title">
@@ -894,46 +844,25 @@
   </div>
 
   <script>
-    // 👈 استبدلي هذا الرابط برابط Web App الخاص بك إذا تغير
+    // 🔴 استبدلي هذا بالرابط الصحيح للـ Web App الخاص بك إن تغيّر
     var WEB_APP_URL =
-      "https://script.google.com/macros/s/AKfycbz_3K9erMsTgpvmW5Pp8dk9Q_3LmXbMELzAY1mhRfDfwaKWq8Wt1C2mhnJbsP-BGoKC/exec";
+      "https://script.google.com/macros/s/AKfycbxvuqbL4W5mbp8bjUY4J7orJAe7NMareU0t61mccheZWuwqNJbQIrb_5bL1V_G6pRAz/exec";
 
     var WHATSAPP_NUMBER = "0798382004";
 
     var districtsByGov = {
-      "عمان": [
-        "قصبة عمان", "لواء ماركا", "لواء القويسمة", "لواء الجامعة",
-        "لواء وادي السير", "لواء ناعور", "لواء سحاب", "لواء الجيزة", "لواء الموقر"
-      ],
-      "إربد": [
-        "قصبة إربد", "لواء بني عبيد", "لواء المزار الشمالي", "لواء الرمثا",
-        "لواء بني كنانة", "لواء الكورة", "لواء الأغوار الشمالية", "لواء الطيبة",
-        "لواء الوسطية"
-      ],
-      "الزرقاء": [
-        "قصبة الزرقاء", "لواء الرصيفة", "لواء الهاشمية", "لواء بيرين"
-      ],
-      "البلقاء": [
-        "قصبة السلط", "لواء الشونة الجنوبية", "لواء دير علا",
-        "لواء عين الباشا", "لواء ماحص والفحيص"
-      ],
-      "المفرق": [
-        "قصبة المفرق", "لواء الرويشد", "لواء البادية الشمالية",
-        "لواء البادية الشمالية الغربية", "لواء بلعما"
-      ],
+      "عمان": ["قصبة عمان","لواء ماركا","لواء القويسمة","لواء الجامعة","لواء وادي السير","لواء ناعور","لواء سحاب","لواء الجيزة","لواء الموقر"],
+      "إربد": ["قصبة إربد","لواء بني عبيد","لواء المزار الشمالي","لواء الرمثا","لواء بني كنانة","لواء الكورة","لواء الأغوار الشمالية","لواء الطيبة","لواء الوسطية"],
+      "الزرقاء": ["قصبة الزرقاء","لواء الرصيفة","لواء الهاشمية","لواء بيرين"],
+      "البلقاء": ["قصبة السلط","لواء الشونة الجنوبية","لواء دير علا","لواء عين الباشا","لواء ماحص والفحيص"],
+      "المفرق": ["قصبة المفرق","لواء الرويشد","لواء البادية الشمالية","لواء البادية الشمالية الغربية","لواء بلعما"],
       "جرش": ["قصبة جرش"],
-      "عجلون": ["قصبة عجلون", "لواء كفرنجة", "لواء القويسمة"],
-      "مأدبا": ["قصبة مأدبا", "لواء ذيبان"],
-      "الكرك": [
-        "قصبة الكرك", "لواء المزار الجنوبي", "لواء الأغوار الجنوبية",
-        "لواء القصر", "لواء القطرانة", "لواء عي", "لواء فقوع"
-      ],
-      "الطفيلة": ["قصبة الطفيلة", "لواء بصيرا", "لواء الحسا"],
-      "معان": [
-        "قصبة معان", "لواء البتراء (إقليم البتراء)",
-        "لواء الشوبك", "لواء الحسينية"
-      ],
-      "العقبة": ["قصبة العقبة", "لواء القويرة", "لواء وادي عربة"]
+      "عجلون": ["قصبة عجلون","لواء كفرنجة","لواء القويسمة"],
+      "مأدبا": ["قصبة مأدبا","لواء ذيبان"],
+      "الكرك": ["قصبة الكرك","لواء المزار الجنوبي","لواء الأغوار الجنوبية","لواء القصر","لواء القطرانة","لواء عي","لواء فقوع"],
+      "الطفيلة": ["قصبة الطفيلة","لواء بصيرا","لواء الحسا"],
+      "معان": ["قصبة معان","لواء البتراء (إقليم البتراء)","لواء الشوبك","لواء الحسينية"],
+      "العقبة": ["قصبة العقبة","لواء القويرة","لواء وادي عربة"]
     };
 
     var lastOrder = null;
@@ -941,14 +870,9 @@
 
     window.addEventListener("load", function () {
       var logoImg = document.getElementById("logo-img");
-      var fallback = document.getElementById("logo-fallback");
-      if (!logoImg) return;
-
-      if (!logoImg.complete || logoImg.naturalWidth === 0) {
+      if (logoImg && (!logoImg.complete || logoImg.naturalWidth === 0)) {
         logoImg.style.display = "none";
-        if (fallback) fallback.style.display = "flex";
-      } else {
-        if (fallback) fallback.style.display = "none";
+        document.getElementById("logo-fallback").style.display = "flex";
       }
     });
 
@@ -961,145 +885,74 @@
       window.scrollTo(0, 0);
     }
 
-    function changeQty(button, delta) {
-      var wrapper = button.closest(".qty-control");
+    function changeQty(btn, delta) {
+      var wrapper = btn.closest(".qty-control");
       var valueEl = wrapper.querySelector(".qty-value");
-      var value = parseInt(valueEl.textContent, 10);
-      if (isNaN(value)) value = 0;
-      value = value + delta;
-      if (value < 0) value = 0;
-      valueEl.textContent = value;
+      var val = Math.max(0, (parseInt(valueEl.textContent) || 0) + delta);
+      valueEl.textContent = val;
       calculateTotals();
     }
 
     function calculateTotals() {
-      var productsTotal = 0;
-      var itemsCount = 0;
+      var total = 0, count = 0;
 
       document.querySelectorAll(".qty-control").forEach(function (ctrl) {
-        var price = parseFloat(ctrl.getAttribute("data-price")) || 0;
-        var qty = parseInt(ctrl.querySelector(".qty-value").textContent, 10) || 0;
-        productsTotal += price * qty;
-        itemsCount += qty;
+        var p = parseFloat(ctrl.dataset.price) || 0;
+        var q = parseInt(ctrl.querySelector(".qty-value").textContent) || 0;
+        total += p * q;
+        count += q;
       });
 
-      var governorate = document.getElementById("governorate").value;
-      var deliveryFee = 0;
-      if (governorate) {
-        deliveryFee = governorate === "عمان" ? 2 : 3;
-      }
+      var gov = document.getElementById("governorate").value;
+      var del = gov ? (gov === "عمان" ? 2 : 3) : 0;
 
-      var grandTotal = productsTotal + deliveryFee;
-
-      document.getElementById("items-count").textContent =
-        itemsCount + " منتج";
-      document.getElementById("products-total").textContent =
-        productsTotal + " دنانير";
-      document.getElementById("delivery-fee").textContent =
-        deliveryFee + " دنانير";
-      document.getElementById("grand-total").textContent =
-        grandTotal + " دنانير";
+      document.getElementById("items-count").textContent = count + " منتج";
+      document.getElementById("products-total").textContent = total + " دنانير";
+      document.getElementById("delivery-fee").textContent = del + " دنانير";
+      document.getElementById("grand-total").textContent = (total + del) + " دنانير";
     }
 
     function onGovernorateChange() {
-      var govSelect = document.getElementById("governorate");
-      var districtSelect = document.getElementById("district");
-      var gov = govSelect.value;
+      var g = document.getElementById("governorate").value;
+      var d = document.getElementById("district");
+      d.innerHTML = '<option value="" selected disabled>اختر اللواء...</option>';
 
-      districtSelect.innerHTML =
-        '<option value="" selected disabled>اختر اللواء...</option>';
-
-      if (districtsByGov[gov]) {
-        districtsByGov[gov].forEach(function (d) {
-          var opt = document.createElement("option");
-          opt.value = d;
-          opt.textContent = d;
-          districtSelect.appendChild(opt);
+      if (districtsByGov[g]) {
+        districtsByGov[g].forEach(function (x) {
+          var o = document.createElement("option");
+          o.value = x;
+          o.textContent = x;
+          d.appendChild(o);
         });
-        districtSelect.disabled = false;
+        d.disabled = false;
       } else {
-        districtSelect.disabled = true;
+        d.disabled = true;
       }
 
       calculateTotals();
     }
 
-    function showError(msg) {
-      document.getElementById("error-text").innerHTML =
-        msg.replace(/\n/g, "<br>");
-      document.getElementById("error-box").classList.remove("hidden");
-    }
-
-    function validate() {
-      document
-        .querySelectorAll(".required-error")
-        .forEach(function (e) { e.classList.remove("required-error"); });
-      document.getElementById("error-box").classList.add("hidden");
-
-      var nameEl = document.getElementById("name");
-      var phoneEl = document.getElementById("phone");
-      var addressEl = document.getElementById("address");
-
-      var valid = true;
-
-      if (!nameEl.value.trim()) {
-        nameEl.classList.add("required-error");
-        valid = false;
-      }
-      if (!phoneEl.value.trim()) {
-        phoneEl.classList.add("required-error");
-        valid = false;
-      }
-      if (!addressEl.value.trim()) {
-        addressEl.classList.add("required-error");
-        valid = false;
-      }
-
-      if (!valid) {
-        showError("الرجاء تعبئة الحقول المطلوبة (الاسم، الهاتف، العنوان)");
-        return false;
-      }
-
-      var digits = phoneEl.value.replace(/\D/g, "");
-      if (!/^07\d{8}$/.test(digits)) {
-        phoneEl.classList.add("required-error");
-        showError("رقم الهاتف غير صحيح. يجب أن يبدأ بـ 07 ويتكون من 10 خانات.");
-        return false;
-      }
-
-      return true;
-    }
-
-    // جمع بيانات الطلب وإرسالها
     function collectOrderData() {
       calculateTotals();
 
       var items = [];
       document.querySelectorAll(".product-row").forEach(function (row) {
-        var qty = parseInt(
-          row.querySelector(".qty-value").textContent,
-          10
-        ) || 0;
-
+        var qty = parseInt(row.querySelector(".qty-value").textContent) || 0;
         if (qty > 0) {
-          var nameText = row
-            .querySelector(".product-name")
-            .innerText
-            .replace(/\s+/g, " ")
-            .trim();
+          var nameSpan = row.querySelector(".product-name");
+          var ctrl = row.querySelector(".qty-control");
+          var price = parseFloat(ctrl.getAttribute("data-price")) || 0;
+
+          var fullName = nameSpan.textContent.replace(/\n/g, ' ').trim();
+          var cleanName = fullName.replace(/^[^\s]+\s*/, '').trim(); // إزالة أول إيموجي
 
           items.push({
-            name: nameText,
+            name: cleanName,
+            price: price,
             qty: qty
           });
         }
       });
-
-      function numFromText(id) {
-        var t = document.getElementById(id).textContent || "";
-        var m = t.match(/[\d.]+/);
-        return m ? parseFloat(m[0]) : 0;
-      }
 
       return {
         name: document.getElementById("name").value.trim(),
@@ -1109,26 +962,54 @@
         notes: document.getElementById("notes").value.trim(),
         governorate: document.getElementById("governorate").value,
         district: document.getElementById("district").value,
-
-        itemsCount: numFromText("items-count"),
-        productsTotal: numFromText("products-total"),
-        deliveryFee: numFromText("delivery-fee"),
-        grandTotal: numFromText("grand-total"),
-
+        itemsCount: parseInt(document.getElementById("items-count").textContent),
+        productsTotal: parseFloat(document.getElementById("products-total").textContent),
+        deliveryFee: parseFloat(document.getElementById("delivery-fee").textContent),
+        grandTotal: parseFloat(document.getElementById("grand-total").textContent),
         items: items
       };
+    }
+
+    function showError(msg) {
+      document.getElementById("error-text").innerHTML = msg.replace(/\n/g, "<br>");
+      document.getElementById("error-box").classList.remove("hidden");
+    }
+
+    function validate() {
+      document.querySelectorAll(".required-error").forEach(function (e) {
+        e.classList.remove("required-error");
+      });
+      document.getElementById("error-box").classList.add("hidden");
+
+      var n = document.getElementById("name");
+      var p = document.getElementById("phone");
+      var a = document.getElementById("address");
+      var valid = true;
+
+      if (!n.value.trim()) { n.classList.add("required-error"); valid = false; }
+      if (!p.value.trim()) { p.classList.add("required-error"); valid = false; }
+      if (!a.value.trim()) { a.classList.add("required-error"); valid = false; }
+
+      if (!valid) {
+        showError("الرجاء تعبئة الحقول المطلوبة (الاسم، الهاتف، العنوان)");
+        return false;
+      }
+
+      if (!/^07\d{8}$/.test(p.value.replace(/\D/g, ""))) {
+        p.classList.add("required-error");
+        showError("رقم الهاتف غير صحيح (يجب أن يبدأ بـ 07 ويتكون من 10 خانات)");
+        return false;
+      }
+
+      return true;
     }
 
     function onSubmitClick() {
       if (!validate()) return;
 
-      var itemsCount = parseInt(
-        document.getElementById("items-count").textContent,
-        10
-      ) || 0;
-
-      if (itemsCount === 0) {
-        showError("الرجاء اختيار منتج واحد على الأقل قبل إرسال الطلب.");
+      var count = parseInt(document.getElementById("items-count").textContent);
+      if (count === 0) {
+        showError("الرجاء اختيار منتج واحد على الأقل");
         return;
       }
 
@@ -1144,43 +1025,39 @@
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "data=" + encodeURIComponent(JSON.stringify(order))
       })
-        .then(function (r) { return r.json(); })
-        .then(function (res) {
-          if (res.result === "success") {
-            lastOrderNumber = res.orderNumber;
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.result === 'success') {
+          lastOrderNumber = res.orderNumber;
 
-            document.getElementById("order-number").textContent =
-              res.orderNumber;
+          document.getElementById("order-number").textContent = res.orderNumber;
+          document.getElementById("confirm-items").textContent =
+            order.itemsCount + " منتج";
+          document.getElementById("confirm-products-total").textContent =
+            order.productsTotal + " دنانير";
+          document.getElementById("confirm-delivery-fee").textContent =
+            order.deliveryFee + " دنانير";
+          document.getElementById("confirm-grand-total").textContent =
+            order.grandTotal + " دنانير";
 
-            document.getElementById("confirm-items").textContent =
-              order.itemsCount + " منتج";
-            document.getElementById("confirm-products-total").textContent =
-              order.productsTotal + " دنانير";
-            document.getElementById("confirm-delivery-fee").textContent =
-              order.deliveryFee + " دنانير";
-            document.getElementById("confirm-grand-total").textContent =
-              order.grandTotal + " دنانير";
-
-            showScreen("confirm");
-            btn.disabled = false;
-            btn.textContent = "📨 إرسال الطلب";
-
-            // فتح واتساب تلقائياً بعد 3 ثوانٍ
-            setTimeout(sendWhatsAppFromConfirm, 3000);
-          } else {
-            showError("حدث خطأ في السيرفر: " + (res.message || ""));
-            btn.disabled = false;
-            btn.textContent = "📨 إرسال الطلب";
-          }
-        })
-        .catch(function (err) {
-          console.error(err);
-          showError(
-            "تعذر الاتصال بالخادم. تأكد من الاتصال بالإنترنت أو من صحة الرابط."
-          );
+          showScreen("confirm");
           btn.disabled = false;
           btn.textContent = "📨 إرسال الطلب";
-        });
+
+          // فتح الواتساب تلقائياً بعد 3 ثوانٍ
+          setTimeout(sendWhatsAppFromConfirm, 3000);
+        } else {
+          showError("حدث خطأ في السيرفر: " + res.message);
+          btn.disabled = false;
+          btn.textContent = "📨 إرسال الطلب";
+        }
+      })
+      .catch(function (err) {
+        console.error(err);
+        showError("تعذر الاتصال بالخادم. تأكد من الإنترنت أو الرابط.");
+        btn.disabled = false;
+        btn.textContent = "📨 إرسال الطلب";
+      });
     }
 
     function sendWhatsAppFromConfirm() {
@@ -1188,55 +1065,67 @@
 
       var ph = "962" + WHATSAPP_NUMBER.substring(1);
 
-      var itemsTxt = "";
-      if (lastOrder.items && lastOrder.items.length > 0) {
-        itemsTxt = lastOrder.items
-          .map(function (i) {
-            return "▪️ " + i.name + " × " + i.qty;
-          })
-          .join("\n");
-      } else {
-        itemsTxt = "- لم يتم اختيار منتجات.";
-      }
+      // تنسيق المنتجات مع الإيموجي والسعر من data-price + أرقام Bold
+      var itemsTxt = lastOrder.items.map(function (item, index) {
+        var name = item.name || "";
+        var price = Number(item.price) || 0;
+        var qty   = Number(item.qty)   || 0;
+        var lineTotal = price * qty;
+
+        var emoji = "🛍";
+        if (name.indexOf("حقيبة") !== -1) emoji = "🎒";
+        else if (name.indexOf("تحضير") !== -1) emoji = "📚";
+        else if (name.indexOf("الحروف") !== -1) emoji = "🔠";
+        else if (name.indexOf("الأرقام") !== -1 || name.indexOf("الارقام") !== -1) emoji = "🔢";
+
+        return emoji + " " + (index + 1) + ") " + name +
+               " × *" + qty + "* = *" + lineTotal + "* د";
+      }).join("\n");
+
+      if (!itemsTxt) itemsTxt = "- لا يوجد منتجات";
 
       var msg =
-        "*طلب جديد رقم " + lastOrderNumber + "* 📦\n" +
-        "👤 الاسم: " + (lastOrder.name || "-") + "\n" +
-        "📱 الهاتف: " + (lastOrder.phone || "-") + "\n" +
-        "📍 الموقع: " + (lastOrder.governorate || "-") + " - " +
-        (lastOrder.district || "-") + "\n" +
-        "🏠 العنوان: " + (lastOrder.address || "-") + "\n\n" +
-        "🛒 *المنتجات:*\n" + itemsTxt + "\n\n" +
-        "💰 الإجمالي: " + (lastOrder.grandTotal || 0) + " د.أ\n" +
-        "📝 ملاحظات: " + (lastOrder.notes || "-");
+"أهلاً وسهلاً  💜 التحضير الإلكتروني 💜 🌟\n" +
+"شكراً على ثقتكم  💜\n" +
+"تم استلام طلبكم بنجاح، وسنتواصل معكم قريباً لتأكيد موعد التوصيل 🚚✨\n\n" +
+"📌 تفاصيل الطلب:\n\n" +
+"رقم الطلب: *" + lastOrderNumber + "*\n" +
+"الاسم: " + (lastOrder.name || "-") + "\n" +
+"الهاتف: *" + (lastOrder.phone || "-") + "*\n" +
+"هاتف بديل: " + (lastOrder.altPhone || "-") + "\n" +
+"المحافظة: " + (lastOrder.governorate || "-") + "\n" +
+"اللواء: " + (lastOrder.district || "-") + "\n" +
+"📍 العنوان: " + (lastOrder.address || "-") + "\n\n" +
+"🛍 المنتجات:\n" + itemsTxt + "\n\n" +
+"💵 مجموع المنتجات: *" + lastOrder.productsTotal + "* دنانير\n" +
+"🚚 رسوم التوصيل: *" + lastOrder.deliveryFee + "* دنانير\n" +
+"💰 الإجمالي الكلي: *" + lastOrder.grandTotal + "* دنانير\n\n" +
+"✏️ ملاحظات العميل: " + (lastOrder.notes || "-") + "\n\n" +
+"في حال رغبتم بتعديل الطلب لاحقاً، يمكنكم مراسلتنا على هذا الرقم مع ذكر رقم الطلب.\n\n" +
+"نسعد بمتابعتكم لنا على فيسبوك  👇\n" +
+"📘 فيسبوك: https://www.facebook.com/ta7deer/";
 
-      window.open(
-        "https://wa.me/" + ph + "?text=" + encodeURIComponent(msg),
-        "_blank"
-      );
+      window.open("https://wa.me/" + ph + "?text=" + encodeURIComponent(msg), "_blank");
     }
 
     function requestEdit() {
       var ph = "962" + WHATSAPP_NUMBER.substring(1);
-      var msg =
+      var text =
         "مرحباً 👋\n" +
         "أرغب بتعديل طلبي السابق من *التحضير الإلكتروني*.\n\n" +
         "رقم الطلب: ________\n" +
         "التعديل المطلوب:\n" +
         "- ..................................\n" +
         "- ..................................";
-      window.open(
-        "https://wa.me/" + ph + "?text=" + encodeURIComponent(msg),
-        "_blank"
-      );
+      window.open("https://wa.me/" + ph + "?text=" + encodeURIComponent(text), "_blank");
     }
 
     function callUs() {
       window.location.href = "tel:" + WHATSAPP_NUMBER;
     }
 
-    function enforceNumeric(input) {
-      input.value = input.value.replace(/\D/g, "").slice(0, 10);
+    function enforceNumeric(e) {
+      e.value = e.value.replace(/\D/g, "").slice(0, 10);
     }
   </script>
 </body>
