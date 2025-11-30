@@ -624,11 +624,12 @@
             </div>
           </div>
 
+          <!-- بطاقات الحروف بعد التعديل إلى 15 دينار -->
           <div class="row product-row">
             <span class="product-name">
-              <span class="product-name-icon">🔠</span> بطاقات الحروف (13 دينار)
+              <span class="product-name-icon">🔠</span> بطاقات الحروف (15 دينار)
             </span>
-            <div class="qty-control" data-price="13">
+            <div class="qty-control" data-price="15">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
               <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
@@ -844,7 +845,6 @@
   </div>
 
   <script>
-    // 🔴 استبدلي هذا بالرابط الصحيح للـ Web App الخاص بك إن تغيّر
     var WEB_APP_URL =
       "https://script.google.com/macros/s/AKfycbwhIv3eKQ0o5o4DkF3c67JVbAORRuiC0awSiywgLseAYWUwuHRY9g34YkkoVGfhAK-p/exec";
 
@@ -944,7 +944,7 @@
           var price = parseFloat(ctrl.getAttribute("data-price")) || 0;
 
           var fullName = nameSpan.textContent.replace(/\n/g, ' ').trim();
-          var cleanName = fullName.replace(/^[^\s]+\s*/, '').trim(); // إزالة أول إيموجي
+          var cleanName = fullName.replace(/^[^\s]+\s*/, '').trim();
 
           items.push({
             name: cleanName,
@@ -1046,7 +1046,6 @@
           btn.disabled = false;
           btn.textContent = "📨 إرسال الطلب";
 
-          // فتح الواتساب تلقائياً بعد 3 ثوانٍ
           setTimeout(sendWhatsAppFromConfirm, 3000);
         } else {
           showError("حدث خطأ في السيرفر: " + res.message);
@@ -1067,7 +1066,6 @@
 
       var ph = "962" + WHATSAPP_NUMBER.substring(1);
 
-      // تنسيق المنتجات مع الإيموجي والسعر من data-price + أرقام Bold
       var itemsTxt = lastOrder.items.map(function (item, index) {
         var name = item.name || "";
         var price = Number(item.price) || 0;
