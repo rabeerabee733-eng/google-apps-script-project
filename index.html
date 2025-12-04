@@ -310,6 +310,30 @@
       color: #aaa3d0;
     }
 
+    /* مجموعة نوع المدرسة */
+    .school-type-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+      margin-top: 2px;
+    }
+
+    .school-type-group .radio-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #ded5ff;
+      background: rgba(255,255,255,0.9);
+      cursor: pointer;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .school-type-group .radio-pill input {
+      margin-left: 6px;
+    }
+
     .btn-primary,
     .btn-secondary {
       width: 100%;
@@ -717,6 +741,19 @@
           <label for="altPhone">رقم هاتف بديل (اختياري)</label>
           <input id="altPhone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
 
+          <!-- نوع المدرسة (حكومية / خاصة) -->
+          <label style="margin-top:8px;">نوع المدرسة</label>
+          <div class="school-type-group">
+            <label class="radio-pill">
+              <input type="radio" name="schoolType" value="مدرسة حكومية">
+              <span>مدرسة حكومية</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="schoolType" value="مدرسة خاصة">
+              <span>مدرسة خاصة</span>
+            </label>
+          </div>
+
           <label for="notes" style="margin-top: 8px;">ملاحظات إضافية (حقل إجباري)</label>
           <textarea id="notes"
                     placeholder="مثال: التحضير مجلد/ورق، وقت مناسب للتوصيل..."></textarea>
@@ -743,6 +780,11 @@
           <div class="summary-row">
             <span>رسوم التوصيل:</span>
             <span class="value" id="delivery-fee">0 دنانير</span>
+          </div>
+
+          <div class="summary-row">
+            <span>نوع المدرسة:</span>
+            <span class="value" id="school-type-summary">غير محدد</span>
           </div>
 
           <hr>
@@ -788,6 +830,10 @@
             <div class="summary-row">
               <span>رسوم التوصيل:</span>
               <span class="value" id="confirm-delivery-fee">-</span>
+            </div>
+            <div class="summary-row">
+              <span>نوع المدرسة:</span>
+              <span class="value" id="confirm-school-type">-</span>
             </div>
             <div class="summary-row">
               <span>الإجمالي الكلي:</span>
@@ -951,6 +997,9 @@
         }
       });
 
+      var schoolTypeEl = document.querySelector('input[name="schoolType"]:checked');
+      var schoolType = schoolTypeEl ? schoolTypeEl.value : "";
+
       return {
         name: document.getElementById("name").value.trim(),
         phone: document.getElementById("phone").value.trim(),
@@ -963,6 +1012,7 @@
         productsTotal: parseFloat(document.getElementById("products-total").textContent) || 0,
         deliveryFee: parseFloat(document.getElementById("delivery-fee").textContent) || 0,
         grandTotal: parseFloat(document.getElementById("grand-total").textContent) || 0,
+        schoolType: schoolType,
         items: items
       };
     }
@@ -1005,6 +1055,12 @@
         return false;
       }
 
+      var schoolTypeEl = document.querySelector('input[name="schoolType"]:checked');
+      if (!schoolTypeEl) {
+        showError("الرجاء اختيار نوع المدرسة (مدرسة حكومية أو مدرسة خاصة)");
+        return false;
+      }
+
       var count = parseInt(document.getElementById("items-count").textContent) || 0;
       if (count === 0) {
         showError("الرجاء اختيار منتج واحد على الأقل");
@@ -1039,6 +1095,7 @@
           document.getElementById("confirm-products-total").textContent = order.productsTotal + " دنانير";
           document.getElementById("confirm-delivery-fee").textContent = order.deliveryFee + " دنانير";
           document.getElementById("confirm-grand-total").textContent = order.grandTotal + " دنانير";
+          document.getElementById("confirm-school-type").textContent = order.schoolType || "-";
 
           showScreen("confirm");
           btn.disabled = false;
@@ -1057,6 +1114,13 @@
         btn.disabled = false;
         btn.textContent = "📨 إرسال الطلب";
       });
+    }
+
+    function updateSchoolTypeSummary() {
+      var el = document.querySelector('input[name="schoolType"]:checked');
+      var txt = el ? el.value : "غير محدد";
+      var target = document.getElementById("school-type-summary");
+      if (target) target.textContent = txt;
     }
 
     function sendWhatsAppFromConfirm() {
@@ -1093,6 +1157,7 @@
 "هاتف بديل: " + (lastOrder.altPhone || "-") + "\n" +
 "المحافظة: " + (lastOrder.governorate || "-") + "\n" +
 "اللواء: " + (lastOrder.district || "-") + "\n" +
+"نوع المدرسة: " + (lastOrder.schoolType || "-") + "\n" +
 "📍 العنوان: " + (lastOrder.address || "-") + "\n\n" +
 "🛍 المنتجات:\n" + itemsTxt + "\n\n" +
 "💵 مجموع المنتجات: *" + lastOrder.productsTotal + "* دنانير\n" +
@@ -1125,8 +1190,14 @@
       el.value = el.value.replace(/\D/g, "").slice(0, 10);
     }
 
-    // تحديث المجموع عند فتح الصفحة لأول مرة
-    document.addEventListener("DOMContentLoaded", calculateTotals);
+    // تحديث المجموع عند فتح الصفحة لأول مرة + ربط نوع المدرسة بالملخص
+    document.addEventListener("DOMContentLoaded", function () {
+      calculateTotals();
+      updateSchoolTypeSummary();
+      document.querySelectorAll('input[name="schoolType"]').forEach(function (el) {
+        el.addEventListener("change", updateSchoolTypeSummary);
+      });
+    });
   </script>
 </body>
 </html>
