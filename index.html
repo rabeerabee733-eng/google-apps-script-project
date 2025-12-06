@@ -229,6 +229,7 @@
     .product-row:nth-of-type(7) .product-name-icon { background: linear-gradient(135deg,#ffe45c,#ffb347); }
     .product-row:nth-of-type(8) .product-name-icon { background: linear-gradient(135deg,#6fc2ff,#a0d9ff); }
     .product-row:nth-of-type(9) .product-name-icon { background: linear-gradient(135deg,#5271ff,#8a9bff); }
+    .product-row:nth-of-type(10) .product-name-icon { background: linear-gradient(135deg,#ffb3b3,#ff8787); }
 
     .qty-control {
       display: inline-flex;
@@ -294,7 +295,7 @@
     input:focus,
     select:focus,
     textarea:focus {
-      border-color: var(--primary);
+      border-color: --primary;
       box-shadow: 0 0 0 1px rgba(132,84,255,0.28);
       background: #fff;
     }
@@ -676,12 +677,25 @@
           </div>
 
           <!-- بطاقات الأرقام 10 دنانير -->
-          <div class="row product-row" style="margin-bottom:0;">
+          <div class="row product-row">
             <div class="product-name">
               <span class="product-name-icon">🔢</span>
               <span class="product-label-text">بطاقات الأرقام (10 دنانير)</span>
             </div>
             <div class="qty-control" data-price="10">
+              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
+              <div class="qty-value">0</div>
+              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
+            </div>
+          </div>
+
+          <!-- بطاقات القوانين الصفية 5 دنانير (جديدة) -->
+          <div class="row product-row" style="margin-bottom:0;">
+            <div class="product-name">
+              <span class="product-name-icon">📜</span>
+              <span class="product-label-text">بطاقات القوانين الصفية (5 دنانير)</span>
+            </div>
+            <div class="qty-control" data-price="5">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
               <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
@@ -899,9 +913,9 @@
   </div>
 
   <script>
-    // رابط الويب آب (كما هو عندك)
+    // رابط الويب آب (تأكدي أنه آخر رابط Deployment مفعّل)
     var WEB_APP_URL =
-      "https://script.google.com/macros/s/AKfycbzo-LCGqZRN5HT4kB0TQLZOVKEw-ZzJ3wxMFUwrimDk_GQ5jRtfTV9lk8vv03YGkSZa/exec";
+      "https://script.google.com/macros/s/AKfycbwhIv3eKQ0o5o4DkF3c67JVbAORRuiC0awSiywgLseAYWUwuHRY9g34YkkoVGfhAK-p/exec";
 
     var WHATSAPP_NUMBER = "0798382004";
 
@@ -1139,6 +1153,7 @@
         else if (name.indexOf("تحضير") !== -1) emoji = "📚";
         else if (name.indexOf("الحروف") !== -1) emoji = "🔠";
         else if (name.indexOf("الأرقام") !== -1 || name.indexOf("الارقام") !== -1) emoji = "🔢";
+        else if (name.indexOf("القوانين الصفية") !== -1) emoji = "📜";
 
         return emoji + " " + (index + 1) + ") " + name +
                " × *" + qty + "* = *" + lineTotal + "* د";
