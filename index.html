@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>التحضير الإلكتروني | حجز وتحضير الدروس</title>
 
-  <!-- مهم للموبايل -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
@@ -12,7 +11,6 @@
         content="نموذج حجز التحضير الإلكتروني والحقائب التعليمية مع خدمة التوصيل لجميع محافظات الأردن." />
   <meta name="theme-color" content="#f8bfd0" />
 
-  <!-- خط Tajawal -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
@@ -32,94 +30,48 @@
       --font-main: "Tajawal", sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: var(--font-main);
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow-x: hidden;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+    html, body { width: 100%; height: 100%; overflow-x: hidden; }
 
     body {
-      background:
-        linear-gradient(120deg, var(--bg-left) 0%, #ffeef0 40%, #f3e8ff 75%, var(--bg-right) 100%);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 18px 10px;
-      font-size: 16px;
-      color: #222;
+      background: linear-gradient(120deg, var(--bg-left) 0%, #ffeef0 40%, #f3e8ff 75%, var(--bg-right) 100%);
+      display: flex; justify-content: center; align-items: flex-start;
+      padding: 18px 10px; font-size: 16px; color: #222;
     }
 
     .app {
-      width: 100%;
-      max-width: 430px;
-      margin: 0 auto;
+      width: 100%; max-width: 430px; margin: 0 auto;
       background: radial-gradient(circle at top left, #fff5e8 0, #fff9ff 55%, #f5f0ff 100%);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-soft);
       border: 1px solid rgba(255, 255, 255, 0.9);
-      overflow: hidden;
-      position: relative;
+      overflow: hidden; position: relative;
     }
 
     header {
       background: linear-gradient(135deg, var(--primary), #f482c7);
-      color: #fff;
-      text-align: center;
-      padding: 16px 16px 22px;
-      position: relative;
+      color: #fff; text-align: center;
+      padding: 16px 16px 22px; position: relative;
     }
 
     header::after {
-      content: "";
-      position: absolute;
-      inset-inline: 14%;
-      bottom: -18px;
-      height: 36px;
-      border-radius: 50%;
+      content: ""; position: absolute; inset-inline: 14%;
+      bottom: -18px; height: 36px; border-radius: 50%;
       background: radial-gradient(circle, rgba(0,0,0,0.18), transparent 65%);
-      opacity: 0.27;
-      filter: blur(4px);
-      z-index: -1;
+      opacity: 0.27; filter: blur(4px); z-index: -1;
     }
 
-    .logo-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
+    .logo-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; }
     .logo-wrapper img {
-      width: 76px;
-      height: 76px;
-      border-radius: 50%;
-      object-fit: contain;
-      background: #fff;
-      padding: 4px;
-      border: 2px solid #fff;
+      width: 76px; height: 76px; border-radius: 50%; object-fit: contain;
+      background: #fff; padding: 4px; border: 2px solid #fff;
       box-shadow: 0 4px 12px rgba(0,0,0,0.18);
     }
 
-    .logo-title {
-      font-size: 20px;
-      font-weight: 700;
-    }
+    .logo-title { font-size: 20px; font-weight: 700; }
+    .logo-subtitle { font-size: 13px; opacity: 0.95; }
 
-    .logo-subtitle {
-      font-size: 13px;
-      opacity: 0.95;
-    }
-
-    main {
-      padding: 18px 14px 20px;
-    }
+    main { padding: 18px 14px 20px; }
 
     .card {
       background: var(--card-bg);
@@ -130,96 +82,48 @@
       box-shadow: 0 6px 16px rgba(0,0,0,0.05);
     }
 
-    .card-1 {
-      background: linear-gradient(135deg, #fff7f9, #fff3ff);
-    }
-    .card-2 {
-      background: linear-gradient(135deg, #fff8eb, #fff2de);
-    }
-    .card-3 {
-      background: linear-gradient(135deg, #f1fff7, #e8fff3);
-    }
-    .card-4 {
-      background: linear-gradient(135deg, #f3f5ff, #e8eeff);
-    }
+    .card-1 { background: linear-gradient(135deg, #fff7f9, #fff3ff); }
+    .card-2 { background: linear-gradient(135deg, #fff8eb, #fff2de); }
+    .card-3 { background: linear-gradient(135deg, #f1fff7, #e8fff3); }
+    .card-4 { background: linear-gradient(135deg, #f3f5ff, #e8eeff); }
 
     .section-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-weight: 700;
-      color: #222;
-      font-size: 15px;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 12px; font-weight: 700; color: #222; font-size: 15px;
     }
 
     .badge-step {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
+      width: 26px; height: 26px; border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, #fff, #ffd8f5);
       border: 2px solid #fff;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      color: #b43778;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #b43778; flex-shrink: 0;
     }
 
     .section-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 9px;
+      width: 26px; height: 26px; border-radius: 9px;
       background: rgba(255,255,255,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-      font-size: 16px;
-      flex-shrink: 0;
+      font-size: 16px; flex-shrink: 0;
     }
 
     .row.product-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-      font-size: 14px;
-      color: #333;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 12px; font-size: 14px; color: #333;
     }
 
-    .product-name {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-
-    .product-label-text {
-      line-height: 1.4;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .product-name { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
+    .product-label-text { line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .product-name-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      color: #fff;
-      flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff; flex-shrink: 0;
       box-shadow: 0 3px 7px rgba(0,0,0,0.18);
     }
 
-    /* ألوان الأيقونات لكل صف على الترتيب */
     .product-row:nth-of-type(1) .product-name-icon { background: linear-gradient(135deg,#ff9fb3,#ff6f91); }
     .product-row:nth-of-type(2) .product-name-icon { background: linear-gradient(135deg,#ffa85c,#ffcf63); }
     .product-row:nth-of-type(3) .product-name-icon { background: linear-gradient(135deg,#58cc9b,#8fe7b8); }
@@ -232,126 +136,60 @@
     .product-row:nth-of-type(10) .product-name-icon { background: linear-gradient(135deg,#ffb3b3,#ff8787); }
 
     .qty-control {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      background: #f6f2ff;
-      border: 1px solid #e0d7ff;
-      overflow: hidden;
-      flex-shrink: 0;
+      display: inline-flex; align-items: center;
+      border-radius: 999px; background: #f6f2ff;
+      border: 1px solid #e0d7ff; overflow: hidden; flex-shrink: 0;
     }
 
     .qty-btn {
-      border: none;
-      padding: 7px 12px;
-      min-width: 34px;
-      font-size: 18px;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #555;
-      transition: background 0.15s ease, transform 0.05s ease;
+      border: none; padding: 7px 12px; min-width: 34px; font-size: 18px;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #555; transition: background 0.15s ease, transform 0.05s ease;
     }
 
-    .qty-btn:active {
-      background: #e5dcff;
-      transform: translateY(1px);
-    }
+    .qty-btn:active { background: #e5dcff; transform: translateY(1px); }
 
     .qty-value {
-      min-width: 32px;
-      text-align: center;
-      font-size: 15px;
-      padding: 5px 10px;
-      background: #ffffff;
-      border-inline: 1px solid #e0d7ff;
-      color: #333;
+      min-width: 32px; text-align: center; font-size: 15px;
+      padding: 5px 10px; background: #ffffff;
+      border-inline: 1px solid #e0d7ff; color: #333;
     }
 
-    label {
-      display: block;
-      font-size: 14px;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      color: #555;
-      font-weight: 500;
-    }
+    label { display: block; font-size: 14px; margin-top: 4px; margin-bottom: 4px; color: #555; font-weight: 500; }
 
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 10px 11px;
-      border-radius: 12px;
-      border: 1px solid #ded5ff;
-      font-size: 15px;
-      background: rgba(255,255,255,0.85);
+    input, select, textarea {
+      width: 100%; padding: 10px 11px;
+      border-radius: 12px; border: 1px solid #ded5ff;
+      font-size: 15px; background: rgba(255,255,255,0.85);
       outline: none;
       transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
 
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: --primary;
-      box-shadow: 0 0 0 1px rgba(132,84,255,0.28);
-      background: #fff;
-    }
+    textarea { min-height: 78px; resize: vertical; }
+    input::placeholder, textarea::placeholder { font-size: 13px; color: #aaa3d0; }
 
-    textarea {
-      min-height: 78px;
-      resize: vertical;
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-      font-size: 13px;
-      color: #aaa3d0;
-    }
-
-    /* مجموعة نوع المدرسة */
-    .school-type-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 4px;
-      margin-top: 2px;
-    }
+    .school-type-group { display: flex; gap: 8px; margin-bottom: 4px; margin-top: 2px; }
 
     .school-type-group .radio-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid #ded5ff;
-      background: rgba(255,255,255,0.9);
-      cursor: pointer;
-      font-size: 13px;
-      color: #555;
+      display: inline-flex; align-items: center;
+      padding: 6px 10px; border-radius: 999px;
+      border: 1px solid #ded5ff; background: rgba(255,255,255,0.9);
+      cursor: pointer; font-size: 13px; color: #555;
     }
 
-    .school-type-group .radio-pill input {
-      margin-left: 6px;
-    }
+    .school-type-group .radio-pill input { margin-left: 6px; }
 
-    .btn-primary,
-    .btn-secondary {
-      width: 100%;
-      border-radius: 999px;
-      border: none;
-      padding: 13px 16px;
-      font-size: 15px;
-      margin-top: 10px;
-      cursor: pointer;
-      font-weight: 600;
+    .btn-primary, .btn-secondary {
+      width: 100%; border-radius: 999px; border: none;
+      padding: 13px 16px; font-size: 15px; margin-top: 10px;
+      cursor: pointer; font-weight: 600;
       transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
     }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), #f068b8);
-      color: #fff;
-      box-shadow: 0 8px 18px rgba(132,84,255,0.38);
+      color: #fff; box-shadow: 0 8px 18px rgba(132,84,255,0.38);
     }
 
     .btn-primary:active {
@@ -360,48 +198,22 @@
       background: linear-gradient(135deg, var(--primary-dark), #e44eaa);
     }
 
-    .btn-primary:disabled {
-      background: #c9c4e6;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
+    .btn-primary:disabled { background: #c9c4e6; box-shadow: none; cursor: not-allowed; }
 
     .btn-secondary {
-      background: #fff;
-      color: var(--primary);
-      border: 1px solid #d6ccff;
-      box-shadow: 0 3px 9px rgba(0,0,0,0.06);
+      background: #fff; color: var(--primary);
+      border: 1px solid #d6ccff; box-shadow: 0 3px 9px rgba(0,0,0,0.06);
     }
 
-    .btn-secondary:active {
-      background: #f4f0ff;
-      transform: translateY(1px);
-    }
+    .btn-secondary:active { background: #f4f0ff; transform: translateY(1px); }
 
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 15px;
-      margin-bottom: 5px;
-      color: #333;
-    }
+    .summary-row { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 5px; color: #333; }
+    .summary-row .value { font-weight: 700; color: var(--primary); }
 
-    .summary-row .value {
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    hr {
-      border: none;
-      border-top: 1px dashed #d8cffc;
-      margin: 8px 0;
-    }
+    hr { border: none; border-top: 1px dashed #d8cffc; margin: 8px 0; }
 
     .screen { display: none; }
-    .screen.active {
-      display: block;
-      animation: fadeIn 0.25s ease-out;
-    }
+    .screen.active { display: block; animation: fadeIn 0.25s ease-out; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
@@ -421,132 +233,42 @@
       gap: 6px;
     }
 
-    .error-icon {
-      margin-top: 2px;
-    }
+    .error-icon { margin-top: 2px; }
 
-    input.required-error,
-    textarea.required-error {
+    input.required-error, textarea.required-error {
       border-color: #ff4d4f !important;
       background: #fff7f8;
       box-shadow: 0 0 0 1px rgba(255,91,91,0.22);
     }
 
-    .center-card {
-      text-align: center;
-      padding-top: 26px;
-    }
+    .center-card { text-align: center; padding-top: 26px; }
 
     .status-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+      width: 80px; height: 80px; border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, #fff, #41d38e);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 14px;
-      color: #fff;
-      font-size: 36px;
-      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px; color: #fff; font-size: 36px; font-weight: 700;
       box-shadow: 0 10px 24px rgba(38,196,120,0.55);
     }
 
-    .title-lg {
-      font-size: 19px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
+    .title-lg { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
+    .text-muted { font-size: 14px; color: #555; line-height: 1.6; }
+    .order-id { font-size: 15px; margin-bottom: 10px; color: #444; }
+    .btn-row { display: flex; gap: 10px; margin-top: 14px; }
 
-    .text-muted {
-      font-size: 14px;
-      color: #555;
-      line-height: 1.6;
-    }
+    .timeline { display: flex; margin-top: 10px; }
+    .timeline-line { display: flex; flex-direction: column; align-items: center; margin-inline-end: 10px; }
+    .tl-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d5cdfa; background: #fff; margin-bottom: 10px; position: relative; }
+    .tl-dot.done { background: var(--primary); border-color: var(--primary); }
+    .tl-dot.done::after { content: "✓"; position: absolute; inset: -1px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; }
+    .tl-line { width: 2px; flex: 1; background: linear-gradient(to bottom, #d5cdfa 0, #d5cdfa 50%, transparent 100%); margin-bottom: 10px; }
 
-    .order-id {
-      font-size: 15px;
-      margin-bottom: 10px;
-      color: #444;
-    }
+    .timeline-steps { font-size: 14px; }
+    .timeline-steps p { margin-bottom: 12px; color: #666; }
+    .timeline-steps p.current { color: var(--primary); font-weight: 600; }
 
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .timeline {
-      display: flex;
-      margin-top: 10px;
-    }
-
-    .timeline-line {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-inline-end: 10px;
-    }
-
-    .tl-dot {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid #d5cdfa;
-      background: #fff;
-      margin-bottom: 10px;
-      position: relative;
-    }
-
-    .tl-dot.done {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-
-    .tl-dot.done::after {
-      content: "✓";
-      position: absolute;
-      inset: -1px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 11px;
-    }
-
-    .tl-line {
-      width: 2px;
-      flex: 1;
-      background: linear-gradient(to bottom, #d5cdfa 0, #d5cdfa 50%, transparent 100%);
-      margin-bottom: 10px;
-    }
-
-    .timeline-steps {
-      font-size: 14px;
-    }
-
-    .timeline-steps p {
-      margin-bottom: 12px;
-      color: #666;
-    }
-
-    .timeline-steps p.current {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .support-note {
-      font-size: 13px;
-      color: #777;
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .support-note a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-    }
+    .support-note { font-size: 13px; color: #777; text-align: center; margin-top: 10px; }
+    .support-note a { color: var(--primary); text-decoration: none; font-weight: 600; }
 
     @media (max-width: 400px) {
       main { padding: 14px 10px 18px; }
@@ -569,8 +291,8 @@
     </header>
 
     <main>
-      <!-- الشاشة الرئيسية -->
       <section id="screen-main" class="screen active">
+
         <!-- 1) اختيار المنتجات -->
         <div class="card card-1">
           <div class="section-title">
@@ -663,7 +385,6 @@
             </div>
           </div>
 
-          <!-- بطاقات الحروف 15 دينار -->
           <div class="row product-row">
             <div class="product-name">
               <span class="product-name-icon">🔠</span>
@@ -676,7 +397,6 @@
             </div>
           </div>
 
-          <!-- بطاقات الأرقام 10 دنانير -->
           <div class="row product-row">
             <div class="product-name">
               <span class="product-name-icon">🔢</span>
@@ -689,7 +409,6 @@
             </div>
           </div>
 
-          <!-- بطاقات القوانين الصفية 5 دنانير (جديدة) -->
           <div class="row product-row" style="margin-bottom:0;">
             <div class="product-name">
               <span class="product-name-icon">📜</span>
@@ -734,14 +453,36 @@
           </select>
 
           <label for="address">العنوان التفصيلي</label>
-          <textarea id="address"
-                    placeholder="العنوان التفصيلي (مثال: اسم الحي، الشارع، رقم البناية)"></textarea>
+          <textarea id="address" placeholder="العنوان التفصيلي (مثال: اسم الحي، الشارع، رقم البناية)"></textarea>
         </div>
 
-        <!-- 3) معلومات الاتصال -->
+        <!-- ✅ 3) شكل التحضير (إجباري) -->
         <div class="card card-3">
           <div class="section-title">
             <div class="badge-step">3</div>
+            <div class="section-icon">🗂️</div>
+            <span>شكل التحضير (حقل إجباري)</span>
+          </div>
+
+          <label class="radio-pill" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <input type="radio" name="prepType" value="التحضير على شكل ورق">
+            <span>التحضير على شكل ورق</span>
+          </label>
+
+          <label class="radio-pill" style="display:flex;align-items:center;gap:8px;">
+            <input type="radio" name="prepType" value="مجلد على شكل دفتر">
+            <span>مجلد على شكل دفتر</span>
+          </label>
+
+          <div id="prepErr" style="display:none;color:#b1001d;margin-top:8px;font-size:13px;">
+            يرجى اختيار شكل التحضير.
+          </div>
+        </div>
+
+        <!-- 4) معلومات الاتصال (كانت 3) -->
+        <div class="card card-3">
+          <div class="section-title">
+            <div class="badge-step">4</div>
             <div class="section-icon">📞</div>
             <span>معلومات الاتصال</span>
           </div>
@@ -755,7 +496,6 @@
           <label for="altPhone">رقم هاتف بديل (اختياري)</label>
           <input id="altPhone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
 
-          <!-- نوع المدرسة (حكومية / خاصة) -->
           <label style="margin-top:8px;">نوع المدرسة</label>
           <div class="school-type-group">
             <label class="radio-pill">
@@ -769,14 +509,13 @@
           </div>
 
           <label for="notes" style="margin-top: 8px;">ملاحظات إضافية (حقل إجباري)</label>
-          <textarea id="notes"
-                    placeholder="مثال: التحضير مجلد/ورق، وقت مناسب للتوصيل..."></textarea>
+          <textarea id="notes" placeholder="مثال: وقت مناسب للتوصيل..."></textarea>
         </div>
 
-        <!-- 4) ملخص الطلب -->
+        <!-- 5) ملخص الطلب (كانت 4) -->
         <div class="card card-4">
           <div class="section-title">
-            <div class="badge-step">4</div>
+            <div class="badge-step">5</div>
             <div class="section-icon">🧾</div>
             <span>ملخص الطلب</span>
           </div>
@@ -913,7 +652,6 @@
   </div>
 
   <script>
-    // رابط الويب آب (تأكدي أنه آخر رابط Deployment مفعّل)
     var WEB_APP_URL =
       "https://script.google.com/macros/s/AKfycbwhIv3eKQ0o5o4DkF3c67JVbAORRuiC0awSiywgLseAYWUwuHRY9g34YkkoVGfhAK-p/exec";
 
@@ -938,9 +676,7 @@
     var lastOrderNumber = null;
 
     function showScreen(name) {
-      document.querySelectorAll(".screen").forEach(function (s) {
-        s.classList.remove("active");
-      });
+      document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
       document.getElementById("screen-" + name).classList.add("active");
       hideError();
       window.scrollTo(0, 0);
@@ -1003,16 +739,15 @@
           var ctrl = row.querySelector(".qty-control");
           var price = parseFloat(ctrl.dataset.price) || 0;
 
-          items.push({
-            name: label,
-            price: price,
-            qty: qty
-          });
+          items.push({ name: label, price: price, qty: qty });
         }
       });
 
       var schoolTypeEl = document.querySelector('input[name="schoolType"]:checked');
       var schoolType = schoolTypeEl ? schoolTypeEl.value : "";
+
+      var prepEl = document.querySelector('input[name="prepType"]:checked');
+      var prepType = prepEl ? prepEl.value : "";
 
       return {
         name: document.getElementById("name").value.trim(),
@@ -1022,6 +757,9 @@
         notes: document.getElementById("notes").value.trim(),
         governorate: document.getElementById("governorate").value,
         district: document.getElementById("district").value,
+
+        prepType: prepType, // ✅ يُرسل للسيرفر
+
         itemsCount: parseInt(document.getElementById("items-count").textContent) || 0,
         productsTotal: parseFloat(document.getElementById("products-total").textContent) || 0,
         deliveryFee: parseFloat(document.getElementById("delivery-fee").textContent) || 0,
@@ -1037,15 +775,11 @@
       box.style.display = "flex";
     }
 
-    function hideError() {
-      document.getElementById("error-box").style.display = "none";
-    }
+    function hideError() { document.getElementById("error-box").style.display = "none"; }
 
     function validate() {
       hideError();
-      document.querySelectorAll(".required-error").forEach(function (el) {
-        el.classList.remove("required-error");
-      });
+      document.querySelectorAll(".required-error").forEach(function (el) { el.classList.remove("required-error"); });
 
       var nameEl = document.getElementById("name");
       var phoneEl = document.getElementById("phone");
@@ -1079,6 +813,18 @@
       if (count === 0) {
         showError("الرجاء اختيار منتج واحد على الأقل");
         return false;
+      }
+
+      // ✅ منع الإرسال قبل اختيار شكل التحضير
+      var prepChosen = document.querySelector('input[name="prepType"]:checked');
+      if (!prepChosen) {
+        var prepErr = document.getElementById("prepErr");
+        if (prepErr) prepErr.style.display = "block";
+        showError("الرجاء اختيار شكل التحضير (التحضير على شكل ورق أو مجلد على شكل دفتر).");
+        return false;
+      } else {
+        var prepErr2 = document.getElementById("prepErr");
+        if (prepErr2) prepErr2.style.display = "none";
       }
 
       return true;
@@ -1173,6 +919,7 @@
 "المحافظة: " + (lastOrder.governorate || "-") + "\n" +
 "اللواء: " + (lastOrder.district || "-") + "\n" +
 "نوع المدرسة: " + (lastOrder.schoolType || "-") + "\n" +
+"شكل التحضير: " + (lastOrder.prepType || "-") + "\n" +
 "📍 العنوان: " + (lastOrder.address || "-") + "\n\n" +
 "🛍 المنتجات:\n" + itemsTxt + "\n\n" +
 "💵 مجموع المنتجات: *" + lastOrder.productsTotal + "* دنانير\n" +
@@ -1197,15 +944,10 @@
       window.open("https://wa.me/" + ph + "?text=" + encodeURIComponent(text), "_blank");
     }
 
-    function callUs() {
-      window.location.href = "tel:" + WHATSAPP_NUMBER;
-    }
+    function callUs() { window.location.href = "tel:" + WHATSAPP_NUMBER; }
 
-    function enforceNumeric(el) {
-      el.value = el.value.replace(/\D/g, "").slice(0, 10);
-    }
+    function enforceNumeric(el) { el.value = el.value.replace(/\D/g, "").slice(0, 10); }
 
-    // تحديث المجموع عند فتح الصفحة لأول مرة + ربط نوع المدرسة بالملخص
     document.addEventListener("DOMContentLoaded", function () {
       calculateTotals();
       updateSchoolTypeSummary();
