@@ -19,8 +19,6 @@
     :root {
       --primary: #8454ff;
       --primary-dark: #6336dd;
-      --accent-pink: #ff7fab;
-      --accent-gold: #f6b756;
       --bg-left: #ffe8d9;
       --bg-right: #efe2ff;
       --card-bg: #fff9ff;
@@ -54,13 +52,6 @@
       padding: 16px 16px 22px; position: relative;
     }
 
-    header::after {
-      content: ""; position: absolute; inset-inline: 14%;
-      bottom: -18px; height: 36px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,0,0,0.18), transparent 65%);
-      opacity: 0.27; filter: blur(4px); z-index: -1;
-    }
-
     .logo-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; }
     .logo-wrapper img {
       width: 76px; height: 76px; border-radius: 50%; object-fit: contain;
@@ -81,11 +72,6 @@
       border: 1px solid rgba(255,255,255,0.9);
       box-shadow: 0 6px 16px rgba(0,0,0,0.05);
     }
-
-    .card-1 { background: linear-gradient(135deg, #fff7f9, #fff3ff); }
-    .card-2 { background: linear-gradient(135deg, #fff8eb, #fff2de); }
-    .card-3 { background: linear-gradient(135deg, #f1fff7, #e8fff3); }
-    .card-4 { background: linear-gradient(135deg, #f3f5ff, #e8eeff); }
 
     .section-title {
       display: flex; align-items: center; gap: 8px;
@@ -117,24 +103,6 @@
     .product-name { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
     .product-label-text { line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .product-name-icon {
-      width: 32px; height: 32px; border-radius: 11px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff; flex-shrink: 0;
-      box-shadow: 0 3px 7px rgba(0,0,0,0.18);
-    }
-
-    .product-row:nth-of-type(1) .product-name-icon { background: linear-gradient(135deg,#ff9fb3,#ff6f91); }
-    .product-row:nth-of-type(2) .product-name-icon { background: linear-gradient(135deg,#ffa85c,#ffcf63); }
-    .product-row:nth-of-type(3) .product-name-icon { background: linear-gradient(135deg,#58cc9b,#8fe7b8); }
-    .product-row:nth-of-type(4) .product-name-icon { background: linear-gradient(135deg,#7c8cff,#aeb5ff); }
-    .product-row:nth-of-type(5) .product-name-icon { background: linear-gradient(135deg,#bd74ff,#f09cff); }
-    .product-row:nth-of-type(6) .product-name-icon { background: linear-gradient(135deg,#ff7e67,#ffc07f); }
-    .product-row:nth-of-type(7) .product-name-icon { background: linear-gradient(135deg,#ffe45c,#ffb347); }
-    .product-row:nth-of-type(8) .product-name-icon { background: linear-gradient(135deg,#6fc2ff,#a0d9ff); }
-    .product-row:nth-of-type(9) .product-name-icon { background: linear-gradient(135deg,#5271ff,#8a9bff); }
-    .product-row:nth-of-type(10) .product-name-icon { background: linear-gradient(135deg,#ffb3b3,#ff8787); }
-
     .qty-control {
       display: inline-flex; align-items: center;
       border-radius: 999px; background: #f6f2ff;
@@ -145,10 +113,8 @@
       border: none; padding: 7px 12px; min-width: 34px; font-size: 18px;
       background: transparent; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      color: #555; transition: background 0.15s ease, transform 0.05s ease;
+      color: #555;
     }
-
-    .qty-btn:active { background: #e5dcff; transform: translateY(1px); }
 
     .qty-value {
       min-width: 32px; text-align: center; font-size: 15px;
@@ -163,39 +129,27 @@
       border-radius: 12px; border: 1px solid #ded5ff;
       font-size: 15px; background: rgba(255,255,255,0.85);
       outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
 
     textarea { min-height: 78px; resize: vertical; }
-    input::placeholder, textarea::placeholder { font-size: 13px; color: #aaa3d0; }
-
-    .school-type-group { display: flex; gap: 8px; margin-bottom: 4px; margin-top: 2px; }
 
     .radio-pill {
       display: inline-flex; align-items: center;
-      padding: 6px 10px; border-radius: 999px;
+      padding: 8px 10px; border-radius: 999px;
       border: 1px solid #ded5ff; background: rgba(255,255,255,0.9);
       cursor: pointer; font-size: 13px; color: #555;
     }
-
-    .school-type-group .radio-pill input { margin-left: 6px; }
 
     .btn-primary, .btn-secondary {
       width: 100%; border-radius: 999px; border: none;
       padding: 13px 16px; font-size: 15px; margin-top: 10px;
       cursor: pointer; font-weight: 600;
-      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
     }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), #f068b8);
-      color: #fff; box-shadow: 0 8px 18px rgba(132,84,255,0.38);
-    }
-
-    .btn-primary:active {
-      transform: translateY(1px);
-      box-shadow: 0 4px 10px rgba(132,84,255,0.4);
-      background: linear-gradient(135deg, var(--primary-dark), #e44eaa);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(132,84,255,0.38);
     }
 
     .btn-primary:disabled { background: #c9c4e6; box-shadow: none; cursor: not-allowed; }
@@ -205,40 +159,26 @@
       border: 1px solid #d6ccff; box-shadow: 0 3px 9px rgba(0,0,0,0.06);
     }
 
-    .btn-secondary:active { background: #f4f0ff; transform: translateY(1px); }
-
     .summary-row { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 5px; color: #333; }
     .summary-row .value { font-weight: 700; color: var(--primary); }
 
     hr { border: none; border-top: 1px dashed #d8cffc; margin: 8px 0; }
 
     .screen { display: none; }
-    .screen.active { display: block; animation: fadeIn 0.25s ease-out; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    .screen.active { display: block; }
 
     .error-box {
       background: #ffe8ea;
       border: 1px solid #ffb3b9;
       color: #b1001d;
-      padding: 8px 9px;
+      padding: 10px 10px;
       border-radius: 11px;
       font-size: 13px;
       margin-bottom: 8px;
       display: none;
       align-items: flex-start;
       gap: 6px;
-    }
-
-    .error-icon { margin-top: 2px; }
-
-    input.required-error, textarea.required-error {
-      border-color: #ff4d4f !important;
-      background: #fff7f8;
-      box-shadow: 0 0 0 1px rgba(255,91,91,0.22);
+      line-height: 1.7;
     }
 
     .center-card { text-align: center; padding-top: 26px; }
@@ -252,29 +192,9 @@
     }
 
     .title-lg { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
-    .text-muted { font-size: 14px; color: #555; line-height: 1.6; }
     .order-id { font-size: 15px; margin-bottom: 10px; color: #444; }
+
     .btn-row { display: flex; gap: 10px; margin-top: 14px; }
-
-    .timeline { display: flex; margin-top: 10px; }
-    .timeline-line { display: flex; flex-direction: column; align-items: center; margin-inline-end: 10px; }
-    .tl-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d5cdfa; background: #fff; margin-bottom: 10px; position: relative; }
-    .tl-dot.done { background: var(--primary); border-color: var(--primary); }
-    .tl-dot.done::after { content: "✓"; position: absolute; inset: -1px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; }
-    .tl-line { width: 2px; flex: 1; background: linear-gradient(to bottom, #d5cdfa 0, #d5cdfa 50%, transparent 100%); margin-bottom: 10px; }
-
-    .timeline-steps { font-size: 14px; }
-    .timeline-steps p { margin-bottom: 12px; color: #666; }
-    .timeline-steps p.current { color: var(--primary); font-weight: 600; }
-
-    .support-note { font-size: 13px; color: #777; text-align: center; margin-top: 10px; }
-    .support-note a { color: var(--primary); text-decoration: none; font-weight: 600; }
-
-    @media (max-width: 400px) {
-      main { padding: 14px 10px 18px; }
-      .card { padding: 14px 10px; }
-      .product-label-text { font-size: 13px; }
-    }
   </style>
 </head>
 
@@ -295,18 +215,16 @@
       <section id="screen-main" class="screen active">
 
         <!-- 1) اختيار المنتجات -->
-        <div class="card card-1">
+        <div class="card">
           <div class="section-title">
             <div class="badge-step">1</div>
             <div class="section-icon">🛒</div>
             <span>اختيار المنتجات</span>
           </div>
 
+          <!-- المنتجات -->
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">🎒</span>
-              <span class="product-label-text">حقيبة الصف الأول (10 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">حقيبة الصف الأول (10 دنانير)</span></div>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -315,10 +233,7 @@
           </div>
 
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">🎒</span>
-              <span class="product-label-text">حقيبة الصف الثاني (10 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">حقيبة الصف الثاني (10 دنانير)</span></div>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -327,10 +242,7 @@
           </div>
 
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">🎒</span>
-              <span class="product-label-text">حقيبة الصف الثالث (10 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">حقيبة الصف الثالث (10 دنانير)</span></div>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -339,10 +251,7 @@
           </div>
 
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">📚</span>
-              <span class="product-label-text">تحضير فقط صف أول (7 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">تحضير فقط صف أول (7 دنانير)</span></div>
             <div class="qty-control" data-price="7">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -351,10 +260,7 @@
           </div>
 
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">📚</span>
-              <span class="product-label-text">تحضير فقط صف ثاني (7 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">تحضير فقط صف ثاني (7 دنانير)</span></div>
             <div class="qty-control" data-price="7">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -363,10 +269,7 @@
           </div>
 
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">📚</span>
-              <span class="product-label-text">تحضير فقط صف ثالث (7 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">تحضير فقط صف ثالث (7 دنانير)</span></div>
             <div class="qty-control" data-price="7">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -375,10 +278,7 @@
           </div>
 
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">💡</span>
-              <span class="product-label-text">حقيبة التعلم النشط (10 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">حقيبة التعلم النشط (10 دنانير)</span></div>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -387,10 +287,7 @@
           </div>
 
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">🔠</span>
-              <span class="product-label-text">بطاقات الحروف (15 دينار)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">بطاقات الحروف (15 دينار)</span></div>
             <div class="qty-control" data-price="15">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -399,10 +296,7 @@
           </div>
 
           <div class="row product-row">
-            <div class="product-name">
-              <span class="product-name-icon">🔢</span>
-              <span class="product-label-text">بطاقات الأرقام (10 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">بطاقات الأرقام (10 دنانير)</span></div>
             <div class="qty-control" data-price="10">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -411,10 +305,7 @@
           </div>
 
           <div class="row product-row" style="margin-bottom:0;">
-            <div class="product-name">
-              <span class="product-name-icon">📜</span>
-              <span class="product-label-text">بطاقات القوانين الصفية (5 دنانير)</span>
-            </div>
+            <div class="product-name"><span class="product-label-text">بطاقات القوانين الصفية (5 دنانير)</span></div>
             <div class="qty-control" data-price="5">
               <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
               <div class="qty-value">0</div>
@@ -424,7 +315,7 @@
         </div>
 
         <!-- 2) معلومات التوصيل -->
-        <div class="card card-2">
+        <div class="card">
           <div class="section-title">
             <div class="badge-step">2</div>
             <div class="section-icon">🚚</div>
@@ -457,8 +348,8 @@
           <textarea id="address" placeholder="العنوان التفصيلي (مثال: اسم الحي، الشارع، رقم البناية)"></textarea>
         </div>
 
-        <!-- 3) شكل التحضير (إجباري) -->
-        <div class="card card-3">
+        <!-- 3) شكل التحضير -->
+        <div class="card">
           <div class="section-title">
             <div class="badge-step">3</div>
             <div class="section-icon">🗂️</div>
@@ -481,7 +372,7 @@
         </div>
 
         <!-- 4) معلومات الاتصال -->
-        <div class="card card-3">
+        <div class="card">
           <div class="section-title">
             <div class="badge-step">4</div>
             <div class="section-icon">📞</div>
@@ -498,7 +389,7 @@
           <input id="altPhone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
 
           <label style="margin-top:8px;">نوع المدرسة</label>
-          <div class="school-type-group">
+          <div style="display:flex;gap:8px;margin-top:2px;">
             <label class="radio-pill">
               <input type="radio" name="schoolType" value="مدرسة حكومية">
               <span>مدرسة حكومية</span>
@@ -513,8 +404,8 @@
           <textarea id="notes" placeholder="مثال: وقت مناسب للتوصيل..."></textarea>
         </div>
 
-        <!-- 5) ملخص الطلب -->
-        <div class="card card-4">
+        <!-- 5) ملخص -->
+        <div class="card">
           <div class="section-title">
             <div class="badge-step">5</div>
             <div class="section-icon">🧾</div>
@@ -554,7 +445,7 @@
         </div>
 
         <div id="error-box" class="error-box">
-          <span class="error-icon">⚠️</span>
+          <span>⚠️</span>
           <span id="error-text"></span>
         </div>
 
@@ -599,67 +490,23 @@
             </div>
           </div>
 
-          <p class="text-muted" style="margin-top:10px;">
-            سيتم فتح واتساب تلقائياً بعد ثوانٍ قليلة لإرسال تفاصيل الطلب.<br>
-            ✏️ لتعديل الطلب لاحقاً، راسلنا عبر واتساب مع ذكر رقم الطلب.
-          </p>
-
           <button class="btn-primary" style="margin-top: 10px;" onclick="sendWhatsAppFromConfirm()">
             💬 إرسال الطلب عبر واتساب الآن
           </button>
 
           <div class="btn-row">
             <button class="btn-secondary" onclick="location.reload()">➕ طلب جديد</button>
-            <button class="btn-primary" onclick="showScreen('track')">🔍 متابعة الطلب</button>
           </div>
         </div>
       </section>
 
-      <!-- شاشة متابعة الطلب -->
-      <section id="screen-track" class="screen">
-        <div class="card">
-          <div class="section-title">
-            <div class="badge-step">•</div>
-            <div class="section-icon">📦</div>
-            <span>حالة الطلب</span>
-          </div>
-
-          <div class="timeline">
-            <div class="timeline-line">
-              <div class="tl-dot done"></div>
-              <div class="tl-line"></div>
-              <div class="tl-dot"></div>
-              <div class="tl-line"></div>
-              <div class="tl-dot"></div>
-              <div class="tl-line"></div>
-              <div class="tl-dot"></div>
-            </div>
-            <div class="timeline-steps">
-              <p class="current">تم استلام الطلب</p>
-              <p>قيد المعالجة</p>
-              <p>تم الشحن</p>
-              <p>تم التوصيل</p>
-            </div>
-          </div>
-
-          <button class="btn-primary" style="margin-top:16px;" onclick="requestEdit()">
-            ✏️ طلب تعديل على طلب سابق
-          </button>
-          <button class="btn-secondary" onclick="callUs()">📞 اتصال هاتفي</button>
-
-          <p class="support-note">
-            للتواصل هاتفياً:
-            <a href="tel:0798382004">0798382004</a>
-          </p>
-        </div>
-      </section>
     </main>
   </div>
 
   <script>
-    // ✅ رابط الويب آب الجديد الذي زوّدتني به
+    // ✅ رابط الويب آب الذي أعطيتني إياه
     var WEB_APP_URL =
-      "https://script.google.com/macros/s/AKfycbyRjMXubUHG-AukqYhQP_Fs8t4G-Xt6tRwEP86S6WJZv3at9nKlCmum6I8UwO58sQc9/exec";
+      "https://script.google.com/macros/s/AKfycbwHM8EJ8QFSO5nevFHSHbX2mGc5z5RVOGOBFq4RPKfV9HzoACpRJmRkMIR6y5Z_V__w/exec";
 
     var WHATSAPP_NUMBER = "0798382004";
 
@@ -763,7 +610,7 @@
         governorate: document.getElementById("governorate").value,
         district: document.getElementById("district").value,
 
-        prepType: prepType, // ✅ أهم حقل (يروح للعمود I)
+        prepType: prepType,
 
         itemsCount: parseInt(document.getElementById("items-count").textContent) || 0,
         productsTotal: parseFloat(document.getElementById("products-total").textContent) || 0,
@@ -786,26 +633,18 @@
 
     function validate() {
       hideError();
-      document.querySelectorAll(".required-error").forEach(function (el) { el.classList.remove("required-error"); });
 
       var nameEl = document.getElementById("name");
       var phoneEl = document.getElementById("phone");
       var addrEl = document.getElementById("address");
       var notesEl = document.getElementById("notes");
 
-      var ok = true;
-      if (!nameEl.value.trim()) { nameEl.classList.add("required-error"); ok = false; }
-      if (!phoneEl.value.trim()) { phoneEl.classList.add("required-error"); ok = false; }
-      if (!addrEl.value.trim()) { addrEl.classList.add("required-error"); ok = false; }
-      if (!notesEl.value.trim()) { notesEl.classList.add("required-error"); ok = false; }
-
-      if (!ok) {
+      if (!nameEl.value.trim() || !phoneEl.value.trim() || !addrEl.value.trim() || !notesEl.value.trim()) {
         showError("الرجاء تعبئة الحقول المطلوبة (الاسم، الهاتف، العنوان، الملاحظات الإضافية)");
         return false;
       }
 
       if (!/^07\d{8}$/.test(phoneEl.value.replace(/\D/g, ""))) {
-        phoneEl.classList.add("required-error");
         showError("رقم الهاتف غير صحيح (يجب أن يبدأ بـ 07 ويتكون من 10 خانات)");
         return false;
       }
@@ -822,19 +661,28 @@
         return false;
       }
 
-      // ✅ منع الإرسال قبل اختيار شكل التحضير
       var prepChosen = document.querySelector('input[name="prepType"]:checked');
       if (!prepChosen) {
-        var prepErr = document.getElementById("prepErr");
-        if (prepErr) prepErr.style.display = "block";
+        document.getElementById("prepErr").style.display = "block";
         showError("الرجاء اختيار شكل التحضير (التحضير على شكل ورق أو مجلد على شكل دفتر).");
         return false;
       } else {
-        var prepErr2 = document.getElementById("prepErr");
-        if (prepErr2) prepErr2.style.display = "none";
+        document.getElementById("prepErr").style.display = "none";
       }
 
       return true;
+    }
+
+    function buildWhatsAppEditLink(phone, altPhone) {
+      var ph = "962" + WHATSAPP_NUMBER.substring(1);
+      var txt =
+        "مرحباً 👋\n" +
+        "تم إرسال طلب سابقاً بهذا الرقم وأرغب بتعديل طلبي.\n\n" +
+        "رقم الهاتف الأساسي: " + (phone || "-") + "\n" +
+        "رقم الهاتف البديل: " + (altPhone || "-") + "\n" +
+        "التعديل المطلوب:\n" +
+        "- ";
+      return "https://wa.me/" + ph + "?text=" + encodeURIComponent(txt);
     }
 
     function onSubmitClick() {
@@ -871,7 +719,17 @@
 
           setTimeout(sendWhatsAppFromConfirm, 3000);
         } else {
-          showError("حدث خطأ في السيرفر: " + (res.message || ""));
+          // ✅ رسالة خاصة للتكرار + زر واتساب
+          if (res.code === "DUPLICATE_PHONE") {
+            var wa = buildWhatsAppEditLink(order.phone, order.altPhone);
+            showError(
+              (res.message || "✅ تم إرسال طلب سابقاً بهذا الرقم.\n📲 في حال الرغبة بتعديل طلبك تواصل معنا واتساب") +
+              "<br><br>💬 <a href='" + wa + "' target='_blank' style='color:#7a1fd1;font-weight:800;text-decoration:none;'>اضغط هنا للتواصل عبر واتساب</a>"
+            );
+          } else {
+            showError("حدث خطأ في السيرفر: " + (res.message || ""));
+          }
+
           btn.disabled = false;
           btn.textContent = "📨 إرسال الطلب";
         }
@@ -884,13 +742,6 @@
       });
     }
 
-    function updateSchoolTypeSummary() {
-      var el = document.querySelector('input[name="schoolType"]:checked');
-      var txt = el ? el.value : "غير محدد";
-      var target = document.getElementById("school-type-summary");
-      if (target) target.textContent = txt;
-    }
-
     function sendWhatsAppFromConfirm() {
       if (!lastOrder || !lastOrderNumber) return;
 
@@ -901,25 +752,14 @@
         var price = Number(item.price) || 0;
         var qty = Number(item.qty) || 0;
         var lineTotal = price * qty;
-
-        var emoji = "🛍";
-        if (name.indexOf("حقيبة") !== -1) emoji = "🎒";
-        else if (name.indexOf("تحضير") !== -1) emoji = "📚";
-        else if (name.indexOf("الحروف") !== -1) emoji = "🔠";
-        else if (name.indexOf("الأرقام") !== -1 || name.indexOf("الارقام") !== -1) emoji = "🔢";
-        else if (name.indexOf("القوانين الصفية") !== -1) emoji = "📜";
-
-        return emoji + " " + (index + 1) + ") " + name +
-               " × *" + qty + "* = *" + lineTotal + "* د";
+        return (index + 1) + ") " + name + " × " + qty + " = " + lineTotal + " د";
       }).join("\n");
 
       if (!itemsTxt) itemsTxt = "- لا يوجد منتجات";
 
       var msg =
-"أهلاً وسهلاً  💜 التحضير الإلكتروني 💜 🌟\n" +
-"شكراً على ثقتكم  💜\n" +
-"تم استلام طلبكم بنجاح، وسنتواصل معكم قريباً لتأكيد موعد التوصيل 🚚✨\n\n" +
-"📌 تفاصيل الطلب:\n\n" +
+"أهلاً وسهلاً 💜 التحضير الإلكتروني 💜\n" +
+"تم استلام طلبكم بنجاح.\n\n" +
 "رقم الطلب: *" + lastOrderNumber + "*\n" +
 "الاسم: " + (lastOrder.name || "-") + "\n" +
 "الهاتف: *" + (lastOrder.phone || "-") + "*\n" +
@@ -928,38 +768,29 @@
 "اللواء: " + (lastOrder.district || "-") + "\n" +
 "نوع المدرسة: " + (lastOrder.schoolType || "-") + "\n" +
 "شكل التحضير: " + (lastOrder.prepType || "-") + "\n" +
-"📍 العنوان: " + (lastOrder.address || "-") + "\n\n" +
-"🛍 المنتجات:\n" + itemsTxt + "\n\n" +
-"💵 مجموع المنتجات: *" + lastOrder.productsTotal + "* دنانير\n" +
-"🚚 رسوم التوصيل: *" + lastOrder.deliveryFee + "* دنانير\n" +
-"💰 الإجمالي الكلي: *" + lastOrder.grandTotal + "* دنانير\n\n" +
-"✏️ ملاحظات العميل: " + (lastOrder.notes || "-") + "\n\n" +
-"في حال رغبتم بتعديل الطلب لاحقاً، يمكنكم مراسلتنا على هذا الرقم مع ذكر رقم الطلب.\n\n" +
-"📘 فيسبوك: https://www.facebook.com/ta7deer/";
+"العنوان: " + (lastOrder.address || "-") + "\n\n" +
+"المنتجات:\n" + itemsTxt + "\n\n" +
+"مجموع المنتجات: *" + lastOrder.productsTotal + "* د\n" +
+"رسوم التوصيل: *" + lastOrder.deliveryFee + "* د\n" +
+"الإجمالي الكلي: *" + lastOrder.grandTotal + "* د\n\n" +
+"ملاحظات العميل: " + (lastOrder.notes || "-");
 
       window.open("https://wa.me/" + ph + "?text=" + encodeURIComponent(msg), "_blank");
     }
 
-    function requestEdit() {
-      var ph = "962" + WHATSAPP_NUMBER.substring(1);
-      var text =
-"مرحباً 👋\n" +
-"أرغب بتعديل طلبي السابق من *التحضير الإلكتروني*.\n\n" +
-"رقم الطلب: ________\n" +
-"التعديل المطلوب:\n" +
-"- ..................................\n" +
-"- ..................................";
-      window.open("https://wa.me/" + ph + "?text=" + encodeURIComponent(text), "_blank");
+    function enforceNumeric(el) {
+      el.value = el.value.replace(/\D/g, "").slice(0, 10);
     }
 
-    function callUs() { window.location.href = "tel:" + WHATSAPP_NUMBER; }
-    function enforceNumeric(el) { el.value = el.value.replace(/\D/g, "").slice(0, 10); }
-
     document.addEventListener("DOMContentLoaded", function () {
+      onGovernorateChange();
       calculateTotals();
-      updateSchoolTypeSummary();
+
       document.querySelectorAll('input[name="schoolType"]').forEach(function (el) {
-        el.addEventListener("change", updateSchoolTypeSummary);
+        el.addEventListener("change", function () {
+          var v = document.querySelector('input[name="schoolType"]:checked');
+          document.getElementById("school-type-summary").textContent = v ? v.value : "غير محدد";
+        });
       });
     });
   </script>
