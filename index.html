@@ -171,7 +171,7 @@
 
     .school-type-group { display: flex; gap: 8px; margin-bottom: 4px; margin-top: 2px; }
 
-    .school-type-group .radio-pill {
+    .radio-pill {
       display: inline-flex; align-items: center;
       padding: 6px 10px; border-radius: 999px;
       border: 1px solid #ded5ff; background: rgba(255,255,255,0.9);
@@ -291,6 +291,7 @@
     </header>
 
     <main>
+      <!-- الشاشة الرئيسية -->
       <section id="screen-main" class="screen active">
 
         <!-- 1) اختيار المنتجات -->
@@ -456,7 +457,7 @@
           <textarea id="address" placeholder="العنوان التفصيلي (مثال: اسم الحي، الشارع، رقم البناية)"></textarea>
         </div>
 
-        <!-- ✅ 3) شكل التحضير (إجباري) -->
+        <!-- 3) شكل التحضير (إجباري) -->
         <div class="card card-3">
           <div class="section-title">
             <div class="badge-step">3</div>
@@ -479,7 +480,7 @@
           </div>
         </div>
 
-        <!-- 4) معلومات الاتصال (كانت 3) -->
+        <!-- 4) معلومات الاتصال -->
         <div class="card card-3">
           <div class="section-title">
             <div class="badge-step">4</div>
@@ -512,7 +513,7 @@
           <textarea id="notes" placeholder="مثال: وقت مناسب للتوصيل..."></textarea>
         </div>
 
-        <!-- 5) ملخص الطلب (كانت 4) -->
+        <!-- 5) ملخص الطلب -->
         <div class="card card-4">
           <div class="section-title">
             <div class="badge-step">5</div>
@@ -589,6 +590,10 @@
               <span class="value" id="confirm-school-type">-</span>
             </div>
             <div class="summary-row">
+              <span>شكل التحضير:</span>
+              <span class="value" id="confirm-prepType">-</span>
+            </div>
+            <div class="summary-row">
               <span>الإجمالي الكلي:</span>
               <span class="value" id="confirm-grand-total">-</span>
             </div>
@@ -652,8 +657,9 @@
   </div>
 
   <script>
+    // ✅ رابط الويب آب الجديد الذي زوّدتني به
     var WEB_APP_URL =
-      "https://script.google.com/macros/s/AKfycbwhIv3eKQ0o5o4DkF3c67JVbAORRuiC0awSiywgLseAYWUwuHRY9g34YkkoVGfhAK-p/exec";
+      "https://script.google.com/macros/s/AKfycbyRjMXubUHG-AukqYhQP_Fs8t4G-Xt6tRwEP86S6WJZv3at9nKlCmum6I8UwO58sQc9/exec";
 
     var WHATSAPP_NUMBER = "0798382004";
 
@@ -738,7 +744,6 @@
           var label = row.querySelector(".product-label-text").textContent.trim();
           var ctrl = row.querySelector(".qty-control");
           var price = parseFloat(ctrl.dataset.price) || 0;
-
           items.push({ name: label, price: price, qty: qty });
         }
       });
@@ -758,7 +763,7 @@
         governorate: document.getElementById("governorate").value,
         district: document.getElementById("district").value,
 
-        prepType: prepType, // ✅ يُرسل للسيرفر
+        prepType: prepType, // ✅ أهم حقل (يروح للعمود I)
 
         itemsCount: parseInt(document.getElementById("items-count").textContent) || 0,
         productsTotal: parseFloat(document.getElementById("products-total").textContent) || 0,
@@ -775,7 +780,9 @@
       box.style.display = "flex";
     }
 
-    function hideError() { document.getElementById("error-box").style.display = "none"; }
+    function hideError() {
+      document.getElementById("error-box").style.display = "none";
+    }
 
     function validate() {
       hideError();
@@ -856,6 +863,7 @@
           document.getElementById("confirm-delivery-fee").textContent = order.deliveryFee + " دنانير";
           document.getElementById("confirm-grand-total").textContent = order.grandTotal + " دنانير";
           document.getElementById("confirm-school-type").textContent = order.schoolType || "-";
+          document.getElementById("confirm-prepType").textContent = order.prepType || "-";
 
           showScreen("confirm");
           btn.disabled = false;
@@ -945,7 +953,6 @@
     }
 
     function callUs() { window.location.href = "tel:" + WHATSAPP_NUMBER; }
-
     function enforceNumeric(el) { el.value = el.value.replace(/\D/g, "").slice(0, 10); }
 
     document.addEventListener("DOMContentLoaded", function () {
