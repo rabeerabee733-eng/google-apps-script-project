@@ -103,6 +103,18 @@
     .product-name { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
     .product-label-text { line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    .paper-only-message {
+      display: none;
+      margin-top: 10px;
+      padding: 9px 10px;
+      border-radius: 11px;
+      background: #fff3d8;
+      border: 1px solid #ffd889;
+      color: #8a5600;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
     .qty-control {
       display: inline-flex; align-items: center;
       border-radius: 999px; background: #f6f2ff;
@@ -277,6 +289,17 @@
             </div>
           </div>
 
+          <div class="row product-row paper-only-product">
+            <div class="product-name">
+              <span class="product-label-text">تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى – ورقي فقط (7 دنانير)</span>
+            </div>
+            <div class="qty-control" data-price="7" data-paper-only="true">
+              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
+              <div class="qty-value">0</div>
+              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
+            </div>
+          </div>
+
           <div class="row product-row">
             <div class="product-name"><span class="product-label-text">حقيبة التعلم النشط (10 دنانير)</span></div>
             <div class="qty-control" data-price="10">
@@ -357,14 +380,18 @@
           </div>
 
           <label class="radio-pill" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <input type="radio" name="prepType" value="التحضير على شكل ورق">
+            <input id="prep-paper" type="radio" name="prepType" value="التحضير على شكل ورق">
             <span>التحضير على شكل ورق</span>
           </label>
 
           <label class="radio-pill" style="display:flex;align-items:center;gap:8px;">
-            <input type="radio" name="prepType" value="مجلد على شكل دفتر">
+            <input id="prep-book" type="radio" name="prepType" value="مجلد على شكل دفتر">
             <span>مجلد على شكل دفتر</span>
           </label>
+
+          <div id="paper-only-message" class="paper-only-message">
+            تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى متوفر ورقيًا فقط، لذلك تم اختيار التحضير على شكل ورق تلقائيًا.
+          </div>
 
           <div id="prepErr" style="display:none;color:#b1001d;margin-top:8px;font-size:13px;">
             يرجى اختيار شكل التحضير.
@@ -388,20 +415,6 @@
           <label for="altPhone">رقم هاتف بديل (اختياري)</label>
           <input id="altPhone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
 
-          <label style="margin-top:8px;">نوع المدرسة</label>
-          <div style="display:flex;gap:8px;margin-top:2px;">
-            <label class="radio-pill">
-              <input type="radio" name="schoolType" value="مدرسة حكومية">
-              <span>مدرسة حكومية</span>
-            </label>
-            <label class="radio-pill">
-              <input type="radio" name="schoolType" value="مدرسة خاصة">
-              <span>مدرسة خاصة</span>
-            </label>
-          </div>
-
-          <label for="notes" style="margin-top: 8px;">ملاحظات إضافية (حقل إجباري)</label>
-          <textarea id="notes" placeholder="مثال: وقت مناسب للتوصيل..."></textarea>
         </div>
 
         <!-- 5) ملخص -->
@@ -425,11 +438,6 @@
           <div class="summary-row">
             <span>رسوم التوصيل:</span>
             <span class="value" id="delivery-fee">0 دنانير</span>
-          </div>
-
-          <div class="summary-row">
-            <span>نوع المدرسة:</span>
-            <span class="value" id="school-type-summary">غير محدد</span>
           </div>
 
           <hr>
@@ -475,10 +483,6 @@
             <div class="summary-row">
               <span>رسوم التوصيل:</span>
               <span class="value" id="confirm-delivery-fee">-</span>
-            </div>
-            <div class="summary-row">
-              <span>نوع المدرسة:</span>
-              <span class="value" id="confirm-school-type">-</span>
             </div>
             <div class="summary-row">
               <span>شكل التحضير:</span>
@@ -540,7 +544,39 @@
       var valueEl = wrapper.querySelector(".qty-value");
       var val = Math.max(0, (parseInt(valueEl.textContent) || 0) + delta);
       valueEl.textContent = val;
+
+      updatePrepTypeAvailability();
       calculateTotals();
+    }
+
+    function hasPaperOnlyProductSelected() {
+      var control = document.querySelector('.qty-control[data-paper-only="true"]');
+      if (!control) return false;
+
+      var qty = parseInt(control.querySelector(".qty-value").textContent) || 0;
+      return qty > 0;
+    }
+
+    function updatePrepTypeAvailability() {
+      var paperOnlySelected = hasPaperOnlyProductSelected();
+      var paperOption = document.getElementById("prep-paper");
+      var bookOption = document.getElementById("prep-book");
+      var message = document.getElementById("paper-only-message");
+
+      if (paperOnlySelected) {
+        paperOption.checked = true;
+        bookOption.checked = false;
+        bookOption.disabled = true;
+        bookOption.closest(".radio-pill").style.opacity = "0.55";
+        bookOption.closest(".radio-pill").style.cursor = "not-allowed";
+        message.style.display = "block";
+        document.getElementById("prepErr").style.display = "none";
+      } else {
+        bookOption.disabled = false;
+        bookOption.closest(".radio-pill").style.opacity = "1";
+        bookOption.closest(".radio-pill").style.cursor = "pointer";
+        message.style.display = "none";
+      }
     }
 
     function calculateTotals() {
@@ -595,9 +631,6 @@
         }
       });
 
-      var schoolTypeEl = document.querySelector('input[name="schoolType"]:checked');
-      var schoolType = schoolTypeEl ? schoolTypeEl.value : "";
-
       var prepEl = document.querySelector('input[name="prepType"]:checked');
       var prepType = prepEl ? prepEl.value : "";
 
@@ -606,7 +639,6 @@
         phone: document.getElementById("phone").value.trim(),
         altPhone: document.getElementById("altPhone").value.trim(),
         address: document.getElementById("address").value.trim(),
-        notes: document.getElementById("notes").value.trim(),
         governorate: document.getElementById("governorate").value,
         district: document.getElementById("district").value,
 
@@ -616,7 +648,6 @@
         productsTotal: parseFloat(document.getElementById("products-total").textContent) || 0,
         deliveryFee: parseFloat(document.getElementById("delivery-fee").textContent) || 0,
         grandTotal: parseFloat(document.getElementById("grand-total").textContent) || 0,
-        schoolType: schoolType,
         items: items
       };
     }
@@ -636,38 +667,58 @@
 
       var nameEl = document.getElementById("name");
       var phoneEl = document.getElementById("phone");
+      var altPhoneEl = document.getElementById("altPhone");
       var addrEl = document.getElementById("address");
-      var notesEl = document.getElementById("notes");
+      var governorateEl = document.getElementById("governorate");
+      var districtEl = document.getElementById("district");
 
-      if (!nameEl.value.trim() || !phoneEl.value.trim() || !addrEl.value.trim() || !notesEl.value.trim()) {
-        showError("الرجاء تعبئة الحقول المطلوبة (الاسم، الهاتف، العنوان، الملاحظات الإضافية)");
+      if (
+        !nameEl.value.trim() ||
+        !phoneEl.value.trim() ||
+        !addrEl.value.trim() ||
+        !governorateEl.value ||
+        !districtEl.value
+      ) {
+        showError("الرجاء تعبئة الحقول المطلوبة: الاسم، الهاتف، المحافظة، اللواء، والعنوان التفصيلي.");
         return false;
       }
 
       if (!/^07\d{8}$/.test(phoneEl.value.replace(/\D/g, ""))) {
-        showError("رقم الهاتف غير صحيح (يجب أن يبدأ بـ 07 ويتكون من 10 خانات)");
+        showError("رقم الهاتف الأساسي غير صحيح، ويجب أن يبدأ بـ 07 ويتكون من 10 خانات.");
         return false;
       }
 
-      var schoolTypeEl = document.querySelector('input[name="schoolType"]:checked');
-      if (!schoolTypeEl) {
-        showError("الرجاء اختيار نوع المدرسة (مدرسة حكومية أو مدرسة خاصة)");
+      if (
+        altPhoneEl.value.trim() &&
+        !/^07\d{8}$/.test(altPhoneEl.value.replace(/\D/g, ""))
+      ) {
+        showError("رقم الهاتف البديل غير صحيح، ويجب أن يبدأ بـ 07 ويتكون من 10 خانات، أو اتركه فارغًا.");
         return false;
       }
 
       var count = parseInt(document.getElementById("items-count").textContent) || 0;
       if (count === 0) {
-        showError("الرجاء اختيار منتج واحد على الأقل");
+        showError("الرجاء اختيار منتج واحد على الأقل.");
         return false;
       }
 
       var prepChosen = document.querySelector('input[name="prepType"]:checked');
       if (!prepChosen) {
         document.getElementById("prepErr").style.display = "block";
-        showError("الرجاء اختيار شكل التحضير (التحضير على شكل ورق أو مجلد على شكل دفتر).");
+        showError("الرجاء اختيار شكل التحضير: التحضير على شكل ورق أو مجلد على شكل دفتر.");
         return false;
-      } else {
-        document.getElementById("prepErr").style.display = "none";
+      }
+
+      document.getElementById("prepErr").style.display = "none";
+
+      if (
+        hasPaperOnlyProductSelected() &&
+        prepChosen.value !== "التحضير على شكل ورق"
+      ) {
+        document.getElementById("prep-paper").checked = true;
+        updatePrepTypeAvailability();
+        showError("تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى متوفر ورقيًا فقط.");
+        return false;
       }
 
       return true;
@@ -710,7 +761,6 @@
           document.getElementById("confirm-products-total").textContent = order.productsTotal + " دنانير";
           document.getElementById("confirm-delivery-fee").textContent = order.deliveryFee + " دنانير";
           document.getElementById("confirm-grand-total").textContent = order.grandTotal + " دنانير";
-          document.getElementById("confirm-school-type").textContent = order.schoolType || "-";
           document.getElementById("confirm-prepType").textContent = order.prepType || "-";
 
           showScreen("confirm");
@@ -727,7 +777,7 @@
               "<br><br>💬 <a href='" + wa + "' target='_blank' style='color:#7a1fd1;font-weight:800;text-decoration:none;'>اضغط هنا للتواصل عبر واتساب</a>"
             );
           } else {
-            showError("حدث خطأ في السيرفر: " + (res.message || ""));
+            showError(res.message || "حدث خطأ أثناء إرسال الطلب.");
           }
 
           btn.disabled = false;
@@ -766,14 +816,12 @@
 "هاتف بديل: " + (lastOrder.altPhone || "-") + "\n" +
 "المحافظة: " + (lastOrder.governorate || "-") + "\n" +
 "اللواء: " + (lastOrder.district || "-") + "\n" +
-"نوع المدرسة: " + (lastOrder.schoolType || "-") + "\n" +
 "شكل التحضير: " + (lastOrder.prepType || "-") + "\n" +
 "العنوان: " + (lastOrder.address || "-") + "\n\n" +
 "المنتجات:\n" + itemsTxt + "\n\n" +
 "مجموع المنتجات: *" + lastOrder.productsTotal + "* د\n" +
 "رسوم التوصيل: *" + lastOrder.deliveryFee + "* د\n" +
-"الإجمالي الكلي: *" + lastOrder.grandTotal + "* د\n\n" +
-"ملاحظات العميل: " + (lastOrder.notes || "-");
+"الإجمالي الكلي: *" + lastOrder.grandTotal + "* د";
 
       window.open("https://wa.me/" + ph + "?text=" + encodeURIComponent(msg), "_blank");
     }
@@ -784,14 +832,8 @@
 
     document.addEventListener("DOMContentLoaded", function () {
       onGovernorateChange();
+      updatePrepTypeAvailability();
       calculateTotals();
-
-      document.querySelectorAll('input[name="schoolType"]').forEach(function (el) {
-        el.addEventListener("change", function () {
-          var v = document.querySelector('input[name="schoolType"]:checked');
-          document.getElementById("school-type-summary").textContent = v ? v.value : "غير محدد";
-        });
-      });
     });
   </script>
 </body>
