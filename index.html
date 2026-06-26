@@ -791,27 +791,57 @@
 
           <div class="summary-row">
             <span>عدد المنتجات:</span>
-            <span id="success-items" class="summary-value">-</span>
+
+            <span
+              id="success-items"
+              class="summary-value"
+            >
+              -
+            </span>
           </div>
 
           <div class="summary-row">
             <span>مجموع المنتجات:</span>
-            <span id="success-products" class="summary-value">-</span>
+
+            <span
+              id="success-products"
+              class="summary-value"
+            >
+              -
+            </span>
           </div>
 
           <div class="summary-row">
             <span>رسوم التوصيل:</span>
-            <span id="success-delivery" class="summary-value">-</span>
+
+            <span
+              id="success-delivery"
+              class="summary-value"
+            >
+              -
+            </span>
           </div>
 
           <div class="summary-row">
             <span>شكل التحضير:</span>
-            <span id="success-prep" class="summary-value">-</span>
+
+            <span
+              id="success-prep"
+              class="summary-value"
+            >
+              -
+            </span>
           </div>
 
           <div class="summary-row">
             <span>الإجمالي الكلي:</span>
-            <span id="success-grand" class="summary-value">-</span>
+
+            <span
+              id="success-grand"
+              class="summary-value"
+            >
+              -
+            </span>
           </div>
 
           <button
@@ -860,13 +890,8 @@
   ></iframe>
 
   <script>
-    /*
-      ضع رابط Google Apps Script الذي ينتهي بـ /exec
-      بين علامتي الاقتباس.
-    */
-
     var WEB_APP_URL =
-      'ضع_هنا_رابط_APPS_SCRIPT_الذي_ينتهي_بـ_exec';
+      'https://script.google.com/macros/s/AKfycbwDt7zZSakpbNgJG6HWfcOmwCr85oLmPKX9op0vTjqAtsM0twWqpVhSjJt2TG1i42ZiKA/exec';
 
     var WHATSAPP_NUMBER =
       '0798382004';
@@ -877,37 +902,43 @@
     var PRODUCTS = [
       {
         id: 'grade1_bag',
-        name: 'حقيبة الصف الأول (10 دنانير)',
+        name:
+          'حقيبة الصف الأول (10 دنانير)',
         price: 10
       },
 
       {
         id: 'grade2_bag',
-        name: 'حقيبة الصف الثاني (10 دنانير)',
+        name:
+          'حقيبة الصف الثاني (10 دنانير)',
         price: 10
       },
 
       {
         id: 'grade3_bag',
-        name: 'حقيبة الصف الثالث (10 دنانير)',
+        name:
+          'حقيبة الصف الثالث (10 دنانير)',
         price: 10
       },
 
       {
         id: 'prep_grade1',
-        name: 'تحضير فقط صف أول (7 دنانير)',
+        name:
+          'تحضير فقط صف أول (7 دنانير)',
         price: 7
       },
 
       {
         id: 'prep_grade2',
-        name: 'تحضير فقط صف ثاني (7 دنانير)',
+        name:
+          'تحضير فقط صف ثاني (7 دنانير)',
         price: 7
       },
 
       {
         id: 'prep_grade3',
-        name: 'تحضير فقط صف ثالث (7 دنانير)',
+        name:
+          'تحضير فقط صف ثالث (7 دنانير)',
         price: 7
       },
 
@@ -928,25 +959,29 @@
 
       {
         id: 'active_learning',
-        name: 'حقيبة التعلم النشط (10 دنانير)',
+        name:
+          'حقيبة التعلم النشط (10 دنانير)',
         price: 10
       },
 
       {
         id: 'letter_cards',
-        name: 'بطاقات الحروف (15 دينار)',
+        name:
+          'بطاقات الحروف (15 دينار)',
         price: 15
       },
 
       {
         id: 'number_cards',
-        name: 'بطاقات الأرقام (10 دنانير)',
+        name:
+          'بطاقات الأرقام (10 دنانير)',
         price: 10
       },
 
       {
         id: 'classroom_rules',
-        name: 'بطاقات القوانين الصفية (5 دنانير)',
+        name:
+          'بطاقات القوانين الصفية (5 دنانير)',
         price: 5
       }
     ];
@@ -1208,15 +1243,21 @@
         .forEach(function(row) {
           var quantity =
             parseInt(
-              row.querySelector('.qty span').textContent,
+              row
+                .querySelector('.qty span')
+                .textContent,
               10
             ) || 0;
 
           var price =
-            Number(row.dataset.price) || 0;
+            Number(
+              row.dataset.price
+            ) || 0;
 
           itemsCount += quantity;
-          productsTotal += price * quantity;
+
+          productsTotal +=
+            price * quantity;
         });
 
       var governorate =
@@ -1249,7 +1290,10 @@
       document.getElementById(
         'grand-total'
       ).textContent =
-        (productsTotal + deliveryFee) +
+        (
+          productsTotal +
+          deliveryFee
+        ) +
         ' دنانير';
     }
 
@@ -1261,7 +1305,9 @@
         .forEach(function(row) {
           var quantity =
             parseInt(
-              row.querySelector('.qty span').textContent,
+              row
+                .querySelector('.qty span')
+                .textContent,
               10
             ) || 0;
 
@@ -1282,20 +1328,34 @@
         );
 
       return {
-        requestId: createRequestId(),
-        name: getValue('name'),
-        phone: getValue('phone'),
-        altPhone: getValue('altPhone'),
-        governorate: getValue('governorate'),
-        district: getValue('district'),
-        address: getValue('address'),
+        requestId:
+          createRequestId(),
+
+        name:
+          getValue('name'),
+
+        phone:
+          getValue('phone'),
+
+        altPhone:
+          getValue('altPhone'),
+
+        governorate:
+          getValue('governorate'),
+
+        district:
+          getValue('district'),
+
+        address:
+          getValue('address'),
 
         prepType:
           prepOption
             ? prepOption.value
             : '',
 
-        items: items
+        items:
+          items
       };
     }
 
@@ -1308,7 +1368,7 @@
 
       if (!validWebAppUrl) {
         showError(
-          'ضع رابط Google Apps Script الصحيح الذي ينتهي بـ /exec داخل المتغير WEB_APP_URL.'
+          'رابط Google Apps Script غير صحيح.'
         );
 
         return false;
@@ -1407,8 +1467,11 @@
         return;
       }
 
-      lastOrder = collectOrderData();
-      activeRequestId = lastOrder.requestId;
+      lastOrder =
+        collectOrderData();
+
+      activeRequestId =
+        lastOrder.requestId;
 
       setSendingState(true);
 
@@ -1417,7 +1480,8 @@
           'post-form'
         );
 
-      form.action = WEB_APP_URL;
+      form.action =
+        WEB_APP_URL;
 
       document.getElementById(
         'post-data'
@@ -1431,7 +1495,7 @@
           setSendingState(false);
 
           showError(
-            'لم يصل رد من الخادم. تأكد من رابط /exec وأن صلاحية التطبيق هي «أي شخص».'
+            'لم يصل رد من الخادم. تأكد من نشر Apps Script بصلاحية «أي شخص».'
           );
         }, 30000);
 
@@ -1463,11 +1527,13 @@
           return;
         }
 
-        var messageData = event.data;
+        var messageData =
+          event.data;
 
         if (
           !messageData ||
-          messageData.source !== CALLBACK_SOURCE ||
+          messageData.source !==
+            CALLBACK_SOURCE ||
           !messageData.result
         ) {
           return;
@@ -1481,7 +1547,9 @@
           return;
         }
 
-        clearTimeout(responseTimer);
+        clearTimeout(
+          responseTimer
+        );
 
         handleServerResponse(
           messageData.result
@@ -1500,14 +1568,16 @@
 
         if (
           response &&
-          response.code === 'DUPLICATE_PHONE'
+          response.code ===
+            'DUPLICATE_PHONE'
         ) {
           whatsappLink =
             buildEditWhatsAppLink();
         }
 
         showError(
-          response && response.message
+          response &&
+          response.message
             ? response.message
             : 'حدث خطأ أثناء إرسال الطلب.',
 
@@ -1518,16 +1588,24 @@
       }
 
       lastOrder.itemsCount =
-        Number(response.itemsCount) || 0;
+        Number(
+          response.itemsCount
+        ) || 0;
 
       lastOrder.productsTotal =
-        Number(response.productsTotal) || 0;
+        Number(
+          response.productsTotal
+        ) || 0;
 
       lastOrder.deliveryFee =
-        Number(response.deliveryFee) || 0;
+        Number(
+          response.deliveryFee
+        ) || 0;
 
       lastOrder.grandTotal =
-        Number(response.grandTotal) || 0;
+        Number(
+          response.grandTotal
+        ) || 0;
 
       lastOrderNumber =
         response.orderNumber;
@@ -1540,17 +1618,20 @@
       document.getElementById(
         'success-items'
       ).textContent =
-        lastOrder.itemsCount + ' منتج';
+        lastOrder.itemsCount +
+        ' منتج';
 
       document.getElementById(
         'success-products'
       ).textContent =
-        lastOrder.productsTotal + ' دنانير';
+        lastOrder.productsTotal +
+        ' دنانير';
 
       document.getElementById(
         'success-delivery'
       ).textContent =
-        lastOrder.deliveryFee + ' دنانير';
+        lastOrder.deliveryFee +
+        ' دنانير';
 
       document.getElementById(
         'success-prep'
@@ -1560,15 +1641,20 @@
       document.getElementById(
         'success-grand'
       ).textContent =
-        lastOrder.grandTotal + ' دنانير';
+        lastOrder.grandTotal +
+        ' دنانير';
 
       document.getElementById(
         'main-screen'
-      ).classList.remove('active');
+      ).classList.remove(
+        'active'
+      );
 
       document.getElementById(
         'success-screen'
-      ).classList.add('active');
+      ).classList.add(
+        'active'
+      );
 
       window.scrollTo({
         top: 0,
@@ -1603,7 +1689,10 @@
               ' × ' +
               item.qty +
               ' = ' +
-              (product.price * item.qty) +
+              (
+                product.price *
+                item.qty
+              ) +
               ' د'
             );
           })
@@ -1629,7 +1718,10 @@
         '*\n' +
 
         'هاتف بديل: ' +
-        (lastOrder.altPhone || '-') +
+        (
+          lastOrder.altPhone ||
+          '-'
+        ) +
         '\n' +
 
         'المحافظة: ' +
@@ -1681,7 +1773,11 @@
       var message =
         'مرحبًا، تم إرسال طلب سابقًا بهذا الرقم وأرغب بتعديل طلبي.\n' +
         'رقم الهاتف الأساسي: ' +
-        (lastOrder ? lastOrder.phone : '-');
+        (
+          lastOrder
+            ? lastOrder.phone
+            : '-'
+        );
 
       return (
         'https://wa.me/962' +
@@ -1708,7 +1804,10 @@
       return null;
     }
 
-    function showError(message, whatsappLink) {
+    function showError(
+      message,
+      whatsappLink
+    ) {
       document.getElementById(
         'error-text'
       ).textContent =
@@ -1783,7 +1882,9 @@
         );
 
       return element
-        ? String(element.value || '').trim()
+        ? String(
+            element.value || ''
+          ).trim()
         : '';
     }
 
