@@ -789,6 +789,9 @@
     var lastOrderNumber = null;
     var activeRequestId = '';
     var responseTimer = null;
+    var pollTimer = null;
+    var activeJsonpScript = null;
+    var activeJsonpCallback = '';
     var toastTimer = null;
     var submitting = false;
 
@@ -1073,13 +1076,17 @@
       document.getElementById('post-data').value = JSON.stringify(pendingOrder);
 
       clearTimeout(responseTimer);
+      stopResultPolling();
+      startResultPolling(activeRequestId);
+
       responseTimer = setTimeout(function() {
+        stopResultPolling();
         submitting = false;
         setSendingState(false);
         closeReview();
-        showError('الاتصال ضعيف أو لم يصل رد من الخادم. تحقق من الإنترنت ثم أعد المحاولة.');
+        showError('لم يتم استلام تأكيد حفظ الطلب من الخادم. تحقق من الإنترنت ثم أعد المحاولة.');
         updateNetworkStatus();
-      }, 40000);
+      }, 50000);
 
       trackEvent('order_confirm_clicked', {
         currency: 'JOD',
@@ -1087,6 +1094,82 @@
       });
 
       form.submit();
+    }
+
+    function startResultPolling(requestId) {
+      pollResult(requestId);
+    }
+
+    function pollResult(requestId) {
+      if (!submitting || !requestId) return;
+
+      cleanupJsonpRequest();
+
+      var callbackName =
+        '__altahdirResult_' +
+        Date.now() +
+        '_' +
+        Math.random().toString(36).slice(2, 8);
+
+      activeJsonpCallback = callbackName;
+
+      window[callbackName] = function(payload) {
+        cleanupJsonpRequest();
+
+        if (payload && payload.ready && payload.result) {
+          clearTimeout(responseTimer);
+          stopResultPolling();
+          handleServerResponse(payload.result);
+          return;
+        }
+
+        pollTimer = setTimeout(function() {
+          pollResult(requestId);
+        }, 1200);
+      };
+
+      var script = document.createElement('script');
+      activeJsonpScript = script;
+      script.async = true;
+      script.src =
+        WEB_APP_URL +
+        '?action=status' +
+        '&requestId=' + encodeURIComponent(requestId) +
+        '&callback=' + encodeURIComponent(callbackName) +
+        '&t=' + Date.now();
+
+      script.onerror = function() {
+        cleanupJsonpRequest();
+        pollTimer = setTimeout(function() {
+          pollResult(requestId);
+        }, 1600);
+      };
+
+      document.head.appendChild(script);
+    }
+
+    function cleanupJsonpRequest() {
+      if (activeJsonpScript && activeJsonpScript.parentNode) {
+        activeJsonpScript.parentNode.removeChild(activeJsonpScript);
+      }
+
+      activeJsonpScript = null;
+
+      if (activeJsonpCallback) {
+        try {
+          delete window[activeJsonpCallback];
+        } catch (ignored) {
+          window[activeJsonpCallback] = undefined;
+        }
+      }
+
+      activeJsonpCallback = '';
+    }
+
+    function stopResultPolling() {
+      clearTimeout(pollTimer);
+      pollTimer = null;
+      cleanupJsonpRequest();
     }
 
     window.addEventListener('message', function(event) {
@@ -1108,10 +1191,12 @@
       }
 
       clearTimeout(responseTimer);
+      stopResultPolling();
       handleServerResponse(messageData.result);
     });
 
     function handleServerResponse(response) {
+      stopResultPolling();
       submitting = false;
       setSendingState(false);
       document.getElementById('review-modal').classList.remove('show');
