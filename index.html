@@ -1077,16 +1077,18 @@
 
       clearTimeout(responseTimer);
       stopResultPolling();
-      startResultPolling(activeRequestId);
+      setTimeout(function() {
+        startResultPolling(activeRequestId);
+      }, 1500);
 
       responseTimer = setTimeout(function() {
         stopResultPolling();
         submitting = false;
         setSendingState(false);
         closeReview();
-        showError('لم يتم استلام تأكيد حفظ الطلب من الخادم. تحقق من الإنترنت ثم أعد المحاولة.');
+        showError('تم إرسال البيانات، لكن تعذر استلام رقم الطلب. لا تعِد الإرسال بنفس الرقم قبل التحقق من الطلبات.');
         updateNetworkStatus();
-      }, 50000);
+      }, 90000);
 
       trackEvent('order_confirm_clicked', {
         currency: 'JOD',
