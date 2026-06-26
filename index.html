@@ -98,7 +98,14 @@
         );
     }
 
+    .logo-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     header img {
+      display: block;
       width: 76px;
       height: 76px;
       padding: 4px;
@@ -202,10 +209,7 @@
       flex-shrink: 0;
       align-items: center;
       overflow: hidden;
-
-      border:
-        1px solid #ded5ff;
-
+      border: 1px solid #ded5ff;
       border-radius: 30px;
     }
 
@@ -334,14 +338,7 @@
 
     .main-button {
       color: #fff;
-
-      background:
-        linear-gradient(
-          135deg,
-          #8454ff,
-          #f068b8
-        );
-
+      background: linear-gradient(135deg, #8454ff, #f068b8);
       border: 0;
 
       box-shadow:
@@ -416,10 +413,12 @@
 
     <header>
 
-      <img
-        src="https://drive.google.com/uc?export=view&id=1w-q181vrQsEMpmDgSW7iuEQvFCZJ6ikg"
-        alt="شعار التحضير الإلكتروني"
-      >
+      <div class="logo-box">
+        <img
+          src="./logo.png"
+          alt="شعار التحضير الإلكتروني"
+        >
+      </div>
 
       <h1>التحضير الإلكتروني</h1>
 
@@ -466,11 +465,7 @@
             id="governorate"
             onchange="changeGovernorate()"
           >
-            <option
-              value=""
-              selected
-              disabled
-            >
+            <option value="" selected disabled>
               اختر المحافظة...
             </option>
 
@@ -499,11 +494,7 @@
             id="district"
             disabled
           >
-            <option
-              value=""
-              selected
-              disabled
-            >
+            <option value="" selected disabled>
               اختر اللواء...
             </option>
           </select>
@@ -531,7 +522,6 @@
           </div>
 
           <label class="radio">
-
             <input
               type="radio"
               name="prepType"
@@ -539,11 +529,9 @@
             >
 
             <span>التحضير على شكل ورق</span>
-
           </label>
 
           <label class="radio">
-
             <input
               type="radio"
               name="prepType"
@@ -551,7 +539,6 @@
             >
 
             <span>مجلد على شكل دفتر</span>
-
           </label>
 
         </div>
@@ -622,33 +609,21 @@
 
           <div class="summary-row">
             <span>عدد المنتجات:</span>
-
-            <span
-              id="items-count"
-              class="summary-value"
-            >
+            <span id="items-count" class="summary-value">
               0 منتج
             </span>
           </div>
 
           <div class="summary-row">
             <span>مجموع المنتجات:</span>
-
-            <span
-              id="products-total"
-              class="summary-value"
-            >
+            <span id="products-total" class="summary-value">
               0 دنانير
             </span>
           </div>
 
           <div class="summary-row">
             <span>رسوم التوصيل:</span>
-
-            <span
-              id="delivery-fee"
-              class="summary-value"
-            >
+            <span id="delivery-fee" class="summary-value">
               0 دنانير
             </span>
           </div>
@@ -657,11 +632,7 @@
 
           <div class="summary-row">
             <span>الإجمالي الكلي:</span>
-
-            <span
-              id="grand-total"
-              class="summary-value"
-            >
+            <span id="grand-total" class="summary-value">
               0 دنانير
             </span>
           </div>
@@ -1141,9 +1112,7 @@
             ) || 0;
 
           itemsCount += quantity;
-
-          productsTotal +=
-            price * quantity;
+          productsTotal += price * quantity;
         });
 
       var governorate =
@@ -1176,10 +1145,7 @@
       document.getElementById(
         'grand-total'
       ).textContent =
-        (
-          productsTotal +
-          deliveryFee
-        ) +
+        (productsTotal + deliveryFee) +
         ' دنانير';
     }
 
@@ -1247,18 +1213,6 @@
 
     function validateForm() {
       hideError();
-
-      var validWebAppUrl =
-        /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/
-          .test(WEB_APP_URL);
-
-      if (!validWebAppUrl) {
-        showError(
-          'رابط Google Apps Script غير صحيح.'
-        );
-
-        return false;
-      }
 
       var phone =
         getValue('phone')
@@ -1433,7 +1387,9 @@
           return;
         }
 
-        clearTimeout(responseTimer);
+        clearTimeout(
+          responseTimer
+        );
 
         handleServerResponse(
           messageData.result
@@ -1723,13 +1679,6 @@
         'error-box'
       ).style.display =
         'block';
-
-      document.getElementById(
-        'error-box'
-      ).scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
     }
 
     function hideError() {
