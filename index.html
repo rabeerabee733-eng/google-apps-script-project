@@ -1,353 +1,546 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>التحضير الإلكتروني | حجز وتحضير الدروس</title>
+  <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  <meta name="description"
-        content="نموذج حجز التحضير الإلكتروني والحقائب التعليمية مع خدمة التوصيل لجميع محافظات الأردن." />
-  <meta name="theme-color" content="#f8bfd0" />
+  <meta
+    name="theme-color"
+    content="#8454ff"
+  >
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta
+    name="description"
+    content="نموذج طلب التحضير الإلكتروني والحقائب التعليمية."
+  >
+
+  <title>التحضير الإلكتروني</title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
+    rel="stylesheet"
+  >
 
   <style>
-    :root {
-      --primary: #8454ff;
-      --primary-dark: #6336dd;
-      --bg-left: #ffe8d9;
-      --bg-right: #efe2ff;
-      --card-bg: #fff9ff;
-      --radius-lg: 26px;
-      --radius-md: 18px;
-      --shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.12);
-      --font-main: "Tajawal", sans-serif;
+    * {
+      box-sizing: border-box;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
-    html, body { width: 100%; height: 100%; overflow-x: hidden; }
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      overflow-x: hidden;
+    }
 
     body {
-      background: linear-gradient(120deg, var(--bg-left) 0%, #ffeef0 40%, #f3e8ff 75%, var(--bg-right) 100%);
-      display: flex; justify-content: center; align-items: flex-start;
-      padding: 18px 10px; font-size: 16px; color: #222;
+      margin: 0;
+      padding: 18px 10px;
+
+      color: #222;
+
+      font-family:
+        "Tajawal",
+        sans-serif;
+
+      background:
+        linear-gradient(
+          120deg,
+          #ffe8d9,
+          #ffeef0,
+          #f3e8ff
+        );
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family:
+        "Tajawal",
+        sans-serif;
     }
 
     .app {
-      width: 100%; max-width: 430px; margin: 0 auto;
-      background: radial-gradient(circle at top left, #fff5e8 0, #fff9ff 55%, #f5f0ff 100%);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-soft);
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      overflow: hidden; position: relative;
+      width: 100%;
+      max-width: 440px;
+
+      margin: 0 auto;
+      overflow: hidden;
+
+      background: #fff9ff;
+
+      border-radius: 26px;
+
+      box-shadow:
+        0 14px 40px
+        rgba(0, 0, 0, 0.12);
     }
 
     header {
-      background: linear-gradient(135deg, var(--primary), #f482c7);
-      color: #fff; text-align: center;
-      padding: 16px 16px 22px; position: relative;
+      padding: 18px;
+
+      color: #fff;
+      text-align: center;
+
+      background:
+        linear-gradient(
+          135deg,
+          #8454ff,
+          #f482c7
+        );
     }
 
-    .logo-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .logo-wrapper img {
-      width: 76px; height: 76px; border-radius: 50%; object-fit: contain;
-      background: #fff; padding: 4px; border: 2px solid #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    header img {
+      width: 76px;
+      height: 76px;
+
+      padding: 4px;
+      object-fit: contain;
+
+      background: #fff;
+
+      border:
+        2px solid #fff;
+
+      border-radius: 50%;
+
+      box-shadow:
+        0 4px 12px
+        rgba(0, 0, 0, 0.18);
     }
 
-    .logo-title { font-size: 20px; font-weight: 700; }
-    .logo-subtitle { font-size: 13px; opacity: 0.95; }
+    header h1 {
+      margin: 7px 0 3px;
+      font-size: 21px;
+    }
 
-    main { padding: 18px 14px 20px; }
+    header p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    main {
+      padding: 16px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
 
     .card {
-      background: var(--card-bg);
-      border-radius: var(--radius-md);
-      padding: 16px 14px;
-      margin-bottom: 16px;
-      border: 1px solid rgba(255,255,255,0.9);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      padding: 15px;
+      margin-bottom: 14px;
+
+      background: #fff;
+
+      border:
+        1px solid #eee5ff;
+
+      border-radius: 18px;
+
+      box-shadow:
+        0 5px 14px
+        rgba(0, 0, 0, 0.05);
     }
 
-    .section-title {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 12px; font-weight: 700; color: #222; font-size: 15px;
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      margin-bottom: 12px;
+
+      font-weight: 800;
     }
 
-    .badge-step {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #fff, #ffd8f5);
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; color: #b43778; flex-shrink: 0;
+    .step {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 27px;
+      height: 27px;
+
+      color: #b43778;
+      background: #ffd8f5;
+
+      border-radius: 50%;
     }
 
-    .section-icon {
-      width: 26px; height: 26px; border-radius: 9px;
-      background: rgba(255,255,255,0.8);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-      font-size: 16px; flex-shrink: 0;
+    .product {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+
+      padding: 11px 0;
+
+      border-bottom:
+        1px dashed #ded5ff;
     }
 
-    .row.product-row {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 10px; margin-bottom: 12px; font-size: 14px; color: #333;
+    .product:last-child {
+      border-bottom: 0;
     }
 
-    .product-name { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
-    .product-label-text { line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-name {
+      flex: 1;
+      min-width: 0;
 
-    .paper-only-message {
-      display: none;
-      margin-top: 10px;
-      padding: 9px 10px;
-      border-radius: 11px;
-      background: #fff3d8;
-      border: 1px solid #ffd889;
-      color: #8a5600;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .product-second-line {
+      display: block;
+
+      margin-top: 2px;
+
+      color: #7135a3;
       font-size: 13px;
-      line-height: 1.7;
+      font-weight: 800;
     }
 
-    .qty-control {
-      display: inline-flex; align-items: center;
-      border-radius: 999px; background: #f6f2ff;
-      border: 1px solid #e0d7ff; overflow: hidden; flex-shrink: 0;
+    .qty {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      overflow: hidden;
+
+      border:
+        1px solid #ded5ff;
+
+      border-radius: 30px;
     }
 
-    .qty-btn {
-      border: none; padding: 7px 12px; min-width: 34px; font-size: 18px;
-      background: transparent; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+    .qty button {
+      width: 36px;
+      height: 36px;
+
       color: #555;
+      font-size: 19px;
+
+      background: #f6f2ff;
+
+      border: 0;
+      cursor: pointer;
     }
 
-    .qty-value {
-      min-width: 32px; text-align: center; font-size: 15px;
-      padding: 5px 10px; background: #ffffff;
-      border-inline: 1px solid #e0d7ff; color: #333;
+    .qty button:active {
+      background: #eae1ff;
     }
 
-    label { display: block; font-size: 14px; margin-top: 4px; margin-bottom: 4px; color: #555; font-weight: 500; }
+    .qty span {
+      min-width: 34px;
+      text-align: center;
+    }
 
-    input, select, textarea {
-      width: 100%; padding: 10px 11px;
-      border-radius: 12px; border: 1px solid #ded5ff;
-      font-size: 15px; background: rgba(255,255,255,0.85);
+    label.field-label {
+      display: block;
+
+      margin: 9px 0 5px;
+
+      color: #555;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px;
+
+      color: #222;
+      background: #fff;
+
+      border:
+        1px solid #ded5ff;
+
+      border-radius: 12px;
+
+      font-size: 15px;
       outline: none;
     }
 
-    textarea { min-height: 78px; resize: vertical; }
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #8454ff;
 
-    .radio-pill {
-      display: inline-flex; align-items: center;
-      padding: 8px 10px; border-radius: 999px;
-      border: 1px solid #ded5ff; background: rgba(255,255,255,0.9);
-      cursor: pointer; font-size: 13px; color: #555;
+      box-shadow:
+        0 0 0 3px
+        rgba(132, 84, 255, 0.12);
     }
 
-    .btn-primary, .btn-secondary {
-      width: 100%; border-radius: 999px; border: none;
-      padding: 13px 16px; font-size: 15px; margin-top: 10px;
-      cursor: pointer; font-weight: 600;
+    textarea {
+      min-height: 85px;
+      resize: vertical;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #f068b8);
-      color: #fff;
-      box-shadow: 0 8px 18px rgba(132,84,255,0.38);
+    .radio {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 10px;
+      margin-bottom: 8px;
+
+      color: #555;
+
+      border:
+        1px solid #ded5ff;
+
+      border-radius: 12px;
+
+      cursor: pointer;
     }
 
-    .btn-primary:disabled { background: #c9c4e6; box-shadow: none; cursor: not-allowed; }
-
-    .btn-secondary {
-      background: #fff; color: var(--primary);
-      border: 1px solid #d6ccff; box-shadow: 0 3px 9px rgba(0,0,0,0.06);
+    .radio input {
+      width: auto;
+      accent-color: #8454ff;
     }
 
-    .summary-row { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 5px; color: #333; }
-    .summary-row .value { font-weight: 700; color: var(--primary); }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
 
-    hr { border: none; border-top: 1px dashed #d8cffc; margin: 8px 0; }
+      margin: 7px 0;
+    }
 
-    .screen { display: none; }
-    .screen.active { display: block; }
+    .summary-value {
+      color: #6336dd;
+      font-weight: 800;
+    }
+
+    .delivery-note {
+      display: block;
+
+      margin-top: 8px;
+
+      color: #777;
+      font-size: 12px;
+      line-height: 1.6;
+    }
 
     .error-box {
-      background: #ffe8ea;
-      border: 1px solid #ffb3b9;
-      color: #b1001d;
-      padding: 10px 10px;
-      border-radius: 11px;
-      font-size: 13px;
-      margin-bottom: 8px;
       display: none;
-      align-items: flex-start;
-      gap: 6px;
+
+      padding: 11px;
+      margin-bottom: 10px;
+
+      color: #a7001a;
+      font-size: 13px;
       line-height: 1.7;
+
+      background: #ffe8ea;
+
+      border:
+        1px solid #ffb3b9;
+
+      border-radius: 11px;
     }
 
-    .center-card { text-align: center; padding-top: 26px; }
+    .error-box a {
+      display: none;
 
-    .status-icon {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #fff, #41d38e);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 14px; color: #fff; font-size: 36px; font-weight: 700;
-      box-shadow: 0 10px 24px rgba(38,196,120,0.55);
+      margin-top: 5px;
+
+      color: #6d20c5;
+      font-weight: 800;
+      text-decoration: none;
     }
 
-    .title-lg { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
-    .order-id { font-size: 15px; margin-bottom: 10px; color: #444; }
+    .main-button,
+    .secondary-button {
+      width: 100%;
 
-    .btn-row { display: flex; gap: 10px; margin-top: 14px; }
+      padding: 13px;
+      margin-top: 10px;
+
+      font-size: 15px;
+      font-weight: 800;
+
+      border-radius: 30px;
+
+      cursor: pointer;
+    }
+
+    .main-button {
+      color: #fff;
+
+      background:
+        linear-gradient(
+          135deg,
+          #8454ff,
+          #f068b8
+        );
+
+      border: 0;
+
+      box-shadow:
+        0 8px 18px
+        rgba(132, 84, 255, 0.35);
+    }
+
+    .main-button:disabled {
+      background: #bbb;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .secondary-button {
+      color: #8454ff;
+      background: #fff;
+
+      border:
+        1px solid #d6ccff;
+    }
+
+    .success-card {
+      text-align: center;
+    }
+
+    .check-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 80px;
+      height: 80px;
+
+      margin: 0 auto 12px;
+
+      color: #fff;
+      font-size: 36px;
+      font-weight: 800;
+
+      background: #41d38e;
+
+      border-radius: 50%;
+    }
+
+    iframe {
+      display: none;
+      width: 0;
+      height: 0;
+      border: 0;
+    }
+
+    @media (max-width: 370px) {
+      body {
+        padding: 8px 5px;
+      }
+
+      main {
+        padding: 10px;
+      }
+
+      .product-name {
+        font-size: 13px;
+      }
+
+      .product-second-line {
+        font-size: 12px;
+      }
+
+      .qty button {
+        width: 32px;
+      }
+    }
   </style>
 </head>
 
 <body>
+
   <div class="app">
+
     <header>
-      <div class="logo-wrapper">
-        <img id="logo-img"
-             src="https://drive.google.com/uc?export=view&id=1w-q181vrQsEMpmDgSW7iuEQvFCZJ6ikg"
-             alt="شعار التحضير الإلكتروني">
-        <div class="logo-title">التحضير الإلكتروني</div>
-        <div class="logo-subtitle">حجز التحضير والحقائب التعليمية مع خدمة توصيل لجميع المحافظات</div>
-      </div>
+
+      <img
+        src="https://drive.google.com/uc?export=view&id=1w-q181vrQsEMpmDgSW7iuEQvFCZJ6ikg"
+        alt="شعار التحضير الإلكتروني"
+      >
+
+      <h1>التحضير الإلكتروني</h1>
+
+      <p>
+        حجز التحضير والحقائب التعليمية
+        مع خدمة التوصيل لجميع المحافظات
+      </p>
+
     </header>
 
     <main>
-      <!-- الشاشة الرئيسية -->
-      <section id="screen-main" class="screen active">
 
-        <!-- 1) اختيار المنتجات -->
+      <section
+        id="main-screen"
+        class="screen active"
+      >
+
         <div class="card">
-          <div class="section-title">
-            <div class="badge-step">1</div>
-            <div class="section-icon">🛒</div>
+
+          <div class="title">
+            <span class="step">1</span>
             <span>اختيار المنتجات</span>
           </div>
 
-          <!-- المنتجات -->
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">حقيبة الصف الأول (10 دنانير)</span></div>
-            <div class="qty-control" data-price="10">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
+          <div id="products-container"></div>
 
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">حقيبة الصف الثاني (10 دنانير)</span></div>
-            <div class="qty-control" data-price="10">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">حقيبة الصف الثالث (10 دنانير)</span></div>
-            <div class="qty-control" data-price="10">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">تحضير فقط صف أول (7 دنانير)</span></div>
-            <div class="qty-control" data-price="7">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">تحضير فقط صف ثاني (7 دنانير)</span></div>
-            <div class="qty-control" data-price="7">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">تحضير فقط صف ثالث (7 دنانير)</span></div>
-            <div class="qty-control" data-price="7">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row paper-only-product">
-            <div class="product-name">
-              <span class="product-label-text">تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى – ورقي فقط (7 دنانير)</span>
-            </div>
-            <div class="qty-control" data-price="7" data-paper-only="true">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">حقيبة التعلم النشط (10 دنانير)</span></div>
-            <div class="qty-control" data-price="10">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">بطاقات الحروف (15 دينار)</span></div>
-            <div class="qty-control" data-price="15">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row">
-            <div class="product-name"><span class="product-label-text">بطاقات الأرقام (10 دنانير)</span></div>
-            <div class="qty-control" data-price="10">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
-
-          <div class="row product-row" style="margin-bottom:0;">
-            <div class="product-name"><span class="product-label-text">بطاقات القوانين الصفية (5 دنانير)</span></div>
-            <div class="qty-control" data-price="5">
-              <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-              <div class="qty-value">0</div>
-              <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
-            </div>
-          </div>
         </div>
 
-        <!-- 2) معلومات التوصيل -->
         <div class="card">
-          <div class="section-title">
-            <div class="badge-step">2</div>
-            <div class="section-icon">🚚</div>
+
+          <div class="title">
+            <span class="step">2</span>
             <span>معلومات التوصيل</span>
           </div>
 
-          <label for="governorate">المحافظة</label>
-          <select id="governorate" onchange="onGovernorateChange()">
-            <option value="" selected disabled>اختر المحافظة...</option>
+          <label
+            class="field-label"
+            for="governorate"
+          >
+            المحافظة
+          </label>
+
+          <select
+            id="governorate"
+            onchange="changeGovernorate()"
+          >
+
+            <option
+              value=""
+              selected
+              disabled
+            >
+              اختر المحافظة...
+            </option>
+
             <option value="عمان">عمان</option>
             <option value="إربد">إربد</option>
             <option value="الزرقاء">الزرقاء</option>
@@ -360,481 +553,1267 @@
             <option value="الطفيلة">الطفيلة</option>
             <option value="معان">معان</option>
             <option value="العقبة">العقبة</option>
+
           </select>
 
-          <label for="district">اللواء</label>
-          <select id="district" disabled>
-            <option value="" selected disabled>اختر اللواء...</option>
+          <label
+            class="field-label"
+            for="district"
+          >
+            اللواء
+          </label>
+
+          <select
+            id="district"
+            disabled
+          >
+
+            <option
+              value=""
+              selected
+              disabled
+            >
+              اختر اللواء...
+            </option>
+
           </select>
 
-          <label for="address">العنوان التفصيلي</label>
-          <textarea id="address" placeholder="العنوان التفصيلي (مثال: اسم الحي، الشارع، رقم البناية)"></textarea>
+          <label
+            class="field-label"
+            for="address"
+          >
+            العنوان التفصيلي
+          </label>
+
+          <textarea
+            id="address"
+            maxlength="500"
+            placeholder="اسم الحي، الشارع، رقم البناية"
+          ></textarea>
+
         </div>
 
-        <!-- 3) شكل التحضير -->
         <div class="card">
-          <div class="section-title">
-            <div class="badge-step">3</div>
-            <div class="section-icon">🗂️</div>
-            <span>شكل التحضير (حقل إجباري)</span>
+
+          <div class="title">
+            <span class="step">3</span>
+            <span>شكل التحضير</span>
           </div>
 
-          <label class="radio-pill" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <input id="prep-paper" type="radio" name="prepType" value="التحضير على شكل ورق">
+          <label class="radio">
+
+            <input
+              type="radio"
+              name="prepType"
+              value="التحضير على شكل ورق"
+            >
+
             <span>التحضير على شكل ورق</span>
+
           </label>
 
-          <label class="radio-pill" style="display:flex;align-items:center;gap:8px;">
-            <input id="prep-book" type="radio" name="prepType" value="مجلد على شكل دفتر">
+          <label class="radio">
+
+            <input
+              type="radio"
+              name="prepType"
+              value="مجلد على شكل دفتر"
+            >
+
             <span>مجلد على شكل دفتر</span>
+
           </label>
 
-          <div id="paper-only-message" class="paper-only-message">
-            تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى متوفر ورقيًا فقط، لذلك تم اختيار التحضير على شكل ورق تلقائيًا.
-          </div>
-
-          <div id="prepErr" style="display:none;color:#b1001d;margin-top:8px;font-size:13px;">
-            يرجى اختيار شكل التحضير.
-          </div>
         </div>
 
-        <!-- 4) معلومات الاتصال -->
         <div class="card">
-          <div class="section-title">
-            <div class="badge-step">4</div>
-            <div class="section-icon">📞</div>
+
+          <div class="title">
+            <span class="step">4</span>
             <span>معلومات الاتصال</span>
           </div>
 
-          <label for="name">الاسم</label>
-          <input id="name" type="text" placeholder="الاسم الكامل" />
+          <label
+            class="field-label"
+            for="name"
+          >
+            الاسم
+          </label>
 
-          <label for="phone">رقم الهاتف الأساسي</label>
-          <input id="phone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
+          <input
+            id="name"
+            type="text"
+            maxlength="100"
+            autocomplete="name"
+            placeholder="الاسم الكامل"
+          >
 
-          <label for="altPhone">رقم هاتف بديل (اختياري)</label>
-          <input id="altPhone" type="tel" placeholder="07XXXXXXXX" oninput="enforceNumeric(this)" />
+          <label
+            class="field-label"
+            for="phone"
+          >
+            رقم الهاتف الأساسي
+          </label>
+
+          <input
+            id="phone"
+            type="tel"
+            inputmode="numeric"
+            maxlength="10"
+            autocomplete="tel"
+            placeholder="07XXXXXXXX"
+            oninput="numbersOnly(this)"
+          >
+
+          <label
+            class="field-label"
+            for="altPhone"
+          >
+            رقم هاتف بديل (اختياري)
+          </label>
+
+          <input
+            id="altPhone"
+            type="tel"
+            inputmode="numeric"
+            maxlength="10"
+            placeholder="07XXXXXXXX"
+            oninput="numbersOnly(this)"
+          >
 
         </div>
 
-        <!-- 5) ملخص -->
         <div class="card">
-          <div class="section-title">
-            <div class="badge-step">5</div>
-            <div class="section-icon">🧾</div>
+
+          <div class="title">
+            <span class="step">5</span>
             <span>ملخص الطلب</span>
           </div>
 
           <div class="summary-row">
             <span>عدد المنتجات:</span>
-            <span class="value" id="items-count">0 منتج</span>
+
+            <span
+              id="items-count"
+              class="summary-value"
+            >
+              0 منتج
+            </span>
           </div>
 
           <div class="summary-row">
             <span>مجموع المنتجات:</span>
-            <span class="value" id="products-total">0 دنانير</span>
+
+            <span
+              id="products-total"
+              class="summary-value"
+            >
+              0 دنانير
+            </span>
           </div>
 
           <div class="summary-row">
             <span>رسوم التوصيل:</span>
-            <span class="value" id="delivery-fee">0 دنانير</span>
+
+            <span
+              id="delivery-fee"
+              class="summary-value"
+            >
+              0 دنانير
+            </span>
           </div>
 
           <hr>
 
           <div class="summary-row">
             <span>الإجمالي الكلي:</span>
-            <span class="value" id="grand-total">0 دنانير</span>
+
+            <span
+              id="grand-total"
+              class="summary-value"
+            >
+              0 دنانير
+            </span>
           </div>
 
-          <p style="font-size:12px;color:#777;margin-top:6px;">
-            * رسوم التوصيل لعمان 2 دينار، ولجميع المحافظات الأخرى 3 دنانير.
-          </p>
+          <span class="delivery-note">
+            رسوم التوصيل لعمان 2 دينار،
+            ولجميع المحافظات الأخرى 3 دنانير.
+          </span>
+
         </div>
 
-        <div id="error-box" class="error-box">
-          <span>⚠️</span>
+        <div
+          id="error-box"
+          class="error-box"
+        >
+
           <span id="error-text"></span>
+
+          <br>
+
+          <a
+            id="error-link"
+            target="_blank"
+            rel="noopener"
+          >
+            اضغط هنا للتواصل عبر واتساب
+          </a>
+
         </div>
 
-        <button class="btn-primary" id="btn-submit" onclick="onSubmitClick()">
+        <button
+          id="submit-button"
+          class="main-button"
+          type="button"
+          onclick="submitOrder()"
+        >
           📨 إرسال الطلب
         </button>
+
       </section>
 
-      <!-- شاشة التأكيد -->
-      <section id="screen-confirm" class="screen">
-        <div class="card center-card">
-          <div class="status-icon">✓</div>
-          <p class="title-lg">تم استلام طلبك بنجاح!</p>
-          <p class="order-id">
-            رقم الطلب: <strong id="order-number">-</strong>
+      <section
+        id="success-screen"
+        class="screen"
+      >
+
+        <div class="card success-card">
+
+          <div class="check-icon">✓</div>
+
+          <h2>تم استلام طلبك بنجاح</h2>
+
+          <p>
+            رقم الطلب:
+            <strong id="order-number">-</strong>
           </p>
 
-          <div style="text-align:right; margin-top:8px;">
-            <div class="summary-row">
-              <span>عدد المنتجات:</span>
-              <span class="value" id="confirm-items">-</span>
-            </div>
-            <div class="summary-row">
-              <span>مجموع المنتجات:</span>
-              <span class="value" id="confirm-products-total">-</span>
-            </div>
-            <div class="summary-row">
-              <span>رسوم التوصيل:</span>
-              <span class="value" id="confirm-delivery-fee">-</span>
-            </div>
-            <div class="summary-row">
-              <span>شكل التحضير:</span>
-              <span class="value" id="confirm-prepType">-</span>
-            </div>
-            <div class="summary-row">
-              <span>الإجمالي الكلي:</span>
-              <span class="value" id="confirm-grand-total">-</span>
-            </div>
+          <div class="summary-row">
+            <span>عدد المنتجات:</span>
+            <span id="success-items" class="summary-value">-</span>
           </div>
 
-          <button class="btn-primary" style="margin-top: 10px;" onclick="sendWhatsAppFromConfirm()">
-            💬 إرسال الطلب عبر واتساب الآن
+          <div class="summary-row">
+            <span>مجموع المنتجات:</span>
+            <span id="success-products" class="summary-value">-</span>
+          </div>
+
+          <div class="summary-row">
+            <span>رسوم التوصيل:</span>
+            <span id="success-delivery" class="summary-value">-</span>
+          </div>
+
+          <div class="summary-row">
+            <span>شكل التحضير:</span>
+            <span id="success-prep" class="summary-value">-</span>
+          </div>
+
+          <div class="summary-row">
+            <span>الإجمالي الكلي:</span>
+            <span id="success-grand" class="summary-value">-</span>
+          </div>
+
+          <button
+            class="main-button"
+            type="button"
+            onclick="sendWhatsApp()"
+          >
+            💬 إرسال الطلب عبر واتساب
           </button>
 
-          <div class="btn-row">
-            <button class="btn-secondary" onclick="location.reload()">➕ طلب جديد</button>
-          </div>
+          <button
+            class="secondary-button"
+            type="button"
+            onclick="location.reload()"
+          >
+            ➕ طلب جديد
+          </button>
+
         </div>
+
       </section>
 
     </main>
+
   </div>
 
+  <form
+    id="post-form"
+    method="post"
+    target="post-frame"
+    style="display:none"
+  >
+
+    <input
+      id="post-data"
+      type="hidden"
+      name="data"
+    >
+
+  </form>
+
+  <iframe
+    id="post-frame"
+    name="post-frame"
+    title="إرسال الطلب"
+  ></iframe>
+
   <script>
-    // ✅ رابط الويب آب الذي أعطيتني إياه
+    /*
+      ضع رابط Google Apps Script الذي ينتهي بـ /exec
+      بين علامتي الاقتباس.
+    */
+
     var WEB_APP_URL =
-      "https://script.google.com/macros/s/AKfycbz7sUQBCSg5DIlL3AxQi6ab9CzHg25QTe3RAJQGcxHebT3hFnj4eKCsSolFYRhfv_g/exec";
+      'ضع_هنا_رابط_APPS_SCRIPT_الذي_ينتهي_بـ_exec';
 
-    var WHATSAPP_NUMBER = "0798382004";
+    var WHATSAPP_NUMBER =
+      '0798382004';
 
-    var districtsByGov = {
-      "عمان": ["قصبة عمان","لواء ماركا","لواء القويسمة","لواء الجامعة","لواء وادي السير","لواء ناعور","لواء سحاب","لواء الجيزة","لواء الموقر"],
-      "إربد": ["قصبة إربد","لواء بني عبيد","لواء المزار الشمالي","لواء الرمثا","لواء بني كنانة","لواء الكورة","لواء الأغوار الشمالية","لواء الطيبة","لواء الوسطية"],
-      "الزرقاء": ["قصبة الزرقاء","لواء الرصيفة","لواء الهاشمية","لواء بيرين"],
-      "البلقاء": ["قصبة السلط","لواء الشونة الجنوبية","لواء دير علا","لواء عين الباشا","لواء ماحص والفحيص"],
-      "المفرق": ["قصبة المفرق","لواء الرويشد","لواء البادية الشمالية","لواء البادية الشمالية الغربية","لواء بلعما"],
-      "جرش": ["قصبة جرش"],
-      "عجلون": ["قصبة عجلون","لواء كفرنجة","لواء القويسمة"],
-      "مأدبا": ["قصبة مأدبا","لواء ذيبان"],
-      "الكرك": ["قصبة الكرك","لواء المزار الجنوبي","لواء الأغوار الجنوبية","لواء القصر","لواء القطرانة","لواء عي","لواء فقوع"],
-      "الطفيلة": ["قصبة الطفيلة","لواء بصيرا","لواء الحسا"],
-      "معان": ["قصبة معان","لواء البتراء (إقليم البتراء)","لواء الشوبك","لواء الحسينية"],
-      "العقبة": ["قصبة العقبة","لواء القويرة","لواء وادي عربة"]
+    var CALLBACK_SOURCE =
+      'ALTAHDIR_ORDER_APP';
+
+    var PRODUCTS = [
+      {
+        id: 'grade1_bag',
+        name: 'حقيبة الصف الأول (10 دنانير)',
+        price: 10
+      },
+
+      {
+        id: 'grade2_bag',
+        name: 'حقيبة الصف الثاني (10 دنانير)',
+        price: 10
+      },
+
+      {
+        id: 'grade3_bag',
+        name: 'حقيبة الصف الثالث (10 دنانير)',
+        price: 10
+      },
+
+      {
+        id: 'prep_grade1',
+        name: 'تحضير فقط صف أول (7 دنانير)',
+        price: 7
+      },
+
+      {
+        id: 'prep_grade2',
+        name: 'تحضير فقط صف ثاني (7 دنانير)',
+        price: 7
+      },
+
+      {
+        id: 'prep_grade3',
+        name: 'تحضير فقط صف ثالث (7 دنانير)',
+        price: 7
+      },
+
+      {
+        id: 'english_first_three',
+
+        name:
+          'تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى – ورقي فقط (7 دنانير)',
+
+        firstLine:
+          'تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى',
+
+        secondLine:
+          'ورقي فقط (7 دنانير)',
+
+        price: 7
+      },
+
+      {
+        id: 'active_learning',
+        name: 'حقيبة التعلم النشط (10 دنانير)',
+        price: 10
+      },
+
+      {
+        id: 'letter_cards',
+        name: 'بطاقات الحروف (15 دينار)',
+        price: 15
+      },
+
+      {
+        id: 'number_cards',
+        name: 'بطاقات الأرقام (10 دنانير)',
+        price: 10
+      },
+
+      {
+        id: 'classroom_rules',
+        name: 'بطاقات القوانين الصفية (5 دنانير)',
+        price: 5
+      }
+    ];
+
+    var DISTRICTS = {
+      'عمان': [
+        'قصبة عمان',
+        'لواء ماركا',
+        'لواء القويسمة',
+        'لواء الجامعة',
+        'لواء وادي السير',
+        'لواء ناعور',
+        'لواء سحاب',
+        'لواء الجيزة',
+        'لواء الموقر'
+      ],
+
+      'إربد': [
+        'قصبة إربد',
+        'لواء بني عبيد',
+        'لواء المزار الشمالي',
+        'لواء الرمثا',
+        'لواء بني كنانة',
+        'لواء الكورة',
+        'لواء الأغوار الشمالية',
+        'لواء الطيبة',
+        'لواء الوسطية'
+      ],
+
+      'الزرقاء': [
+        'قصبة الزرقاء',
+        'لواء الرصيفة',
+        'لواء الهاشمية',
+        'لواء بيرين'
+      ],
+
+      'البلقاء': [
+        'قصبة السلط',
+        'لواء الشونة الجنوبية',
+        'لواء دير علا',
+        'لواء عين الباشا',
+        'لواء ماحص والفحيص'
+      ],
+
+      'المفرق': [
+        'قصبة المفرق',
+        'لواء الرويشد',
+        'لواء البادية الشمالية',
+        'لواء البادية الشمالية الغربية',
+        'لواء بلعما'
+      ],
+
+      'جرش': [
+        'قصبة جرش'
+      ],
+
+      'عجلون': [
+        'قصبة عجلون',
+        'لواء كفرنجة'
+      ],
+
+      'مأدبا': [
+        'قصبة مأدبا',
+        'لواء ذيبان'
+      ],
+
+      'الكرك': [
+        'قصبة الكرك',
+        'لواء المزار الجنوبي',
+        'لواء الأغوار الجنوبية',
+        'لواء القصر',
+        'لواء القطرانة',
+        'لواء عي',
+        'لواء فقوع'
+      ],
+
+      'الطفيلة': [
+        'قصبة الطفيلة',
+        'لواء بصيرا',
+        'لواء الحسا'
+      ],
+
+      'معان': [
+        'قصبة معان',
+        'لواء البتراء (إقليم البتراء)',
+        'لواء الشوبك',
+        'لواء الحسينية'
+      ],
+
+      'العقبة': [
+        'قصبة العقبة',
+        'لواء القويرة',
+        'لواء وادي عربة'
+      ]
     };
 
     var lastOrder = null;
     var lastOrderNumber = null;
+    var activeRequestId = '';
+    var responseTimer = null;
 
-    function showScreen(name) {
-      document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
-      document.getElementById("screen-" + name).classList.add("active");
-      hideError();
-      window.scrollTo(0, 0);
+    function renderProducts() {
+      var container =
+        document.getElementById(
+          'products-container'
+        );
+
+      container.innerHTML = '';
+
+      PRODUCTS.forEach(function(product) {
+        var row =
+          document.createElement('div');
+
+        row.className = 'product';
+        row.dataset.productId = product.id;
+        row.dataset.price = String(product.price);
+
+        var nameBox =
+          document.createElement('div');
+
+        nameBox.className = 'product-name';
+
+        if (
+          product.firstLine &&
+          product.secondLine
+        ) {
+          var firstLine =
+            document.createElement('span');
+
+          firstLine.textContent =
+            product.firstLine;
+
+          var secondLine =
+            document.createElement('span');
+
+          secondLine.className =
+            'product-second-line';
+
+          secondLine.textContent =
+            product.secondLine;
+
+          nameBox.appendChild(firstLine);
+          nameBox.appendChild(secondLine);
+
+        } else {
+          nameBox.textContent =
+            product.name;
+        }
+
+        var quantityBox =
+          document.createElement('div');
+
+        quantityBox.className = 'qty';
+
+        var minusButton =
+          document.createElement('button');
+
+        minusButton.type = 'button';
+        minusButton.textContent = '−';
+
+        var quantityValue =
+          document.createElement('span');
+
+        quantityValue.textContent = '0';
+
+        var plusButton =
+          document.createElement('button');
+
+        plusButton.type = 'button';
+        plusButton.textContent = '+';
+
+        minusButton.addEventListener(
+          'click',
+          function() {
+            changeQuantity(row, -1);
+          }
+        );
+
+        plusButton.addEventListener(
+          'click',
+          function() {
+            changeQuantity(row, 1);
+          }
+        );
+
+        quantityBox.appendChild(minusButton);
+        quantityBox.appendChild(quantityValue);
+        quantityBox.appendChild(plusButton);
+
+        row.appendChild(nameBox);
+        row.appendChild(quantityBox);
+
+        container.appendChild(row);
+      });
     }
 
-    function changeQty(btn, delta) {
-      var wrapper = btn.closest(".qty-control");
-      var valueEl = wrapper.querySelector(".qty-value");
-      var val = Math.max(0, (parseInt(valueEl.textContent) || 0) + delta);
-      valueEl.textContent = val;
+    function changeQuantity(row, difference) {
+      var quantityElement =
+        row.querySelector('.qty span');
 
-      updatePrepTypeAvailability();
+      var currentQuantity =
+        parseInt(
+          quantityElement.textContent,
+          10
+        ) || 0;
+
+      var newQuantity =
+        Math.max(
+          0,
+          Math.min(
+            99,
+            currentQuantity + difference
+          )
+        );
+
+      quantityElement.textContent =
+        String(newQuantity);
+
       calculateTotals();
     }
 
-    function hasPaperOnlyProductSelected() {
-      var control = document.querySelector('.qty-control[data-paper-only="true"]');
-      if (!control) return false;
+    function changeGovernorate() {
+      var governorate =
+        getValue('governorate');
 
-      var qty = parseInt(control.querySelector(".qty-value").textContent) || 0;
-      return qty > 0;
-    }
+      var districtSelect =
+        document.getElementById(
+          'district'
+        );
 
-    function updatePrepTypeAvailability() {
-      var paperOnlySelected = hasPaperOnlyProductSelected();
-      var paperOption = document.getElementById("prep-paper");
-      var bookOption = document.getElementById("prep-book");
-      var message = document.getElementById("paper-only-message");
+      districtSelect.innerHTML =
+        '<option value="" selected disabled>اختر اللواء...</option>';
 
-      if (paperOnlySelected) {
-        paperOption.checked = true;
-        bookOption.checked = false;
-        bookOption.disabled = true;
-        bookOption.closest(".radio-pill").style.opacity = "0.55";
-        bookOption.closest(".radio-pill").style.cursor = "not-allowed";
-        message.style.display = "block";
-        document.getElementById("prepErr").style.display = "none";
-      } else {
-        bookOption.disabled = false;
-        bookOption.closest(".radio-pill").style.opacity = "1";
-        bookOption.closest(".radio-pill").style.cursor = "pointer";
-        message.style.display = "none";
-      }
+      var districts =
+        DISTRICTS[governorate] || [];
+
+      districts.forEach(function(district) {
+        var option =
+          document.createElement('option');
+
+        option.value = district;
+        option.textContent = district;
+
+        districtSelect.appendChild(option);
+      });
+
+      districtSelect.disabled =
+        districts.length === 0;
+
+      calculateTotals();
     }
 
     function calculateTotals() {
-      var total = 0, count = 0;
+      var itemsCount = 0;
+      var productsTotal = 0;
 
-      document.querySelectorAll(".qty-control").forEach(function (ctrl) {
-        var price = parseFloat(ctrl.dataset.price) || 0;
-        var qty = parseInt(ctrl.querySelector(".qty-value").textContent) || 0;
-        total += price * qty;
-        count += qty;
-      });
+      document
+        .querySelectorAll('.product')
+        .forEach(function(row) {
+          var quantity =
+            parseInt(
+              row.querySelector('.qty span').textContent,
+              10
+            ) || 0;
 
-      var gov = document.getElementById("governorate").value;
-      var delivery = gov ? (gov === "عمان" ? 2 : 3) : 0;
+          var price =
+            Number(row.dataset.price) || 0;
 
-      document.getElementById("items-count").textContent = count + " منتج";
-      document.getElementById("products-total").textContent = total + " دنانير";
-      document.getElementById("delivery-fee").textContent = delivery + " دنانير";
-      document.getElementById("grand-total").textContent = (total + delivery) + " دنانير";
-    }
-
-    function onGovernorateChange() {
-      var gov = document.getElementById("governorate").value;
-      var d = document.getElementById("district");
-      d.innerHTML = '<option value="" selected disabled>اختر اللواء...</option>';
-
-      if (districtsByGov[gov]) {
-        districtsByGov[gov].forEach(function (x) {
-          var o = document.createElement("option");
-          o.value = o.textContent = x;
-          d.appendChild(o);
+          itemsCount += quantity;
+          productsTotal += price * quantity;
         });
-        d.disabled = false;
-      } else {
-        d.disabled = true;
-      }
 
-      calculateTotals();
+      var governorate =
+        getValue('governorate');
+
+      var deliveryFee =
+        governorate
+          ? (
+              governorate === 'عمان'
+                ? 2
+                : 3
+            )
+          : 0;
+
+      document.getElementById(
+        'items-count'
+      ).textContent =
+        itemsCount + ' منتج';
+
+      document.getElementById(
+        'products-total'
+      ).textContent =
+        productsTotal + ' دنانير';
+
+      document.getElementById(
+        'delivery-fee'
+      ).textContent =
+        deliveryFee + ' دنانير';
+
+      document.getElementById(
+        'grand-total'
+      ).textContent =
+        (productsTotal + deliveryFee) +
+        ' دنانير';
     }
 
     function collectOrderData() {
-      calculateTotals();
-
       var items = [];
-      document.querySelectorAll(".product-row").forEach(function (row) {
-        var qty = parseInt(row.querySelector(".qty-value").textContent) || 0;
-        if (qty > 0) {
-          var label = row.querySelector(".product-label-text").textContent.trim();
-          var ctrl = row.querySelector(".qty-control");
-          var price = parseFloat(ctrl.dataset.price) || 0;
-          items.push({ name: label, price: price, qty: qty });
-        }
-      });
 
-      var prepEl = document.querySelector('input[name="prepType"]:checked');
-      var prepType = prepEl ? prepEl.value : "";
+      document
+        .querySelectorAll('.product')
+        .forEach(function(row) {
+          var quantity =
+            parseInt(
+              row.querySelector('.qty span').textContent,
+              10
+            ) || 0;
+
+          if (quantity > 0) {
+            items.push({
+              productId:
+                row.dataset.productId,
+
+              qty:
+                quantity
+            });
+          }
+        });
+
+      var prepOption =
+        document.querySelector(
+          'input[name="prepType"]:checked'
+        );
 
       return {
-        name: document.getElementById("name").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        altPhone: document.getElementById("altPhone").value.trim(),
-        address: document.getElementById("address").value.trim(),
-        governorate: document.getElementById("governorate").value,
-        district: document.getElementById("district").value,
+        requestId: createRequestId(),
+        name: getValue('name'),
+        phone: getValue('phone'),
+        altPhone: getValue('altPhone'),
+        governorate: getValue('governorate'),
+        district: getValue('district'),
+        address: getValue('address'),
 
-        prepType: prepType,
+        prepType:
+          prepOption
+            ? prepOption.value
+            : '',
 
-        itemsCount: parseInt(document.getElementById("items-count").textContent) || 0,
-        productsTotal: parseFloat(document.getElementById("products-total").textContent) || 0,
-        deliveryFee: parseFloat(document.getElementById("delivery-fee").textContent) || 0,
-        grandTotal: parseFloat(document.getElementById("grand-total").textContent) || 0,
         items: items
       };
     }
 
-    function showError(msg) {
-      var box = document.getElementById("error-box");
-      document.getElementById("error-text").innerHTML = msg.replace(/\n/g, "<br>");
-      box.style.display = "flex";
-    }
-
-    function hideError() {
-      document.getElementById("error-box").style.display = "none";
-    }
-
-    function validate() {
+    function validateForm() {
       hideError();
 
-      var nameEl = document.getElementById("name");
-      var phoneEl = document.getElementById("phone");
-      var altPhoneEl = document.getElementById("altPhone");
-      var addrEl = document.getElementById("address");
-      var governorateEl = document.getElementById("governorate");
-      var districtEl = document.getElementById("district");
+      var validWebAppUrl =
+        /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/
+          .test(WEB_APP_URL);
+
+      if (!validWebAppUrl) {
+        showError(
+          'ضع رابط Google Apps Script الصحيح الذي ينتهي بـ /exec داخل المتغير WEB_APP_URL.'
+        );
+
+        return false;
+      }
+
+      var phone =
+        getValue('phone')
+          .replace(/\D/g, '');
+
+      var altPhone =
+        getValue('altPhone')
+          .replace(/\D/g, '');
+
+      var prepOption =
+        document.querySelector(
+          'input[name="prepType"]:checked'
+        );
 
       if (
-        !nameEl.value.trim() ||
-        !phoneEl.value.trim() ||
-        !addrEl.value.trim() ||
-        !governorateEl.value ||
-        !districtEl.value
+        !getValue('name') ||
+        !phone ||
+        !getValue('governorate') ||
+        !getValue('district') ||
+        !getValue('address')
       ) {
-        showError("الرجاء تعبئة الحقول المطلوبة: الاسم، الهاتف، المحافظة، اللواء، والعنوان التفصيلي.");
+        showError(
+          'يرجى تعبئة الاسم والهاتف والمحافظة واللواء والعنوان التفصيلي.'
+        );
+
         return false;
       }
 
-      if (!/^07\d{8}$/.test(phoneEl.value.replace(/\D/g, ""))) {
-        showError("رقم الهاتف الأساسي غير صحيح، ويجب أن يبدأ بـ 07 ويتكون من 10 خانات.");
+      if (!/^07\d{8}$/.test(phone)) {
+        showError(
+          'رقم الهاتف الأساسي غير صحيح؛ يجب أن يبدأ بـ 07 ويتكون من 10 خانات.'
+        );
+
         return false;
       }
 
       if (
-        altPhoneEl.value.trim() &&
-        !/^07\d{8}$/.test(altPhoneEl.value.replace(/\D/g, ""))
+        altPhone &&
+        !/^07\d{8}$/.test(altPhone)
       ) {
-        showError("رقم الهاتف البديل غير صحيح، ويجب أن يبدأ بـ 07 ويتكون من 10 خانات، أو اتركه فارغًا.");
+        showError(
+          'رقم الهاتف البديل غير صحيح أو اتركه فارغًا.'
+        );
+
         return false;
       }
-
-      var count = parseInt(document.getElementById("items-count").textContent) || 0;
-      if (count === 0) {
-        showError("الرجاء اختيار منتج واحد على الأقل.");
-        return false;
-      }
-
-      var prepChosen = document.querySelector('input[name="prepType"]:checked');
-      if (!prepChosen) {
-        document.getElementById("prepErr").style.display = "block";
-        showError("الرجاء اختيار شكل التحضير: التحضير على شكل ورق أو مجلد على شكل دفتر.");
-        return false;
-      }
-
-      document.getElementById("prepErr").style.display = "none";
 
       if (
-        hasPaperOnlyProductSelected() &&
-        prepChosen.value !== "التحضير على شكل ورق"
+        altPhone &&
+        altPhone === phone
       ) {
-        document.getElementById("prep-paper").checked = true;
-        updatePrepTypeAvailability();
-        showError("تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى متوفر ورقيًا فقط.");
+        showError(
+          'رقم الهاتف البديل يجب أن يكون مختلفًا عن رقم الهاتف الأساسي.'
+        );
+
+        return false;
+      }
+
+      var itemsCount = 0;
+
+      document
+        .querySelectorAll('.qty span')
+        .forEach(function(element) {
+          itemsCount +=
+            parseInt(
+              element.textContent,
+              10
+            ) || 0;
+        });
+
+      if (itemsCount === 0) {
+        showError(
+          'يرجى اختيار منتج واحد على الأقل.'
+        );
+
+        return false;
+      }
+
+      if (!prepOption) {
+        showError(
+          'يرجى اختيار شكل التحضير: ورق أو مجلد على شكل دفتر.'
+        );
+
         return false;
       }
 
       return true;
     }
 
-    function buildWhatsAppEditLink(phone, altPhone) {
-      var ph = "962" + WHATSAPP_NUMBER.substring(1);
-      var txt =
-        "مرحباً 👋\n" +
-        "تم إرسال طلب سابقاً بهذا الرقم وأرغب بتعديل طلبي.\n\n" +
-        "رقم الهاتف الأساسي: " + (phone || "-") + "\n" +
-        "رقم الهاتف البديل: " + (altPhone || "-") + "\n" +
-        "التعديل المطلوب:\n" +
-        "- ";
-      return "https://wa.me/" + ph + "?text=" + encodeURIComponent(txt);
+    function submitOrder() {
+      if (!validateForm()) {
+        return;
+      }
+
+      lastOrder = collectOrderData();
+      activeRequestId = lastOrder.requestId;
+
+      setSendingState(true);
+
+      var form =
+        document.getElementById(
+          'post-form'
+        );
+
+      form.action = WEB_APP_URL;
+
+      document.getElementById(
+        'post-data'
+      ).value =
+        JSON.stringify(lastOrder);
+
+      clearTimeout(responseTimer);
+
+      responseTimer =
+        setTimeout(function() {
+          setSendingState(false);
+
+          showError(
+            'لم يصل رد من الخادم. تأكد من رابط /exec وأن صلاحية التطبيق هي «أي شخص».'
+          );
+        }, 30000);
+
+      form.submit();
     }
 
-    function onSubmitClick() {
-      if (!validate()) return;
+    window.addEventListener(
+      'message',
+      function(event) {
+        var frame =
+          document.getElementById(
+            'post-frame'
+          );
 
-      var order = collectOrderData();
-      lastOrder = order;
-
-      var btn = document.getElementById("btn-submit");
-      btn.disabled = true;
-      btn.textContent = "جاري إرسال الطلب...";
-
-      fetch(WEB_APP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "data=" + encodeURIComponent(JSON.stringify(order))
-      })
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
-        if (res.result === "success") {
-          lastOrderNumber = res.orderNumber;
-
-          document.getElementById("order-number").textContent = res.orderNumber;
-          document.getElementById("confirm-items").textContent = order.itemsCount + " منتج";
-          document.getElementById("confirm-products-total").textContent = order.productsTotal + " دنانير";
-          document.getElementById("confirm-delivery-fee").textContent = order.deliveryFee + " دنانير";
-          document.getElementById("confirm-grand-total").textContent = order.grandTotal + " دنانير";
-          document.getElementById("confirm-prepType").textContent = order.prepType || "-";
-
-          showScreen("confirm");
-          btn.disabled = false;
-          btn.textContent = "📨 إرسال الطلب";
-
-          setTimeout(sendWhatsAppFromConfirm, 3000);
-        } else {
-          // ✅ رسالة خاصة للتكرار + زر واتساب
-          if (res.code === "DUPLICATE_PHONE") {
-            var wa = buildWhatsAppEditLink(order.phone, order.altPhone);
-            showError(
-              (res.message || "✅ تم إرسال طلب سابقاً بهذا الرقم.\n📲 في حال الرغبة بتعديل طلبك تواصل معنا واتساب") +
-              "<br><br>💬 <a href='" + wa + "' target='_blank' style='color:#7a1fd1;font-weight:800;text-decoration:none;'>اضغط هنا للتواصل عبر واتساب</a>"
-            );
-          } else {
-            showError(res.message || "حدث خطأ أثناء إرسال الطلب.");
-          }
-
-          btn.disabled = false;
-          btn.textContent = "📨 إرسال الطلب";
+        if (
+          event.source !==
+          frame.contentWindow
+        ) {
+          return;
         }
-      })
-      .catch(function (err) {
-        console.error(err);
-        showError("تعذر الاتصال بالخادم. تأكد من الإنترنت أو الرابط.");
-        btn.disabled = false;
-        btn.textContent = "📨 إرسال الطلب";
+
+        var allowedOrigin =
+          event.origin === 'null' ||
+
+          /^https:\/\/([a-z0-9-]+\.)*(googleusercontent\.com|google\.com)$/i
+            .test(event.origin);
+
+        if (!allowedOrigin) {
+          return;
+        }
+
+        var messageData = event.data;
+
+        if (
+          !messageData ||
+          messageData.source !== CALLBACK_SOURCE ||
+          !messageData.result
+        ) {
+          return;
+        }
+
+        if (
+          messageData.result.requestId &&
+          messageData.result.requestId !==
+            activeRequestId
+        ) {
+          return;
+        }
+
+        clearTimeout(responseTimer);
+
+        handleServerResponse(
+          messageData.result
+        );
+      }
+    );
+
+    function handleServerResponse(response) {
+      setSendingState(false);
+
+      if (
+        !response ||
+        response.result !== 'success'
+      ) {
+        var whatsappLink = '';
+
+        if (
+          response &&
+          response.code === 'DUPLICATE_PHONE'
+        ) {
+          whatsappLink =
+            buildEditWhatsAppLink();
+        }
+
+        showError(
+          response && response.message
+            ? response.message
+            : 'حدث خطأ أثناء إرسال الطلب.',
+
+          whatsappLink
+        );
+
+        return;
+      }
+
+      lastOrder.itemsCount =
+        Number(response.itemsCount) || 0;
+
+      lastOrder.productsTotal =
+        Number(response.productsTotal) || 0;
+
+      lastOrder.deliveryFee =
+        Number(response.deliveryFee) || 0;
+
+      lastOrder.grandTotal =
+        Number(response.grandTotal) || 0;
+
+      lastOrderNumber =
+        response.orderNumber;
+
+      document.getElementById(
+        'order-number'
+      ).textContent =
+        response.orderNumber;
+
+      document.getElementById(
+        'success-items'
+      ).textContent =
+        lastOrder.itemsCount + ' منتج';
+
+      document.getElementById(
+        'success-products'
+      ).textContent =
+        lastOrder.productsTotal + ' دنانير';
+
+      document.getElementById(
+        'success-delivery'
+      ).textContent =
+        lastOrder.deliveryFee + ' دنانير';
+
+      document.getElementById(
+        'success-prep'
+      ).textContent =
+        lastOrder.prepType;
+
+      document.getElementById(
+        'success-grand'
+      ).textContent =
+        lastOrder.grandTotal + ' دنانير';
+
+      document.getElementById(
+        'main-screen'
+      ).classList.remove('active');
+
+      document.getElementById(
+        'success-screen'
+      ).classList.add('active');
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
       });
     }
 
-    function sendWhatsAppFromConfirm() {
-      if (!lastOrder || !lastOrderNumber) return;
+    function sendWhatsApp() {
+      if (
+        !lastOrder ||
+        !lastOrderNumber
+      ) {
+        return;
+      }
 
-      var ph = "962" + WHATSAPP_NUMBER.substring(1);
+      var itemsText =
+        lastOrder.items
+          .map(function(item, index) {
+            var product =
+              findProductById(
+                item.productId
+              );
 
-      var itemsTxt = lastOrder.items.map(function (item, index) {
-        var name = item.name || "";
-        var price = Number(item.price) || 0;
-        var qty = Number(item.qty) || 0;
-        var lineTotal = price * qty;
-        return (index + 1) + ") " + name + " × " + qty + " = " + lineTotal + " د";
-      }).join("\n");
+            if (!product) {
+              return '';
+            }
 
-      if (!itemsTxt) itemsTxt = "- لا يوجد منتجات";
+            return (
+              (index + 1) +
+              ') ' +
+              product.name +
+              ' × ' +
+              item.qty +
+              ' = ' +
+              (product.price * item.qty) +
+              ' د'
+            );
+          })
+          .filter(function(line) {
+            return line !== '';
+          })
+          .join('\n');
 
-      var msg =
-"أهلاً وسهلاً 💜 التحضير الإلكتروني 💜\n" +
-"تم استلام طلبكم بنجاح.\n\n" +
-"رقم الطلب: *" + lastOrderNumber + "*\n" +
-"الاسم: " + (lastOrder.name || "-") + "\n" +
-"الهاتف: *" + (lastOrder.phone || "-") + "*\n" +
-"هاتف بديل: " + (lastOrder.altPhone || "-") + "\n" +
-"المحافظة: " + (lastOrder.governorate || "-") + "\n" +
-"اللواء: " + (lastOrder.district || "-") + "\n" +
-"شكل التحضير: " + (lastOrder.prepType || "-") + "\n" +
-"العنوان: " + (lastOrder.address || "-") + "\n\n" +
-"المنتجات:\n" + itemsTxt + "\n\n" +
-"مجموع المنتجات: *" + lastOrder.productsTotal + "* د\n" +
-"رسوم التوصيل: *" + lastOrder.deliveryFee + "* د\n" +
-"الإجمالي الكلي: *" + lastOrder.grandTotal + "* د";
+      var message =
+        'أهلاً وسهلاً 💜 التحضير الإلكتروني 💜\n' +
+        'تم استلام طلبكم بنجاح.\n\n' +
 
-      window.open("https://wa.me/" + ph + "?text=" + encodeURIComponent(msg), "_blank");
+        'رقم الطلب: *' +
+        lastOrderNumber +
+        '*\n' +
+
+        'الاسم: ' +
+        lastOrder.name +
+        '\n' +
+
+        'الهاتف: *' +
+        lastOrder.phone +
+        '*\n' +
+
+        'هاتف بديل: ' +
+        (lastOrder.altPhone || '-') +
+        '\n' +
+
+        'المحافظة: ' +
+        lastOrder.governorate +
+        '\n' +
+
+        'اللواء: ' +
+        lastOrder.district +
+        '\n' +
+
+        'شكل التحضير: ' +
+        lastOrder.prepType +
+        '\n' +
+
+        'العنوان: ' +
+        lastOrder.address +
+        '\n\n' +
+
+        'المنتجات:\n' +
+        itemsText +
+        '\n\n' +
+
+        'مجموع المنتجات: *' +
+        lastOrder.productsTotal +
+        '* د\n' +
+
+        'رسوم التوصيل: *' +
+        lastOrder.deliveryFee +
+        '* د\n' +
+
+        'الإجمالي الكلي: *' +
+        lastOrder.grandTotal +
+        '* د';
+
+      var whatsappUrl =
+        'https://wa.me/962' +
+        WHATSAPP_NUMBER.substring(1) +
+        '?text=' +
+        encodeURIComponent(message);
+
+      window.open(
+        whatsappUrl,
+        '_blank',
+        'noopener'
+      );
     }
 
-    function enforceNumeric(el) {
-      el.value = el.value.replace(/\D/g, "").slice(0, 10);
+    function buildEditWhatsAppLink() {
+      var message =
+        'مرحبًا، تم إرسال طلب سابقًا بهذا الرقم وأرغب بتعديل طلبي.\n' +
+        'رقم الهاتف الأساسي: ' +
+        (lastOrder ? lastOrder.phone : '-');
+
+      return (
+        'https://wa.me/962' +
+        WHATSAPP_NUMBER.substring(1) +
+        '?text=' +
+        encodeURIComponent(message)
+      );
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      onGovernorateChange();
-      updatePrepTypeAvailability();
-      calculateTotals();
-    });
+    function findProductById(productId) {
+      for (
+        var i = 0;
+        i < PRODUCTS.length;
+        i++
+      ) {
+        if (
+          PRODUCTS[i].id ===
+          productId
+        ) {
+          return PRODUCTS[i];
+        }
+      }
+
+      return null;
+    }
+
+    function showError(message, whatsappLink) {
+      document.getElementById(
+        'error-text'
+      ).textContent =
+        message ||
+        'حدث خطأ غير متوقع.';
+
+      var linkElement =
+        document.getElementById(
+          'error-link'
+        );
+
+      if (whatsappLink) {
+        linkElement.href =
+          whatsappLink;
+
+        linkElement.style.display =
+          'inline-block';
+
+      } else {
+        linkElement.removeAttribute(
+          'href'
+        );
+
+        linkElement.style.display =
+          'none';
+      }
+
+      document.getElementById(
+        'error-box'
+      ).style.display =
+        'block';
+
+      document.getElementById(
+        'error-box'
+      ).scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+
+    function hideError() {
+      document.getElementById(
+        'error-box'
+      ).style.display =
+        'none';
+
+      document.getElementById(
+        'error-link'
+      ).style.display =
+        'none';
+    }
+
+    function setSendingState(isSending) {
+      var button =
+        document.getElementById(
+          'submit-button'
+        );
+
+      button.disabled =
+        isSending;
+
+      button.textContent =
+        isSending
+          ? 'جاري إرسال الطلب...'
+          : '📨 إرسال الطلب';
+    }
+
+    function getValue(elementId) {
+      var element =
+        document.getElementById(
+          elementId
+        );
+
+      return element
+        ? String(element.value || '').trim()
+        : '';
+    }
+
+    function numbersOnly(element) {
+      element.value =
+        element.value
+          .replace(/\D/g, '')
+          .slice(0, 10);
+    }
+
+    function createRequestId() {
+      return (
+        'req_' +
+        Date.now() +
+        '_' +
+        Math.random()
+          .toString(36)
+          .slice(2, 10)
+      );
+    }
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      function() {
+        renderProducts();
+        calculateTotals();
+      }
+    );
   </script>
+
 </body>
 </html>
+```
