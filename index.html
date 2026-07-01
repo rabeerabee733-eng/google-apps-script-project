@@ -643,8 +643,8 @@
           <a id="error-link" target="_blank" rel="noopener">اضغط هنا للتواصل عبر واتساب</a>
         </div>
 
-        <button id="review-button" class="main-button" type="button" onclick="openReview()">
-          🧾 مراجعة الطلب
+        <button id="submit-button" class="main-button" type="button" onclick="submitOrder()">
+          📨 إرسال الطلب
         </button>
       </section>
 
@@ -690,43 +690,6 @@
         </div>
       </section>
     </main>
-  </div>
-
-  <div id="review-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="review-title">
-    <div class="modal-card">
-      <h2 id="review-title" class="modal-title">مراجعة الطلب قبل الإرسال</h2>
-
-      <div class="review-section">
-        <h3>معلومات الاتصال</h3>
-        <div class="review-line"><span>الاسم:</span><strong id="review-name">-</strong></div>
-        <div class="review-line"><span>الهاتف:</span><strong id="review-phone">-</strong></div>
-      </div>
-
-      <div class="review-section">
-        <h3>معلومات التوصيل</h3>
-        <div class="review-line"><span>المحافظة واللواء:</span><strong id="review-location">-</strong></div>
-        <div class="review-line"><span>العنوان:</span><strong id="review-address">-</strong></div>
-      </div>
-
-      <div class="review-section">
-        <h3>المنتجات والكميات</h3>
-        <ol id="review-products" class="review-products"></ol>
-      </div>
-
-      <div class="review-section">
-        <div class="review-line"><span>شكل التحضير:</span><strong id="review-prep">-</strong></div>
-        <div class="review-line"><span>المجموع النهائي:</span><strong id="review-total">-</strong></div>
-      </div>
-
-      <div class="modal-actions">
-        <button id="confirm-button" class="main-button" type="button" onclick="confirmOrder()">
-          ✅ تأكيد الطلب
-        </button>
-        <button id="edit-button" class="secondary-button" type="button" onclick="closeReview()">
-          ✏️ تعديل الطلب
-        </button>
-      </div>
-    </div>
   </div>
 
   <div id="toast" class="toast" role="status"></div>
@@ -1014,59 +977,15 @@
       return true;
     }
 
-    function openReview() {
+    function submitOrder() {
       if (submitting || !validateForm()) return;
-
-      pendingOrder = collectOrderData();
-      fillReview(pendingOrder);
-      document.getElementById('review-modal').classList.add('show');
-      document.body.classList.add('modal-open');
-      document.getElementById('confirm-button').focus();
-
-      trackEvent('begin_checkout', {
-        currency: 'JOD',
-        value: pendingOrder.clientTotals.grandTotal,
-        items_count: pendingOrder.clientTotals.itemsCount
-      });
-    }
-
-    function fillReview(order) {
-      document.getElementById('review-name').textContent = order.name;
-      document.getElementById('review-phone').textContent = order.phone + (order.altPhone ? ' / ' + order.altPhone : '');
-      document.getElementById('review-location').textContent = order.governorate + ' – ' + order.district;
-      document.getElementById('review-address').textContent = order.address;
-      document.getElementById('review-prep').textContent = order.prepType;
-      document.getElementById('review-total').textContent = order.clientTotals.grandTotal + ' دنانير';
-
-      var list = document.getElementById('review-products');
-      list.innerHTML = '';
-
-      order.items.forEach(function(item) {
-        var product = findProductById(item.productId);
-        if (!product) return;
-
-        var li = document.createElement('li');
-        li.textContent = product.name + ' × ' + item.qty;
-        list.appendChild(li);
-      });
-    }
-
-    function closeReview() {
-      if (submitting) return;
-      document.getElementById('review-modal').classList.remove('show');
-      document.body.classList.remove('modal-open');
-      document.getElementById('review-button').focus();
-    }
-
-    function confirmOrder() {
-      if (submitting || !pendingOrder) return;
 
       if (!navigator.onLine) {
         showError('لا يوجد اتصال بالإنترنت. تحقق من الشبكة ثم أعد المحاولة.');
-        closeReview();
         return;
       }
 
+      pendingOrder = collectOrderData();
       submitting = true;
       activeRequestId = pendingOrder.requestId;
       setSendingState(true);
@@ -1077,6 +996,7 @@
 
       clearTimeout(responseTimer);
       stopResultPolling();
+
       setTimeout(function() {
         startResultPolling(activeRequestId);
       }, 1500);
@@ -1085,7 +1005,6 @@
         stopResultPolling();
         submitting = false;
         setSendingState(false);
-        closeReview();
         showError('تم إرسال البيانات، لكن تعذر استلام رقم الطلب. لا تعِد الإرسال بنفس الرقم قبل التحقق من الطلبات.');
         updateNetworkStatus();
       }, 90000);
@@ -1201,9 +1120,6 @@
       stopResultPolling();
       submitting = false;
       setSendingState(false);
-      document.getElementById('review-modal').classList.remove('show');
-      document.body.classList.remove('modal-open');
-
       if (!response || response.result !== 'success') {
         var whatsappLink = '';
         if (response && response.code === 'DUPLICATE_PHONE') {
@@ -1251,14 +1167,10 @@
     }
 
     function setSendingState(isSending) {
-      var reviewButton = document.getElementById('review-button');
-      var confirmButton = document.getElementById('confirm-button');
-      var editButton = document.getElementById('edit-button');
+      var submitButton = document.getElementById('submit-button');
 
-      reviewButton.disabled = isSending;
-      confirmButton.disabled = isSending;
-      editButton.disabled = isSending;
-      confirmButton.textContent = isSending ? 'جاري إرسال الطلب...' : '✅ تأكيد الطلب';
+      submitButton.disabled = isSending;
+      submitButton.textContent = isSending ? 'جاري إرسال الطلب...' : '📨 إرسال الطلب';
     }
 
     function sendWhatsApp() {
@@ -1412,16 +1324,6 @@
     function createRequestId() {
       return 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
     }
-
-    document.getElementById('review-modal').addEventListener('click', function(event) {
-      if (event.target === this && !submitting) closeReview();
-    });
-
-    document.addEventListener('keydown', function(event) {
-      if (event.key === 'Escape' && document.getElementById('review-modal').classList.contains('show')) {
-        closeReview();
-      }
-    });
 
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
