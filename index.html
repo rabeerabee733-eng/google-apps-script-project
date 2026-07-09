@@ -1402,7 +1402,7 @@
           <a id="error-link" target="_blank" rel="noopener">التواصل عبر واتساب</a>
         </div>
         <button id="status-check-button" class="secondary-button" type="button"
-          style="display:none" onclick="checkOrderStatusNow()">
+          style="display:none!important" onclick="checkOrderStatusNow()">
           التحقق من رقم الطلب
         </button>
 
@@ -1410,7 +1410,7 @@
           إرسال الطلب
         </button>
         <div id="sending-status" style="display:none;margin-top:10px;text-align:center;color:#526275;font-size:13px;line-height:1.7">
-          يتم حفظ الطلب واستلام رقم الحجز، يرجى عدم إغلاق الصفحة.
+          يتم حفظ الطلب، وستفتح صفحة رقم الطلب تلقائيًا.
         </div>
       </div>
     </section>
@@ -1441,12 +1441,10 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <form id="post-form" method="post" target="post-frame" style="display:none">
+  <form id="post-form" method="post" target="_self" style="display:none">
     <input id="post-data" type="hidden" name="data">
   </form>
-  <iframe id="post-frame" name="post-frame" title="إرسال الطلب"></iframe>
-
-  <script>
+<script>
 
     /* توافق JavaScript مع متصفحات Android وSafari القديمة */
     if (!Array.isArray) {
@@ -1818,6 +1816,8 @@
       }
 
       hideStatusCheckButton();
+      hideError();
+
       pendingOrder = collectOrderData();
       submitting = true;
       setSendingState(true);
@@ -1826,27 +1826,12 @@
       form.action = WEB_APP_URL;
       document.getElementById('post-data').value = JSON.stringify(pendingOrder);
 
-      clearTimeout(responseTimer);
-      stopResultPolling();
-
+      /*
+       * الإرسال يتم في نفس الصفحة.
+       * Google Apps Script سيفتح مباشرة صفحة نجاح تحتوي رقم الطلب.
+       * بهذه الطريقة لا نعتمد على postMessage أو JSONP أو iframe.
+       */
       form.submit();
-
-      // الاستعلام الاحتياطي يبدأ بعد إرسال النموذج.
-      setTimeout(function() {
-        startResultPolling(pendingOrder.requestId);
-      }, 1200);
-
-      responseTimer = setTimeout(function() {
-        stopResultPolling();
-        submitting = false;
-        setSendingState(false);
-        showError(
-          'تم حفظ الطلب غالبًا، لكن تعذر عرض رقم الطلب تلقائيًا. ' +
-          'اضغط زر «التحقق من رقم الطلب» أدناه قبل إعادة الإرسال.',
-          buildEditWhatsAppLink()
-        );
-        showStatusCheckButton();
-      }, 120000);
     }
 
 
@@ -2075,7 +2060,7 @@
     function setSendingState(isSending) {
       var button = document.getElementById('submit-button');
       button.disabled = isSending;
-      button.textContent = isSending ? 'جاري إرسال الطلب...' : 'إرسال الطلب';
+      button.textContent = isSending ? 'جاري حفظ الطلب وفتح رقم الطلب...' : 'إرسال الطلب';
 
       var status = document.getElementById('sending-status');
       if (status) {
