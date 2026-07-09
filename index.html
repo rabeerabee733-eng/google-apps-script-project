@@ -2,7 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no">
   <meta name="theme-color" content="#0b2b53">
   <meta name="description" content="نموذج حجز التحضير الإلكتروني والحقائب التعليمية.">
   <title>حجز التحضير الإلكتروني</title>
@@ -75,7 +77,8 @@
     }
 
     .header-inner {
-      width: min(1180px, calc(100% - 24px));
+      width: calc(100% - 24px);
+      max-width: 1180px;
       margin: 0 auto;
       padding: 14px 0;
       display: flex;
@@ -113,7 +116,7 @@
     .brand-title {
       margin: 0;
       color: var(--gold);
-      font-size: clamp(16px, 3vw, 22px);
+      font-size: 18px;
       font-weight: 800;
       line-height: 1.3;
     }
@@ -136,7 +139,8 @@
     }
 
     .page-shell {
-      width: min(1180px, calc(100% - 24px));
+      width: calc(100% - 24px);
+      max-width: 1180px;
       margin: 0 auto;
       padding: 28px 0 40px;
     }
@@ -149,7 +153,7 @@
     .hero h1 {
       margin: 0 0 8px;
       color: var(--navy);
-      font-size: clamp(26px, 5vw, 42px);
+      font-size: 34px;
     }
 
     .hero p {
@@ -176,7 +180,7 @@
 
     .card {
       margin-bottom: 18px;
-      padding: clamp(14px, 2.5vw, 24px);
+      padding: 20px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 18px;
@@ -600,7 +604,8 @@
 
     @media (max-width: 620px) {
       .header-inner {
-        width: min(100% - 18px, 1180px);
+        width: calc(100% - 18px);
+        max-width: 1180px;
         gap: 10px;
       }
 
@@ -618,7 +623,8 @@
       }
 
       .page-shell {
-        width: min(100% - 14px, 1180px);
+        width: calc(100% - 14px);
+        max-width: 1180px;
         padding-top: 18px;
       }
 
@@ -1036,6 +1042,40 @@
       }
     }
 
+  
+    /* توافق إضافي مع متصفحات الهواتف القديمة */
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .page-shell,
+    .card,
+    .product-card,
+    .form-grid,
+    .product-main,
+    .product-total-row,
+    .product-split-row {
+      min-width: 0;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      max-width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 12px;
+      }
+    }
+
   </style>
 </head>
 
@@ -1230,6 +1270,50 @@
   <iframe id="post-frame" name="post-frame" title="إرسال الطلب"></iframe>
 
   <script>
+
+    /* توافق JavaScript مع متصفحات Android وSafari القديمة */
+    if (!Array.isArray) {
+      Array.isArray = function(value) {
+        return Object.prototype.toString.call(value) === '[object Array]';
+      };
+    }
+
+    if (window.NodeList && !NodeList.prototype.forEach) {
+      NodeList.prototype.forEach = function(callback, thisArg) {
+        for (var i = 0; i < this.length; i++) {
+          callback.call(thisArg || window, this[i], i, this);
+        }
+      };
+    }
+
+    if (window.Element && !Element.prototype.closest) {
+      Element.prototype.closest = function(selector) {
+        var element = this;
+        while (element && element.nodeType === 1) {
+          if (element.matches ? element.matches(selector) :
+              element.msMatchesSelector ? element.msMatchesSelector(selector) :
+              element.webkitMatchesSelector && element.webkitMatchesSelector(selector)) {
+            return element;
+          }
+          element = element.parentElement || element.parentNode;
+        }
+        return null;
+      };
+    }
+
+    if (window.Element && !Element.prototype.matches) {
+      Element.prototype.matches =
+        Element.prototype.msMatchesSelector ||
+        Element.prototype.webkitMatchesSelector ||
+        function(selector) {
+          var matches = (this.document || this.ownerDocument).querySelectorAll(selector);
+          var i = matches.length;
+          while (--i >= 0 && matches.item(i) !== this) {}
+          return i > -1;
+        };
+    }
+
+
     var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby5IE8RtmfqFcpLILfhep_CDWCamPidUYGVK3LQL2fJhVgl5SCmbm0MhH3bpBqzJqay/exec';
     var WHATSAPP_NUMBER = '0798382004';
     var CALLBACK_SOURCE = 'ALTAHDIR_ORDER_APP';
@@ -1703,7 +1787,7 @@
         showToast('رقم الطلب: ' + text);
       }
 
-      area.remove();
+      if (area.parentNode) area.parentNode.removeChild(area);
     }
 
     function showScreen(name) {
@@ -1713,7 +1797,11 @@
 
       document.getElementById(name + '-screen').classList.add('active');
       hideError();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        window.scrollTo(0, 0);
+      }
     }
 
     function setSendingState(isSending) {
@@ -1757,7 +1845,11 @@
       }
 
       box.classList.add('show');
-      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      try {
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (error) {
+        box.scrollIntoView(true);
+      }
     }
 
     function hideError() {
@@ -1814,6 +1906,18 @@
         .replace(/'/g, '&#039;');
     }
 
+
+    window.onerror = function(message) {
+      var banner = document.getElementById('network-banner');
+      if (banner) {
+        banner.textContent =
+          'تعذر تشغيل صفحة الحجز على هذا المتصفح. افتح الرابط في Chrome أو Safari وحدّث الصفحة.';
+        banner.className = 'network-banner show';
+      }
+      return false;
+    };
+
+
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
 
@@ -1823,5 +1927,12 @@
       updateNetworkStatus();
     });
   </script>
+
+  <noscript>
+    <div style="margin:20px;padding:15px;background:#fff0f2;border:1px solid #e9a7b3;border-radius:12px;text-align:center;font-family:Arial,sans-serif">
+      يجب تفعيل JavaScript حتى تعمل صفحة الحجز.
+    </div>
+  </noscript>
+
 </body>
 </html>
