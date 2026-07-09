@@ -2543,38 +2543,46 @@
 
       form.submit();
 
-      startResultPolling(
-        pendingOrder.requestId
-      );
-
       clearTimeout(
         responseTimer
+      );
+
+      stopResultPolling();
+
+      startResultPolling(
+        pendingOrder.requestId
       );
 
       responseTimer =
         setTimeout(
           function() {
             stopResultPolling();
-
             submitting = false;
             setSendingState(false);
 
             showError(
-              'تعذر استلام نتيجة الطلب من الخادم خلال المهلة المحددة. ' +
+              'لم يصل رد الخادم خلال 60 ثانية. ' +
               'تأكد من نشر Code.gs الجديد بصلاحية Anyone ثم أعد المحاولة.'
             );
           },
-          45000
+          60000
         );
     }
 
-    function startResultPolling(requestId) {
+    function startResultPolling(
+      requestId
+    ) {
       pollAttempt = 0;
       pollResult(requestId);
     }
 
-    function pollResult(requestId) {
-      if (!submitting || !requestId) {
+    function pollResult(
+      requestId
+    ) {
+      if (
+        !submitting ||
+        !requestId
+      ) {
         return;
       }
 
@@ -2592,7 +2600,6 @@
       }
 
       runJsonpRequest(
-        'status',
         requestId,
         function(payload) {
           if (
@@ -2600,18 +2607,25 @@
             payload.ready === true &&
             payload.result
           ) {
-            clearTimeout(responseTimer);
+            clearTimeout(
+              responseTimer
+            );
+
             stopResultPolling();
+
             handleServerResponse(
               payload.result
             );
+
             return;
           }
 
           pollTimer =
             setTimeout(
               function() {
-                pollResult(requestId);
+                pollResult(
+                  requestId
+                );
               },
               1000
             );
@@ -2620,7 +2634,9 @@
           pollTimer =
             setTimeout(
               function() {
-                pollResult(requestId);
+                pollResult(
+                  requestId
+                );
               },
               1500
             );
@@ -2629,7 +2645,6 @@
     }
 
     function runJsonpRequest(
-      action,
       requestId,
       onSuccess,
       onError
@@ -2637,9 +2652,7 @@
       cleanupJsonpRequest();
 
       var callbackName =
-        '__altahdir_' +
-        action +
-        '_' +
+        '__altahdir_status_' +
         Date.now() +
         '_' +
         Math.random()
@@ -2649,8 +2662,18 @@
       activeJsonpCallback =
         callbackName;
 
+      var completed =
+        false;
+
       window[callbackName] =
         function(payload) {
+          if (completed) {
+            return;
+          }
+
+          completed =
+            true;
+
           cleanupJsonpRequest();
           onSuccess(payload);
         };
@@ -2663,26 +2686,32 @@
       activeJsonpScript =
         script;
 
-      var url =
+      script.async =
+        true;
+
+      script.src =
         WEB_APP_URL +
-        '?action=' +
-        encodeURIComponent(action) +
+        '?action=status' +
+        '&requestId=' +
+        encodeURIComponent(
+          requestId
+        ) +
         '&callback=' +
-        encodeURIComponent(callbackName) +
+        encodeURIComponent(
+          callbackName
+        ) +
         '&t=' +
         Date.now();
 
-      if (requestId) {
-        url +=
-          '&requestId=' +
-          encodeURIComponent(requestId);
-      }
-
-      script.src = url;
-      script.async = true;
-
       script.onerror =
         function() {
+          if (completed) {
+            return;
+          }
+
+          completed =
+            true;
+
           cleanupJsonpRequest();
 
           if (onError) {
@@ -2697,9 +2726,13 @@
       setTimeout(
         function() {
           if (
+            !completed &&
             activeJsonpCallback ===
             callbackName
           ) {
+            completed =
+              true;
+
             cleanupJsonpRequest();
 
             if (onError) {
@@ -2707,7 +2740,7 @@
             }
           }
         },
-        8000
+        7000
       );
     }
 
@@ -2723,7 +2756,8 @@
           );
       }
 
-      activeJsonpScript = null;
+      activeJsonpScript =
+        null;
 
       if (activeJsonpCallback) {
         try {
@@ -2737,12 +2771,18 @@
         }
       }
 
-      activeJsonpCallback = '';
+      activeJsonpCallback =
+        '';
     }
 
     function stopResultPolling() {
-      clearTimeout(pollTimer);
-      pollTimer = null;
+      clearTimeout(
+        pollTimer
+      );
+
+      pollTimer =
+        null;
+
       cleanupJsonpRequest();
     }
 
@@ -2774,34 +2814,22 @@
         pendingOrder;
 
       lastOrder.itemsCount =
-        Number(
-          response.itemsCount
-        ) || 0;
+        Number(response.itemsCount) || 0;
 
       lastOrder.folderCount =
-        Number(
-          response.folderCount
-        ) || 0;
+        Number(response.folderCount) || 0;
 
       lastOrder.paperCount =
-        Number(
-          response.paperCount
-        ) || 0;
+        Number(response.paperCount) || 0;
 
       lastOrder.productsTotal =
-        Number(
-          response.productsTotal
-        ) || 0;
+        Number(response.productsTotal) || 0;
 
       lastOrder.deliveryFee =
-        Number(
-          response.deliveryFee
-        ) || 0;
+        Number(response.deliveryFee) || 0;
 
       lastOrder.grandTotal =
-        Number(
-          response.grandTotal
-        ) || 0;
+        Number(response.grandTotal) || 0;
 
       lastOrderNumber =
         String(
@@ -2812,7 +2840,7 @@
 
       if (!lastOrderNumber) {
         showError(
-          'تم حفظ الطلب، لكن الخادم لم يُرجع رقم الطلب.'
+          'تم حفظ الطلب، لكن لم يُرجع الخادم رقم الطلب.'
         );
         return;
       }
