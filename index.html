@@ -1357,7 +1357,7 @@
           id="sending-status"
           class="sending-status"
         >
-          يتم حفظ الطلب، وستظهر شاشة رقم الطلب خلال لحظات.
+          يتم حفظ الطلب واستلام الرقم التسلسلي من الإكسل، يرجى عدم إغلاق الصفحة.
         </div>
       </div>
     </section>
@@ -2463,9 +2463,6 @@
         requestId:
           createRequestId(),
 
-        clientOrderNumber:
-          createClientOrderNumber(),
-
         website:
           getValue('website'),
 
@@ -3291,23 +3288,6 @@
         element.value
           .replace(/\D/g, '')
           .slice(0, 10);
-    }
-
-    function createClientOrderNumber() {
-      /*
-       * رقم ثابت من 12 خانة:
-       * 9 خانات من الوقت + 3 خانات عشوائية.
-       * يتم إنشاؤه مرة واحدة للطلب نفسه ويرسل كما هو إلى الشيت.
-       */
-      var timePart =
-        String(Date.now()).slice(-9);
-
-      var randomPart =
-        String(
-          Math.floor(Math.random() * 900) + 100
-        );
-
-      return timePart + randomPart;
     }
 
     function createRequestId() {
