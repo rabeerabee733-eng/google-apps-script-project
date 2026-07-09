@@ -1527,6 +1527,9 @@
     var lastOrder = null;
     var lastOrderNumber = null;
     var responseTimer = null;
+    var pollTimer = null;
+    var activeJsonpScript = null;
+    var activeJsonpCallback = '';
     var toastTimer = null;
     var submitting = false;
 
@@ -1816,17 +1819,104 @@
       document.getElementById('post-data').value = JSON.stringify(pendingOrder);
 
       clearTimeout(responseTimer);
+      stopResultPolling();
+
+      form.submit();
+
+      // الاستعلام الاحتياطي يبدأ بعد إرسال النموذج.
+      setTimeout(function() {
+        startResultPolling(pendingOrder.requestId);
+      }, 1200);
+
       responseTimer = setTimeout(function() {
+        stopResultPolling();
         submitting = false;
         setSendingState(false);
         showError(
-          'تم إرسال البيانات، لكن لم يصل رد من الخادم خلال الوقت المحدد. ' +
-          'لا تضغط إرسال مرة أخرى قبل التحقق من الطلبات أو التواصل عبر واتساب.',
+          'تم إرسال البيانات، لكن تعذر استلام رقم الطلب. ' +
+          'تحقق من صفحة الطلبات قبل إعادة الإرسال أو تواصل عبر واتساب.',
           buildEditWhatsAppLink()
         );
-      }, 45000);
+      }, 90000);
+    }
 
-      form.submit();
+
+    function startResultPolling(requestId) {
+      if (!requestId) return;
+      pollResult(requestId);
+    }
+
+    function pollResult(requestId) {
+      if (!submitting || !requestId) return;
+
+      cleanupJsonpRequest();
+
+      var callbackName =
+        '__altahdirResult_' +
+        Date.now() +
+        '_' +
+        Math.random().toString(36).slice(2, 8);
+
+      activeJsonpCallback = callbackName;
+
+      window[callbackName] = function(payload) {
+        cleanupJsonpRequest();
+
+        if (payload && payload.ready && payload.result) {
+          clearTimeout(responseTimer);
+          stopResultPolling();
+          handleServerResponse(payload.result);
+          return;
+        }
+
+        pollTimer = setTimeout(function() {
+          pollResult(requestId);
+        }, 1400);
+      };
+
+      var script = document.createElement('script');
+      activeJsonpScript = script;
+      script.async = true;
+      script.src =
+        WEB_APP_URL +
+        '?action=status' +
+        '&requestId=' + encodeURIComponent(requestId) +
+        '&callback=' + encodeURIComponent(callbackName) +
+        '&t=' + Date.now();
+
+      script.onerror = function() {
+        cleanupJsonpRequest();
+
+        pollTimer = setTimeout(function() {
+          pollResult(requestId);
+        }, 1800);
+      };
+
+      document.head.appendChild(script);
+    }
+
+    function cleanupJsonpRequest() {
+      if (activeJsonpScript && activeJsonpScript.parentNode) {
+        activeJsonpScript.parentNode.removeChild(activeJsonpScript);
+      }
+
+      activeJsonpScript = null;
+
+      if (activeJsonpCallback) {
+        try {
+          delete window[activeJsonpCallback];
+        } catch (error) {
+          window[activeJsonpCallback] = undefined;
+        }
+      }
+
+      activeJsonpCallback = '';
+    }
+
+    function stopResultPolling() {
+      clearTimeout(pollTimer);
+      pollTimer = null;
+      cleanupJsonpRequest();
     }
 
     window.addEventListener('message', function(event) {
@@ -1843,10 +1933,12 @@
       }
 
       clearTimeout(responseTimer);
+      stopResultPolling();
       handleServerResponse(data.result);
     });
 
     function handleServerResponse(response) {
+      stopResultPolling();
       submitting = false;
       setSendingState(false);
 
