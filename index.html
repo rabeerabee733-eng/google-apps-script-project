@@ -177,6 +177,7 @@
 
     .screen { display: none; }
     .screen.active { display: block; }
+    #main-screen.active { visibility: visible; opacity: 1; }
 
     .card {
       margin-bottom: 18px;
@@ -1076,10 +1077,179 @@
       }
     }
 
+  
+    /* إصلاح Android: منع انزياح الصفحة خارج الشاشة في وضع RTL */
+    html {
+      margin: 0;
+      padding: 0;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      position: relative;
+      margin: 0;
+      padding: 0;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    .site-header,
+    .header-inner,
+    .page-shell,
+    .hero,
+    .card,
+    .products-list,
+    .product-card,
+    .form-grid,
+    .summary-layout,
+    footer {
+      max-width: 100%;
+    }
+
+    @media screen and (max-width: 768px) {
+      .site-header,
+      .page-shell,
+      footer {
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+      }
+
+      .header-inner {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 10px 12px;
+      }
+
+      .page-shell {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 12px 7px 26px;
+      }
+
+      .hero,
+      .card,
+      .product-card,
+      .summary-box,
+      .info-box {
+        width: 100%;
+        max-width: none;
+        margin-right: 0;
+        margin-left: 0;
+      }
+
+      /* استخدام block بدل CSS Grid في الهواتف القديمة */
+      .form-grid,
+      .summary-layout,
+      .product-main,
+      .product-card.simple .product-main,
+      .product-total-row {
+        display: block;
+        width: 100%;
+      }
+
+      .form-grid > div,
+      .summary-layout > div,
+      .product-total-row > div {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      /* المجلد والورقي بجانب بعضهما باستخدام Flex الأكثر توافقًا */
+      .product-split-row {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        width: 100%;
+        gap: 0;
+        margin: 0 -4px;
+      }
+
+      .product-split-row .field-mini {
+        display: block;
+        width: 50%;
+        min-width: 0;
+        padding: 0 4px;
+      }
+
+      .product-info {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .field-mini,
+      .qty-stepper,
+      .qty-readonly,
+      .line-total-wrap,
+      input,
+      select,
+      textarea,
+      button {
+        max-width: 100%;
+      }
+
+      .qty-stepper {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        width: 100%;
+      }
+
+      .qty-stepper .qty-button {
+        -webkit-box-flex: 0;
+        -webkit-flex: 0 0 44px;
+        flex: 0 0 44px;
+        width: 44px;
+      }
+
+      .qty-stepper .qty-input {
+        -webkit-box-flex: 1;
+        -webkit-flex: 1 1 auto;
+        flex: 1 1 auto;
+        width: 1%;
+        min-width: 0;
+      }
+
+      .full-width {
+        width: 100%;
+      }
+
+      .summary-row {
+        width: 100%;
+      }
+    }
+
+    @media screen and (max-width: 340px) {
+      .product-split-row {
+        display: block;
+        margin: 0;
+      }
+
+      .product-split-row .field-mini {
+        width: 100%;
+        padding: 0;
+        margin-bottom: 9px;
+      }
+
+      .header-phone {
+        display: none;
+      }
+    }
+
   </style>
 </head>
 
 <body>
+
+  <div id="page-loading" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#f5f7fa;color:#08284d;font-family:Arial,sans-serif;font-weight:bold">
+    جاري تحميل صفحة الحجز...
+  </div>
+
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
@@ -1797,11 +1967,7 @@
 
       document.getElementById(name + '-screen').classList.add('active');
       hideError();
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (error) {
-        window.scrollTo(0, 0);
-      }
+      window.scrollTo(0, 0);
     }
 
     function setSendingState(isSending) {
@@ -1845,11 +2011,7 @@
       }
 
       box.classList.add('show');
-      try {
-        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } catch (error) {
-        box.scrollIntoView(true);
-      }
+      box.scrollIntoView(true);
     }
 
     function hideError() {
@@ -1922,6 +2084,11 @@
     window.addEventListener('offline', updateNetworkStatus);
 
     document.addEventListener('DOMContentLoaded', function() {
+
+      var loading = document.getElementById('page-loading');
+      if (loading && loading.parentNode) {
+        loading.parentNode.removeChild(loading);
+      }
       renderProducts();
       calculateTotals();
       updateNetworkStatus();
@@ -1933,6 +2100,16 @@
       يجب تفعيل JavaScript حتى تعمل صفحة الحجز.
     </div>
   </noscript>
+
+
+  <script>
+    setTimeout(function () {
+      var loading = document.getElementById('page-loading');
+      if (loading && loading.parentNode) {
+        loading.parentNode.removeChild(loading);
+      }
+    }, 5000);
+  </script>
 
 </body>
 </html>
