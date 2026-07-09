@@ -1538,6 +1538,103 @@
     var toastTimer = null;
     var submitting = false;
 
+
+    function getQueryParameter(name) {
+      var query = window.location.search.substring(1);
+      var parts = query ? query.split('&') : [];
+
+      for (var i = 0; i < parts.length; i++) {
+        var pair = parts[i].split('=');
+        var key = decodeURIComponent(pair[0] || '');
+
+        if (key === name) {
+          return decodeURIComponent(
+            (pair.slice(1).join('=') || '')
+              .replace(/\+/g, ' ')
+          );
+        }
+      }
+
+      return '';
+    }
+
+    function openResultFromUrl() {
+      var status = getQueryParameter('status');
+
+      if (status === 'success') {
+        lastOrderNumber = getQueryParameter('order');
+
+        lastOrder = {
+          itemsCount: Number(getQueryParameter('items')) || 0,
+          folderCount: Number(getQueryParameter('folders')) || 0,
+          paperCount: Number(getQueryParameter('papers')) || 0,
+          productsTotal: Number(getQueryParameter('productsTotal')) || 0,
+          deliveryFee: Number(getQueryParameter('delivery')) || 0,
+          grandTotal: Number(getQueryParameter('grand')) || 0,
+          items: [],
+          name: '',
+          phone: '',
+          altPhone: '',
+          governorate: '',
+          district: '',
+          address: '',
+          notes: ''
+        };
+
+        document.getElementById('order-number').textContent =
+          lastOrderNumber || '-';
+
+        document.getElementById('success-items').textContent =
+          lastOrder.itemsCount;
+
+        document.getElementById('success-folders').textContent =
+          lastOrder.folderCount;
+
+        document.getElementById('success-papers').textContent =
+          lastOrder.paperCount;
+
+        document.getElementById('success-products').textContent =
+          lastOrder.productsTotal + ' د.أ';
+
+        document.getElementById('success-delivery').textContent =
+          lastOrder.deliveryFee + ' د.أ';
+
+        document.getElementById('success-grand').textContent =
+          lastOrder.grandTotal + ' د.أ';
+
+        showScreen('success');
+
+        try {
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+          );
+        } catch (error) {}
+
+        return true;
+      }
+
+      if (status === 'error') {
+        showError(
+          getQueryParameter('message') ||
+          'تعذر إرسال الطلب.'
+        );
+
+        try {
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+          );
+        } catch (error) {}
+
+        return true;
+      }
+
+      return false;
+    }
+
     function renderProducts() {
       var container = document.getElementById('products-container');
       container.innerHTML = '';
@@ -1975,6 +2072,26 @@
     function sendWhatsApp() {
       if (!lastOrder || !lastOrderNumber) return;
 
+      if (!lastOrder.items || lastOrder.items.length === 0) {
+        var simpleMessage =
+          'تم استلام طلب التحضير الإلكتروني بنجاح.\n\n' +
+          'رقم الطلب: *' + lastOrderNumber + '*\n' +
+          'إجمالي النسخ: ' + lastOrder.itemsCount + '\n' +
+          'مجلد: ' + lastOrder.folderCount + '\n' +
+          'ورقي: ' + lastOrder.paperCount + '\n' +
+          'مجموع المنتجات: ' + lastOrder.productsTotal + ' د\n' +
+          'رسوم التوصيل: ' + lastOrder.deliveryFee + ' د\n' +
+          'الإجمالي الكلي: *' + lastOrder.grandTotal + ' د*';
+
+        window.open(
+          'https://wa.me/962' + WHATSAPP_NUMBER.substring(1) +
+          '?text=' + encodeURIComponent(simpleMessage),
+          '_blank',
+          'noopener'
+        );
+        return;
+      }
+
       var itemsText = lastOrder.items.map(function(item, index) {
         var product = findProductById(item.productId);
         if (!product) return '';
@@ -2219,6 +2336,7 @@
       renderProducts();
       calculateTotals();
       updateNetworkStatus();
+      openResultFromUrl();
     });
   </script>
 
