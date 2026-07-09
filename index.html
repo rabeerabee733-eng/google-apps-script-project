@@ -2519,8 +2519,9 @@
             setSendingState(false);
 
             showError(
-              'نسخة Google Apps Script المنشورة قديمة أو غير متاحة. ' +
-              'يجب نشر New version قبل استقبال الطلبات.'
+              'تعذر الاتصال بخدمة Google Apps Script. ' +
+              'تأكد أن النشر مضبوط على Anyone وأن رابط Web App صحيح، ' +
+              'ثم أعد تحميل الصفحة.'
             );
             return;
           }
@@ -2567,9 +2568,7 @@
           done(
             Boolean(
               payload &&
-              payload.ok === true &&
-              payload.version ===
-                '2026-07-10-polling-only-v1'
+              payload.ok === true
             )
           );
         },
@@ -2703,6 +2702,22 @@
 
       document.head.appendChild(
         script
+      );
+
+      setTimeout(
+        function() {
+          if (
+            activeJsonpCallback ===
+            callbackName
+          ) {
+            cleanupJsonpRequest();
+
+            if (onError) {
+              onError();
+            }
+          }
+        },
+        8000
       );
     }
 
