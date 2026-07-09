@@ -2542,19 +2542,38 @@
           pendingOrder
         );
 
-      form.submit();
-      resetSendingIfStuck();
+      clearTimeout(
+        responseTimer
+      );
 
-      /*
-       * لا ننتظر postMessage أو JSONP حتى لا يعلق الموقع.
-       * نفس رقم الطلب يتم إرساله إلى الخادم ويحفظ في العمود A.
-       */
+      stopResultPolling();
+
+      form.submit();
+
       setTimeout(
         function() {
-          showImmediateSuccess();
+          startResultPolling(
+            pendingOrder.requestId
+          );
         },
-        1200
+        1000
       );
+
+      responseTimer =
+        setTimeout(
+          function() {
+            stopResultPolling();
+
+            submitting = false;
+            setSendingState(false);
+
+            showError(
+              'تم إرسال الطلب، لكن تعذر استلام رقم الطلب من الخادم. ' +
+              'لا تعِد الإرسال قبل التحقق من ورقة الطلبات.'
+            );
+          },
+          90000
+        );
     }
 
 
@@ -2729,26 +2748,15 @@
           return;
         }
 
-        if (
-          data.result.result === 'error' &&
-          document
-            .getElementById(
-              'main-screen'
-            )
-            .classList.contains(
-              'active'
-            )
-        ) {
-          submitting = false;
-          setSendingState(false);
+        clearTimeout(
+          responseTimer
+        );
 
-          showError(
-            data.result.message ||
-            'حدث خطأ أثناء إرسال الطلب.',
-            data.result.whatsappLink ||
-            ''
-          );
-        }
+        stopResultPolling();
+
+        handleServerResponse(
+          data.result
+        );
       }
     );
 
@@ -2811,66 +2819,20 @@
         ) || 0;
 
       lastOrderNumber =
-        response.orderNumber ||
-        response.orderId ||
-        response.id ||
-        '';
+        String(
+          response.orderNumber ||
+          response.orderId ||
+          ''
+        );
 
-      fillSuccessScreen();
-      showScreen('success');
-    }
-
-
-    function showImmediateSuccess() {
-      if (!pendingOrder) {
+      if (!lastOrderNumber) {
+        showError(
+          'تم حفظ الطلب، لكن الخادم لم يُرجع رقم الطلب.'
+        );
         return;
       }
 
-      var totals =
-        pendingOrder.clientTotals ||
-        getCurrentTotals();
-
-      lastOrder =
-        pendingOrder;
-
-      lastOrder.itemsCount =
-        Number(
-          totals.itemsCount
-        ) || 0;
-
-      lastOrder.folderCount =
-        Number(
-          totals.folderCount
-        ) || 0;
-
-      lastOrder.paperCount =
-        Number(
-          totals.paperCount
-        ) || 0;
-
-      lastOrder.productsTotal =
-        Number(
-          totals.productsTotal
-        ) || 0;
-
-      lastOrder.deliveryFee =
-        Number(
-          totals.deliveryFee
-        ) || 0;
-
-      lastOrder.grandTotal =
-        Number(
-          totals.grandTotal
-        ) || 0;
-
-      lastOrderNumber =
-        pendingOrder.clientOrderNumber;
-
       fillSuccessScreen();
-
-      submitting = false;
-      setSendingState(false);
-
       showScreen('success');
     }
 
@@ -2940,27 +2902,6 @@
 
       hideError();
       window.scrollTo(0, 0);
-    }
-
-
-    function resetSendingIfStuck() {
-      setTimeout(
-        function() {
-          if (
-            submitting &&
-            document
-              .getElementById(
-                'main-screen'
-              )
-              .classList.contains(
-                'active'
-              )
-          ) {
-            showImmediateSuccess();
-          }
-        },
-        8000
-      );
     }
 
     function setSendingState(
