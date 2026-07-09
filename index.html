@@ -447,6 +447,156 @@
       font-weight: 700;
     }
 
+
+    /* بطاقات ملونة لحقول معلومات العميل والتوصيل */
+    .contact-field {
+      --field-accent: #2563eb;
+      --field-dark: #1e3a8a;
+      --field-bg: #eff6ff;
+      --field-soft: #dbeafe;
+      --field-border: #93c5fd;
+
+      position: relative;
+      min-width: 0;
+      padding: 12px;
+      overflow: hidden;
+      background:
+        linear-gradient(
+          135deg,
+          var(--field-bg),
+          #ffffff 78%
+        );
+      border: 1px solid var(--field-border);
+      border-right: 5px solid var(--field-accent);
+      border-radius: 14px;
+      box-shadow:
+        0 5px 14px
+        rgba(8, 40, 77, 0.055);
+    }
+
+    .contact-field::after {
+      content: "";
+      position: absolute;
+      top: -24px;
+      left: -24px;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--field-soft);
+      opacity: 0.62;
+      pointer-events: none;
+    }
+
+    .contact-field .field-label {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--field-dark);
+      font-weight: 800;
+    }
+
+    .field-icon {
+      width: 27px;
+      height: 27px;
+      flex: 0 0 27px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--field-soft);
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .contact-field input,
+    .contact-field select,
+    .contact-field textarea {
+      position: relative;
+      z-index: 1;
+      color: var(--field-dark);
+      background: rgba(255, 255, 255, 0.92);
+      border-color: var(--field-border);
+      font-weight: 600;
+    }
+
+    .contact-field input::placeholder,
+    .contact-field textarea::placeholder {
+      color: #7b8799;
+      font-weight: 500;
+    }
+
+    .contact-field input:focus,
+    .contact-field select:focus,
+    .contact-field textarea:focus {
+      border-color: var(--field-accent);
+      box-shadow:
+        0 0 0 3px
+        var(--field-soft);
+    }
+
+    .contact-field select:disabled {
+      color: #7b8799;
+      background: rgba(245, 247, 250, 0.96);
+      cursor: not-allowed;
+    }
+
+    .field-name {
+      --field-accent: #2563eb;
+      --field-dark: #1e3a8a;
+      --field-bg: #eff6ff;
+      --field-soft: #dbeafe;
+      --field-border: #93c5fd;
+    }
+
+    .field-phone {
+      --field-accent: #059669;
+      --field-dark: #065f46;
+      --field-bg: #ecfdf5;
+      --field-soft: #d1fae5;
+      --field-border: #6ee7b7;
+    }
+
+    .field-alt-phone {
+      --field-accent: #7c3aed;
+      --field-dark: #5b21b6;
+      --field-bg: #f5f3ff;
+      --field-soft: #ede9fe;
+      --field-border: #c4b5fd;
+    }
+
+    .field-governorate {
+      --field-accent: #d97706;
+      --field-dark: #92400e;
+      --field-bg: #fffbeb;
+      --field-soft: #fef3c7;
+      --field-border: #fcd34d;
+    }
+
+    .field-district {
+      --field-accent: #0891b2;
+      --field-dark: #155e75;
+      --field-bg: #ecfeff;
+      --field-soft: #cffafe;
+      --field-border: #67e8f9;
+    }
+
+    .field-address {
+      --field-accent: #db2777;
+      --field-dark: #9d174d;
+      --field-bg: #fdf2f8;
+      --field-soft: #fce7f3;
+      --field-border: #f9a8d4;
+    }
+
+    .field-notes {
+      --field-accent: #475569;
+      --field-dark: #1e293b;
+      --field-bg: #f8fafc;
+      --field-soft: #e2e8f0;
+      --field-border: #cbd5e1;
+    }
+
     .summary-layout {
       display: grid;
       grid-template-columns:
@@ -751,6 +901,22 @@
         margin-bottom: 11px;
       }
 
+      .contact-field {
+        padding: 11px 10px;
+        border-radius: 13px;
+        border-right-width: 5px;
+      }
+
+      .contact-field .field-label {
+        font-size: 14px;
+      }
+
+      .field-icon {
+        width: 26px;
+        height: 26px;
+        flex-basis: 26px;
+      }
+
       .full-width {
         grid-column: auto;
       }
@@ -912,12 +1078,12 @@
         </div>
 
         <div class="form-grid">
-          <div>
+          <div class="contact-field field-name">
             <label
               class="field-label"
               for="name"
             >
-              الاسم الكامل *
+              <span class="field-icon">👤</span> الاسم الكامل *
             </label>
 
             <input
@@ -929,12 +1095,12 @@
             >
           </div>
 
-          <div>
+          <div class="contact-field field-phone">
             <label
               class="field-label"
               for="phone"
             >
-              رقم الهاتف الأساسي *
+              <span class="field-icon">📱</span> رقم الهاتف الأساسي *
             </label>
 
             <input
@@ -948,12 +1114,12 @@
             >
           </div>
 
-          <div>
+          <div class="contact-field field-alt-phone">
             <label
               class="field-label"
               for="altPhone"
             >
-              رقم هاتف بديل (اختياري)
+              <span class="field-icon">☎️</span> رقم هاتف بديل (اختياري)
             </label>
 
             <input
@@ -966,12 +1132,12 @@
             >
           </div>
 
-          <div>
+          <div class="contact-field field-governorate">
             <label
               class="field-label"
               for="governorate"
             >
-              المحافظة *
+              <span class="field-icon">📍</span> المحافظة *
             </label>
 
             <select
@@ -1001,12 +1167,12 @@
             </select>
           </div>
 
-          <div>
+          <div class="contact-field field-district">
             <label
               class="field-label"
               for="district"
             >
-              اللواء *
+              <span class="field-icon">🗺️</span> اللواء *
             </label>
 
             <select
@@ -1023,12 +1189,12 @@
             </select>
           </div>
 
-          <div class="full-width">
+          <div class="contact-field field-address full-width">
             <label
               class="field-label"
               for="address"
             >
-              العنوان التفصيلي *
+              <span class="field-icon">🏠</span> العنوان التفصيلي *
             </label>
 
             <textarea
@@ -1038,12 +1204,12 @@
             ></textarea>
           </div>
 
-          <div class="full-width">
+          <div class="contact-field field-notes full-width">
             <label
               class="field-label"
               for="notes"
             >
-              ملاحظات إضافية (اختياري)
+              <span class="field-icon">📝</span> ملاحظات إضافية (اختياري)
             </label>
 
             <textarea
@@ -2936,22 +3102,20 @@
     }
 
     function createClientOrderNumber() {
+      /*
+       * رقم ثابت من 12 خانة:
+       * 9 خانات من الوقت + 3 خانات عشوائية.
+       * يتم إنشاؤه مرة واحدة للطلب نفسه ويرسل كما هو إلى الشيت.
+       */
       var timePart =
-        String(
-          Date.now()
-        ).slice(-10);
+        String(Date.now()).slice(-9);
 
       var randomPart =
         String(
-          Math.floor(
-            Math.random() * 90
-          ) + 10
+          Math.floor(Math.random() * 900) + 100
         );
 
-      return (
-        timePart +
-        randomPart
-      );
+      return timePart + randomPart;
     }
 
     function createRequestId() {
