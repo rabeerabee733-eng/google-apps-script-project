@@ -13,6 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
+  <!-- BUILD: 2026-07-10-NO-HEALTH-GATE -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -998,7 +999,7 @@
   </style>
 </head>
 
-<body>
+<body data-build="2026-07-10-NO-HEALTH-GATE">
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
@@ -2497,7 +2498,10 @@
     }
 
     function submitOrder() {
-      if (submitting || !validateForm()) {
+      if (
+        submitting ||
+        !validateForm()
+      ) {
         return;
       }
 
@@ -2509,73 +2513,60 @@
       }
 
       hideError();
+
+      pendingOrder =
+        collectOrderData();
+
       submitting = true;
       setSendingState(true);
 
-      checkServerHealth(
-        function(isHealthy) {
-          if (!isHealthy) {
+      var form =
+        document.getElementById(
+          'post-form'
+        );
+
+      var dataInput =
+        document.getElementById(
+          'post-data'
+        );
+
+      form.action =
+        WEB_APP_URL;
+
+      form.target =
+        'post-frame';
+
+      dataInput.value =
+        JSON.stringify(
+          pendingOrder
+        );
+
+      form.submit();
+
+      startResultPolling(
+        pendingOrder.requestId
+      );
+
+      clearTimeout(
+        responseTimer
+      );
+
+      responseTimer =
+        setTimeout(
+          function() {
+            stopResultPolling();
+
             submitting = false;
             setSendingState(false);
 
             showError(
-              'تعذر الاتصال بخدمة Google Apps Script. ' +
-              'تأكد أن النشر مضبوط على Anyone وأن رابط Web App صحيح، ' +
-              'ثم أعد تحميل الصفحة.'
+              'تم إرسال الطلب، لكن تعذر استلام رقم الطلب. ' +
+              'تحقق من أن Request ID محفوظ في العمود Q، ' +
+              'وأن Code.gs الجديد منشور كتطبيق ويب.'
             );
-            return;
-          }
-
-          pendingOrder = collectOrderData();
-
-          var form = document.getElementById('post-form');
-          var dataInput = document.getElementById('post-data');
-
-          form.action = WEB_APP_URL;
-          form.target = 'post-frame';
-          dataInput.value = JSON.stringify(pendingOrder);
-
-          form.submit();
-
-          startResultPolling(
-            pendingOrder.requestId
-          );
-
-          clearTimeout(responseTimer);
-
-          responseTimer = setTimeout(
-            function() {
-              stopResultPolling();
-              submitting = false;
-              setSendingState(false);
-
-              showError(
-                'تم إرسال الطلب، لكن لم يظهر في العمود Q خلال 60 ثانية. ' +
-                'تحقق أن Code.gs الجديد منشور وأن Request ID محفوظ في العمود Q.'
-              );
-            },
-            60000
-          );
-        }
-      );
-    }
-
-    function checkServerHealth(done) {
-      runJsonpRequest(
-        'health',
-        '',
-        function(payload) {
-          done(
-            Boolean(
-              payload &&
-              payload.ok === true
-            )
-          );
-        },
-        function() {
-          done(false);
-        }
-      );
+          },
+          60000
+        );
     }
 
     function startResultPolling(requestId) {
