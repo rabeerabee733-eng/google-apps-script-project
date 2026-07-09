@@ -1401,10 +1401,17 @@
           <br>
           <a id="error-link" target="_blank" rel="noopener">التواصل عبر واتساب</a>
         </div>
+        <button id="status-check-button" class="secondary-button" type="button"
+          style="display:none" onclick="checkOrderStatusNow()">
+          التحقق من رقم الطلب
+        </button>
 
         <button id="submit-button" class="main-button" type="button" onclick="submitOrder()">
           إرسال الطلب
         </button>
+        <div id="sending-status" style="display:none;margin-top:10px;text-align:center;color:#526275;font-size:13px;line-height:1.7">
+          يتم حفظ الطلب واستلام رقم الحجز، يرجى عدم إغلاق الصفحة.
+        </div>
       </div>
     </section>
 
@@ -1810,6 +1817,7 @@
         return;
       }
 
+      hideStatusCheckButton();
       pendingOrder = collectOrderData();
       submitting = true;
       setSendingState(true);
@@ -1833,11 +1841,12 @@
         submitting = false;
         setSendingState(false);
         showError(
-          'تم إرسال البيانات، لكن تعذر استلام رقم الطلب. ' +
-          'تحقق من صفحة الطلبات قبل إعادة الإرسال أو تواصل عبر واتساب.',
+          'تم حفظ الطلب غالبًا، لكن تعذر عرض رقم الطلب تلقائيًا. ' +
+          'اضغط زر «التحقق من رقم الطلب» أدناه قبل إعادة الإرسال.',
           buildEditWhatsAppLink()
         );
-      }, 90000);
+        showStatusCheckButton();
+      }, 120000);
     }
 
 
@@ -1847,7 +1856,7 @@
     }
 
     function pollResult(requestId) {
-      if (!submitting || !requestId) return;
+      if (!requestId || !pendingOrder) return;
 
       cleanupJsonpRequest();
 
@@ -1871,7 +1880,7 @@
 
         pollTimer = setTimeout(function() {
           pollResult(requestId);
-        }, 1400);
+        }, 1000);
       };
 
       var script = document.createElement('script');
@@ -1889,7 +1898,7 @@
 
         pollTimer = setTimeout(function() {
           pollResult(requestId);
-        }, 1800);
+        }, 1300);
       };
 
       document.head.appendChild(script);
@@ -1957,6 +1966,7 @@
         return;
       }
 
+      hideStatusCheckButton();
       lastOrder = pendingOrder;
       lastOrder.itemsCount = Number(response.itemsCount) || 0;
       lastOrder.folderCount = Number(response.folderCount) || 0;
@@ -2066,6 +2076,11 @@
       var button = document.getElementById('submit-button');
       button.disabled = isSending;
       button.textContent = isSending ? 'جاري إرسال الطلب...' : 'إرسال الطلب';
+
+      var status = document.getElementById('sending-status');
+      if (status) {
+        status.style.display = isSending ? 'block' : 'none';
+      }
     }
 
     function buildEditWhatsAppLink() {
@@ -2085,6 +2100,41 @@
         if (PRODUCTS[i].id === productId) return PRODUCTS[i];
       }
       return null;
+    }
+
+
+    function showStatusCheckButton() {
+      var button = document.getElementById('status-check-button');
+      if (button) button.style.display = 'block';
+    }
+
+    function hideStatusCheckButton() {
+      var button = document.getElementById('status-check-button');
+      if (button) button.style.display = 'none';
+    }
+
+    function checkOrderStatusNow() {
+      if (!pendingOrder || !pendingOrder.requestId) {
+        showError('لا يوجد رقم طلب تقني للتحقق منه.');
+        return;
+      }
+
+      hideStatusCheckButton();
+      submitting = true;
+      setSendingState(true);
+      startResultPolling(pendingOrder.requestId);
+
+      clearTimeout(responseTimer);
+      responseTimer = setTimeout(function() {
+        stopResultPolling();
+        submitting = false;
+        setSendingState(false);
+        showStatusCheckButton();
+        showError(
+          'لم يظهر رقم الطلب بعد. تواصل معنا عبر واتساب مع رقم الهاتف المستخدم.',
+          buildEditWhatsAppLink()
+        );
+      }, 30000);
     }
 
     function showError(message, whatsappLink) {
