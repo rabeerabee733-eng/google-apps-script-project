@@ -961,6 +961,81 @@
       }
     }
 
+  
+    .product-card {
+      display: block;
+    }
+
+    .product-info {
+      margin-bottom: 12px;
+    }
+
+    .product-total-row {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .product-total-row .field-mini {
+      width: 100%;
+    }
+
+    .product-split-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .product-split-row .field-mini {
+      min-width: 0;
+    }
+
+  
+    @media (max-width: 480px) {
+      .product-card {
+        padding: 12px 10px;
+      }
+
+      .product-info {
+        margin-bottom: 10px;
+      }
+
+      .product-total-row {
+        margin-bottom: 9px;
+      }
+
+      .product-split-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .product-total-row .qty-stepper {
+        width: 100%;
+      }
+
+      .product-split-row .qty-stepper {
+        grid-template-columns: 42px minmax(34px, 1fr) 42px;
+      }
+
+      .product-split-row .qty-button {
+        min-width: 42px;
+      }
+
+      .product-split-row .qty-input {
+        padding-right: 2px;
+        padding-left: 2px;
+      }
+
+      .split-note {
+        margin-bottom: 0;
+      }
+    }
+
+    @media (max-width: 330px) {
+      .product-split-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -1214,7 +1289,6 @@
         card.dataset.paperOnly = product.paperOnly ? 'true' : 'false';
 
         var html = '';
-        html += '<div class="product-main">';
         html += '<div class="product-info">';
         html += '<span class="product-name">' + escapeHtml(product.name) + '</span>';
         html += '<span class="product-price ' + (product.highlight ? 'purple' : '') + '">' +
@@ -1222,18 +1296,20 @@
         html += '</div>';
 
         if (product.splitAllowed) {
+          html += '<div class="product-total-row">';
           html += fieldHtml('العدد الكلي', 'qty-total', false);
+          html += '</div>';
+
+          html += '<div class="product-split-row">';
           html += fieldHtml('مجلد', 'qty-folder', false);
           html += fieldHtml('ورقي', 'qty-paper', true);
-        } else {
-          html += fieldHtml(product.paperOnly ? 'العدد الورقي' : 'العدد', 'qty-total', false);
-        }
+          html += '</div>';
 
-        html += '<div class="field-mini line-total-wrap"><label>السعر الإجمالي</label><div class="line-total">0 د.أ</div></div>';
-        html += '</div>';
-
-        if (product.splitAllowed) {
           html += '<p class="split-note">أدخل العدد الكلي ثم عدد المجلد، وسيُحسب عدد الورقي تلقائيًا.</p>';
+        } else {
+          html += '<div class="product-total-row">';
+          html += fieldHtml(product.paperOnly ? 'العدد الورقي' : 'العدد الكلي', 'qty-total', false);
+          html += '</div>';
         }
 
         card.innerHTML = html;
@@ -1316,9 +1392,6 @@
 
         paperInput.value = String(Math.max(0, total - folder));
       }
-
-      card.querySelector('.line-total').textContent =
-        (total * Number(card.dataset.price || 0)) + ' د.أ';
 
       calculateTotals();
     }
