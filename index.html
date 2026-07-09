@@ -13,6 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
+  <!-- BUILD: FINAL-STATUS-V2 -->
   <!-- BUILD: 2026-07-10-NO-HEALTH-GATE -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2541,13 +2542,13 @@
           pendingOrder
         );
 
-      form.submit();
-
       clearTimeout(
         responseTimer
       );
 
       stopResultPolling();
+
+      form.submit();
 
       startResultPolling(
         pendingOrder.requestId
@@ -2557,12 +2558,13 @@
         setTimeout(
           function() {
             stopResultPolling();
+
             submitting = false;
             setSendingState(false);
 
             showError(
-              'لم يصل رد الخادم خلال 60 ثانية. ' +
-              'تأكد من نشر Code.gs الجديد بصلاحية Anyone ثم أعد المحاولة.'
+              'لم تصل نتيجة الطلب خلال 60 ثانية. ' +
+              'افتح رابط ping وتأكد أن الإصدار FINAL-STATUS-V2 منشور بصلاحية Anyone.'
             );
           },
           60000
@@ -2599,7 +2601,7 @@
           pollAttempt;
       }
 
-      runJsonpRequest(
+      requestOrderStatus(
         requestId,
         function(payload) {
           if (
@@ -2627,7 +2629,7 @@
                   requestId
                 );
               },
-              1000
+              1200
             );
         },
         function() {
@@ -2638,13 +2640,13 @@
                   requestId
                 );
               },
-              1500
+              1800
             );
         }
       );
     }
 
-    function runJsonpRequest(
+    function requestOrderStatus(
       requestId,
       onSuccess,
       onError
@@ -2652,18 +2654,18 @@
       cleanupJsonpRequest();
 
       var callbackName =
-        '__altahdir_status_' +
+        '__altahdirStatus_' +
         Date.now() +
         '_' +
         Math.random()
           .toString(36)
-          .slice(2, 8);
-
-      activeJsonpCallback =
-        callbackName;
+          .slice(2, 9);
 
       var completed =
         false;
+
+      activeJsonpCallback =
+        callbackName;
 
       window[callbackName] =
         function(payload) {
@@ -2671,11 +2673,13 @@
             return;
           }
 
-          completed =
-            true;
+          completed = true;
 
           cleanupJsonpRequest();
-          onSuccess(payload);
+
+          onSuccess(
+            payload
+          );
         };
 
       var script =
@@ -2686,8 +2690,7 @@
       activeJsonpScript =
         script;
 
-      script.async =
-        true;
+      script.async = true;
 
       script.src =
         WEB_APP_URL +
@@ -2700,7 +2703,7 @@
         encodeURIComponent(
           callbackName
         ) +
-        '&t=' +
+        '&_=' +
         Date.now();
 
       script.onerror =
@@ -2709,8 +2712,7 @@
             return;
           }
 
-          completed =
-            true;
+          completed = true;
 
           cleanupJsonpRequest();
 
@@ -2725,13 +2727,8 @@
 
       setTimeout(
         function() {
-          if (
-            !completed &&
-            activeJsonpCallback ===
-            callbackName
-          ) {
-            completed =
-              true;
+          if (!completed) {
+            completed = true;
 
             cleanupJsonpRequest();
 
@@ -2740,7 +2737,7 @@
             }
           }
         },
-        7000
+        10000
       );
     }
 
@@ -2756,8 +2753,7 @@
           );
       }
 
-      activeJsonpScript =
-        null;
+      activeJsonpScript = null;
 
       if (activeJsonpCallback) {
         try {
@@ -2771,8 +2767,7 @@
         }
       }
 
-      activeJsonpCallback =
-        '';
+      activeJsonpCallback = '';
     }
 
     function stopResultPolling() {
@@ -2780,8 +2775,7 @@
         pollTimer
       );
 
-      pollTimer =
-        null;
+      pollTimer = null;
 
       cleanupJsonpRequest();
     }
@@ -2800,7 +2794,7 @@
           response &&
           response.message
             ? response.message
-            : 'حدث خطأ أثناء إرسال الطلب.',
+            : 'حدث خطأ أثناء معالجة الطلب.',
           response &&
           response.whatsappLink
             ? response.whatsappLink
@@ -2814,22 +2808,34 @@
         pendingOrder;
 
       lastOrder.itemsCount =
-        Number(response.itemsCount) || 0;
+        Number(
+          response.itemsCount
+        ) || 0;
 
       lastOrder.folderCount =
-        Number(response.folderCount) || 0;
+        Number(
+          response.folderCount
+        ) || 0;
 
       lastOrder.paperCount =
-        Number(response.paperCount) || 0;
+        Number(
+          response.paperCount
+        ) || 0;
 
       lastOrder.productsTotal =
-        Number(response.productsTotal) || 0;
+        Number(
+          response.productsTotal
+        ) || 0;
 
       lastOrder.deliveryFee =
-        Number(response.deliveryFee) || 0;
+        Number(
+          response.deliveryFee
+        ) || 0;
 
       lastOrder.grandTotal =
-        Number(response.grandTotal) || 0;
+        Number(
+          response.grandTotal
+        ) || 0;
 
       lastOrderNumber =
         String(
@@ -2840,8 +2846,9 @@
 
       if (!lastOrderNumber) {
         showError(
-          'تم حفظ الطلب، لكن لم يُرجع الخادم رقم الطلب.'
+          'تم حفظ الطلب، لكن الخادم لم يُرجع رقم الطلب.'
         );
+
         return;
       }
 
