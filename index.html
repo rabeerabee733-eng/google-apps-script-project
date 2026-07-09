@@ -1751,6 +1751,10 @@
     var lastOrder = null;
     var lastOrderNumber = null;
     var submitting = false;
+    var responseTimer = null;
+    var pollTimer = null;
+    var activeJsonpScript = null;
+    var activeJsonpCallback = '';
     var toastTimer = null;
 
     function renderProducts() {
@@ -2507,7 +2511,6 @@
         showError(
           'لا يوجد اتصال بالإنترنت. تحقق من الشبكة ثم أعد المحاولة.'
         );
-
         return;
       }
 
@@ -2516,6 +2519,7 @@
 
       submitting = true;
       setSendingState(true);
+      hideError();
 
       var form =
         document.getElementById(
@@ -2538,69 +2542,195 @@
           pendingOrder
         );
 
+      clearTimeout(
+        responseTimer
+      );
+
+      stopResultPolling();
+
       form.submit();
 
-      /*
-       * إظهار رقم الطلب مباشرة.
-       * نفس الرقم يتم إرساله إلى الشيت وحفظه في العمود A.
-       */
       setTimeout(
         function() {
-          showImmediateSuccess();
+          startResultPolling(
+            pendingOrder.requestId
+          );
         },
-        1200
+        1000
       );
+
+      responseTimer =
+        setTimeout(
+          function() {
+            stopResultPolling();
+            submitting = false;
+            setSendingState(false);
+
+            showError(
+              'تم إرسال الطلب، لكن تعذر استلام رقم الطلب من الخادم. ' +
+              'لا تعِد الإرسال قبل التحقق من الشيت.'
+            );
+          },
+          90000
+        );
     }
 
-    function showImmediateSuccess() {
-      if (!pendingOrder) {
+
+
+
+    function startResultPolling(
+      requestId
+    ) {
+      if (!requestId) {
         return;
       }
 
-      var totals =
-        pendingOrder.clientTotals ||
-        getCurrentTotals();
+      pollResult(
+        requestId
+      );
+    }
 
-      lastOrder =
-        pendingOrder;
+    function pollResult(
+      requestId
+    ) {
+      if (
+        !submitting ||
+        !requestId
+      ) {
+        return;
+      }
 
-      lastOrder.itemsCount =
-        Number(
-          totals.itemsCount
-        ) || 0;
+      cleanupJsonpRequest();
 
-      lastOrder.folderCount =
-        Number(
-          totals.folderCount
-        ) || 0;
+      var callbackName =
+        '__altahdirResult_' +
+        Date.now() +
+        '_' +
+        Math.random()
+          .toString(36)
+          .slice(2, 8);
 
-      lastOrder.paperCount =
-        Number(
-          totals.paperCount
-        ) || 0;
+      activeJsonpCallback =
+        callbackName;
 
-      lastOrder.productsTotal =
-        Number(
-          totals.productsTotal
-        ) || 0;
+      window[callbackName] =
+        function(payload) {
+          cleanupJsonpRequest();
 
-      lastOrder.deliveryFee =
-        Number(
-          totals.deliveryFee
-        ) || 0;
+          if (
+            payload &&
+            payload.ready &&
+            payload.result
+          ) {
+            clearTimeout(
+              responseTimer
+            );
 
-      lastOrder.grandTotal =
-        Number(
-          totals.grandTotal
-        ) || 0;
+            stopResultPolling();
 
-      lastOrderNumber =
-        pendingOrder.clientOrderNumber;
+            handleServerResponse(
+              payload.result
+            );
 
-      fillSuccessScreen();
-      submitting = false;
-      setSendingState(false);
-      showScreen('success');
+            return;
+          }
+
+          pollTimer =
+            setTimeout(
+              function() {
+                pollResult(
+                  requestId
+                );
+              },
+              1200
+            );
+        };
+
+      var script =
+        document.createElement(
+          'script'
+        );
+
+      activeJsonpScript =
+        script;
+
+      script.async =
+        true;
+
+      script.src =
+        WEB_APP_URL +
+        '?action=status' +
+        '&requestId=' +
+        encodeURIComponent(
+          requestId
+        ) +
+        '&callback=' +
+        encodeURIComponent(
+          callbackName
+        ) +
+        '&t=' +
+        Date.now();
+
+      script.onerror =
+        function() {
+          cleanupJsonpRequest();
+
+          pollTimer =
+            setTimeout(
+              function() {
+                pollResult(
+                  requestId
+                );
+              },
+              1600
+            );
+        };
+
+      document.head.appendChild(
+        script
+      );
+    }
+
+    function cleanupJsonpRequest() {
+      if (
+        activeJsonpScript &&
+        activeJsonpScript.parentNode
+      ) {
+        activeJsonpScript
+          .parentNode
+          .removeChild(
+            activeJsonpScript
+          );
+      }
+
+      activeJsonpScript =
+        null;
+
+      if (activeJsonpCallback) {
+        try {
+          delete window[
+            activeJsonpCallback
+          ];
+        } catch (error) {
+          window[
+            activeJsonpCallback
+          ] = undefined;
+        }
+      }
+
+      activeJsonpCallback =
+        '';
+    }
+
+    function stopResultPolling() {
+      clearTimeout(
+        pollTimer
+      );
+
+      pollTimer =
+        null;
+
+      cleanupJsonpRequest();
     }
 
     window.addEventListener(
@@ -2617,32 +2747,85 @@
           return;
         }
 
-        /*
-         * إذا وصل خطأ حقيقي قبل ظهور شاشة النجاح،
-         * يتم إظهاره للمستخدم.
-         */
-        if (
-          data.result.result === 'error' &&
-          document
-            .getElementById(
-              'main-screen'
-            )
-            .classList.contains(
-              'active'
-            )
-        ) {
-          submitting = false;
-          setSendingState(false);
+        clearTimeout(
+          responseTimer
+        );
 
-          showError(
-            data.result.message ||
-            'حدث خطأ أثناء إرسال الطلب.',
-            data.result.whatsappLink ||
-            ''
-          );
-        }
+        stopResultPolling();
+
+        handleServerResponse(
+          data.result
+        );
       }
     );
+
+
+    function handleServerResponse(
+      response
+    ) {
+      submitting = false;
+      setSendingState(false);
+
+      if (
+        !response ||
+        response.result !== 'success'
+      ) {
+        showError(
+          response &&
+          response.message
+            ? response.message
+            : 'حدث خطأ أثناء إرسال الطلب.',
+          response &&
+          response.whatsappLink
+            ? response.whatsappLink
+            : ''
+        );
+
+        return;
+      }
+
+      lastOrder =
+        pendingOrder;
+
+      lastOrder.itemsCount =
+        Number(
+          response.itemsCount
+        ) || 0;
+
+      lastOrder.folderCount =
+        Number(
+          response.folderCount
+        ) || 0;
+
+      lastOrder.paperCount =
+        Number(
+          response.paperCount
+        ) || 0;
+
+      lastOrder.productsTotal =
+        Number(
+          response.productsTotal
+        ) || 0;
+
+      lastOrder.deliveryFee =
+        Number(
+          response.deliveryFee
+        ) || 0;
+
+      lastOrder.grandTotal =
+        Number(
+          response.grandTotal
+        ) || 0;
+
+      lastOrderNumber =
+        response.orderNumber ||
+        response.orderId ||
+        response.id ||
+        '';
+
+      fillSuccessScreen();
+      showScreen('success');
+    }
 
     function fillSuccessScreen() {
       document.getElementById(
