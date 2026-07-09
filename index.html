@@ -1357,8 +1357,7 @@
           id="sending-status"
           class="sending-status"
         >
-          يتم حفظ الطلب وفتح رقم الحجز،
-          يرجى عدم إغلاق الصفحة.
+          يتم حفظ الطلب، وستظهر شاشة رقم الطلب خلال لحظات.
         </div>
       </div>
     </section>
@@ -2514,12 +2513,13 @@
         return;
       }
 
+      hideError();
+
       pendingOrder =
         collectOrderData();
 
       submitting = true;
       setSendingState(true);
-      hideError();
 
       var form =
         document.getElementById(
@@ -2542,37 +2542,19 @@
           pendingOrder
         );
 
-      clearTimeout(
-        responseTimer
-      );
-
-      stopResultPolling();
-
       form.submit();
+      resetSendingIfStuck();
 
+      /*
+       * لا ننتظر postMessage أو JSONP حتى لا يعلق الموقع.
+       * نفس رقم الطلب يتم إرساله إلى الخادم ويحفظ في العمود A.
+       */
       setTimeout(
         function() {
-          startResultPolling(
-            pendingOrder.requestId
-          );
+          showImmediateSuccess();
         },
-        1000
+        1200
       );
-
-      responseTimer =
-        setTimeout(
-          function() {
-            stopResultPolling();
-            submitting = false;
-            setSendingState(false);
-
-            showError(
-              'تم إرسال الطلب، لكن تعذر استلام رقم الطلب من الخادم. ' +
-              'لا تعِد الإرسال قبل التحقق من الشيت.'
-            );
-          },
-          90000
-        );
     }
 
 
@@ -2747,15 +2729,26 @@
           return;
         }
 
-        clearTimeout(
-          responseTimer
-        );
+        if (
+          data.result.result === 'error' &&
+          document
+            .getElementById(
+              'main-screen'
+            )
+            .classList.contains(
+              'active'
+            )
+        ) {
+          submitting = false;
+          setSendingState(false);
 
-        stopResultPolling();
-
-        handleServerResponse(
-          data.result
-        );
+          showError(
+            data.result.message ||
+            'حدث خطأ أثناء إرسال الطلب.',
+            data.result.whatsappLink ||
+            ''
+          );
+        }
       }
     );
 
@@ -2827,6 +2820,60 @@
       showScreen('success');
     }
 
+
+    function showImmediateSuccess() {
+      if (!pendingOrder) {
+        return;
+      }
+
+      var totals =
+        pendingOrder.clientTotals ||
+        getCurrentTotals();
+
+      lastOrder =
+        pendingOrder;
+
+      lastOrder.itemsCount =
+        Number(
+          totals.itemsCount
+        ) || 0;
+
+      lastOrder.folderCount =
+        Number(
+          totals.folderCount
+        ) || 0;
+
+      lastOrder.paperCount =
+        Number(
+          totals.paperCount
+        ) || 0;
+
+      lastOrder.productsTotal =
+        Number(
+          totals.productsTotal
+        ) || 0;
+
+      lastOrder.deliveryFee =
+        Number(
+          totals.deliveryFee
+        ) || 0;
+
+      lastOrder.grandTotal =
+        Number(
+          totals.grandTotal
+        ) || 0;
+
+      lastOrderNumber =
+        pendingOrder.clientOrderNumber;
+
+      fillSuccessScreen();
+
+      submitting = false;
+      setSendingState(false);
+
+      showScreen('success');
+    }
+
     function fillSuccessScreen() {
       document.getElementById(
         'order-number'
@@ -2893,6 +2940,27 @@
 
       hideError();
       window.scrollTo(0, 0);
+    }
+
+
+    function resetSendingIfStuck() {
+      setTimeout(
+        function() {
+          if (
+            submitting &&
+            document
+              .getElementById(
+                'main-screen'
+              )
+              .classList.contains(
+                'active'
+              )
+          ) {
+            showImmediateSuccess();
+          }
+        },
+        8000
+      );
     }
 
     function setSendingState(
