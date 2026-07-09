@@ -1752,6 +1752,7 @@
     var submitting = false;
     var responseTimer = null;
     var pollTimer = null;
+    var pollAttempt = 0;
     var activeJsonpScript = null;
     var activeJsonpCallback = '';
     var toastTimer = null;
@@ -2569,7 +2570,7 @@
               'لا تعِد الإرسال قبل التحقق من ورقة الطلبات.'
             );
           },
-          90000
+          45000
         );
     }
 
@@ -2583,6 +2584,8 @@
         return;
       }
 
+      pollAttempt = 0;
+
       pollResult(
         requestId
       );
@@ -2591,11 +2594,21 @@
     function pollResult(
       requestId
     ) {
-      if (
-        !submitting ||
-        !requestId
-      ) {
+      if (!requestId) {
         return;
+      }
+
+      pollAttempt++;
+
+      var status =
+        document.getElementById(
+          'sending-status'
+        );
+
+      if (status) {
+        status.textContent =
+          'تم إرسال الطلب، جاري استلام الرقم التسلسلي من الإكسل... ' +
+          pollAttempt;
       }
 
       cleanupJsonpRequest();
@@ -2617,7 +2630,7 @@
 
           if (
             payload &&
-            payload.ready &&
+            payload.ready === true &&
             payload.result
           ) {
             clearTimeout(
@@ -2640,7 +2653,7 @@
                   requestId
                 );
               },
-              1200
+              900
             );
         };
 
@@ -2680,7 +2693,7 @@
                   requestId
                 );
               },
-              1600
+              1200
             );
         };
 
