@@ -13,7 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
-  <!-- BUILD: GITHUB-ALL-FEATURES-V2-NO-PREFLIGHT -->
+  <!-- BUILD: GITHUB-SAME-ORIGIN-BRIDGE-V2 -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1641,6 +1641,13 @@
     style="display:none;width:0;height:0;border:0"
   ></iframe>
 
+  <iframe
+    id="status-frame"
+    name="status-frame"
+    title="فحص حالة الطلب"
+    style="display:none;width:0;height:0;border:0"
+  ></iframe>
+
   <script>
     var WEB_APP_URL =
       'https://script.google.com/macros/s/AKfycbwDt7zZSakpbNgJG6HWfcOmwCr85oLmPKX9op0vTjqAtsM0twWqpVhSjJt2TG1i42ZiKA/exec';
@@ -1649,7 +1656,7 @@
       '0798382004';
 
     var REQUIRED_SERVER_VERSION =
-      '2026-07-10-GITHUB-ALL-FEATURES-V1';
+      '2026-07-10-GITHUB-BRIDGE-V2';
 
     var PRODUCTS = [
       {
@@ -1820,9 +1827,6 @@
     var submitting = false;
     var statusTimer = null;
     var totalTimeout = null;
-    var activeJsonpScript = null;
-    var activeJsonpCallback = '';
-    var jsonpTimeout = null;
     var toastTimer = null;
 
     /*
@@ -2669,275 +2673,92 @@
         return;
       }
 
-      jsonpOrderStatus(
-        requestId,
-        function(payload) {
-          if (
-            payload &&
-            payload.version &&
-            payload.version !==
-              REQUIRED_SERVER_VERSION
-          ) {
-            stopStatusPolling();
-
-            submitting = false;
-            setSendingState(
-              false
-            );
-
-            showError(
-              'إصدار Apps Script تغيّر أثناء الإرسال. ' +
-              'أعد نشر Code.gs ثم حدّث الصفحة.'
-            );
-
-            return;
-          }
-
-          if (
-            payload &&
-            payload.ready === true &&
-            payload.result
-          ) {
-            stopStatusPolling();
-
-            handleServerResponse(
-              payload.result
-            );
-
-            return;
-          }
-
-          statusTimer =
-            setTimeout(
-              function() {
-                pollOrderStatus(
-                  requestId
-                );
-              },
-              1200
-            );
-        },
-        function() {
-          /*
-           * فشل طلب حالة واحد لا يعيد إرسال الطلب.
-           * ننتظر ثم نستعلم فقط مرة أخرى.
-           */
-          statusTimer =
-            setTimeout(
-              function() {
-                pollOrderStatus(
-                  requestId
-                );
-              },
-              1800
-            );
-        }
-      );
-    }
-
-    function jsonpOrderStatus(
-      requestId,
-      onSuccess,
-      onError
-    ) {
-      jsonpRequest(
-        'orderStatus',
-        requestId,
-        onSuccess,
-        onError
-      );
-    }
-
-    function jsonpRequest(
-      action,
-      requestId,
-      onSuccess,
-      onError
-    ) {
-      cleanupJsonp();
-
-      var callbackName =
-        '__altahdirJsonp_' +
-        Date.now() +
-        '_' +
-        Math.random()
-          .toString(36)
-          .slice(2, 9);
-
-      var completed =
-        false;
-
-      var loadedWithoutCallback =
-        false;
-
-      activeJsonpCallback =
-        callbackName;
-
-      window[
-        callbackName
-      ] =
-        function(payload) {
-          if (completed) {
-            return;
-          }
-
-          completed =
-            true;
-
-          cleanupJsonp();
-
-          onSuccess(
-            payload
-          );
-        };
-
-      var script =
-        document.createElement(
-          'script'
+      var statusFrame =
+        document.getElementById(
+          'status-frame'
         );
 
-      activeJsonpScript =
-        script;
+      if (!statusFrame) {
+        submitting = false;
+        setSendingState(
+          false
+        );
 
-      script.async =
-        true;
+        showError(
+          'تعذر تجهيز قناة التحقق من رقم الطلب.'
+        );
 
-      var source =
+        return;
+      }
+
+      statusFrame.src =
         WEB_APP_URL +
-        '?action=' +
+        '?action=statusBridge' +
+        '&requestId=' +
         encodeURIComponent(
-          action
-        ) +
-        '&callback=' +
-        encodeURIComponent(
-          callbackName
+          requestId
         ) +
         '&_=' +
         Date.now();
+    }
 
-      if (requestId) {
-        source +=
-          '&requestId=' +
-          encodeURIComponent(
-            requestId
+    /*
+     * تستدعيها callback.html بعد أن يصبح iframe
+     * على نفس نطاق GitHub Pages.
+     */
+    window.altahdirBridgeReceive =
+      function(payload) {
+        if (
+          !submitting ||
+          !payload
+        ) {
+          return;
+        }
+
+        if (
+          payload.version &&
+          payload.version !==
+            REQUIRED_SERVER_VERSION
+        ) {
+          stopStatusPolling();
+
+          submitting = false;
+          setSendingState(
+            false
           );
-      }
 
-      script.src =
-        source;
+          showError(
+            'إصدار Apps Script لا يطابق إصدار الموقع. ' +
+            'أعد نشر Code.gs ثم حدّث الصفحة.'
+          );
 
-      script.onerror =
-        function() {
-          if (completed) {
-            return;
-          }
+          return;
+        }
 
-          completed =
-            true;
+        if (
+          payload.ready === true &&
+          payload.result
+        ) {
+          stopStatusPolling();
 
-          cleanupJsonp();
+          handleServerResponse(
+            payload.result
+          );
 
-          if (onError) {
-            onError();
-          }
-        };
+          return;
+        }
 
-      /*
-       * قد يُحمّل النشر القديم HTML أو نصًا بدل callback.
-       * onload وحده لا يعني نجاح JSONP، لذلك ننتظر لحظة
-       * ثم نعدّه فشلًا إذا لم تُنفذ دالة callback.
-       */
-      script.onload =
-        function() {
-          loadedWithoutCallback =
-            true;
-
+        statusTimer =
           setTimeout(
             function() {
-              if (
-                completed ||
-                !loadedWithoutCallback
-              ) {
-                return;
-              }
-
-              completed =
-                true;
-
-              cleanupJsonp();
-
-              if (onError) {
-                onError();
-              }
+              pollOrderStatus(
+                pendingOrder &&
+                pendingOrder.requestId
+              );
             },
-            600
+            1300
           );
-        };
-
-      document.head.appendChild(
-        script
-      );
-
-      jsonpTimeout =
-        setTimeout(
-          function() {
-            if (completed) {
-              return;
-            }
-
-            completed =
-              true;
-
-            cleanupJsonp();
-
-            if (onError) {
-              onError();
-            }
-          },
-          8000
-        );
-    }
-
-    function cleanupJsonp() {
-      clearTimeout(
-        jsonpTimeout
-      );
-
-      jsonpTimeout =
-        null;
-
-      if (
-        activeJsonpScript &&
-        activeJsonpScript
-          .parentNode
-      ) {
-        activeJsonpScript
-          .parentNode
-          .removeChild(
-            activeJsonpScript
-          );
-      }
-
-      activeJsonpScript =
-        null;
-
-      if (
-        activeJsonpCallback
-      ) {
-        try {
-          delete window[
-            activeJsonpCallback
-          ];
-        } catch (error) {
-          window[
-            activeJsonpCallback
-          ] = undefined;
-        }
-      }
-
-      activeJsonpCallback =
-        '';
-    }
+      };
 
     function stopStatusPolling() {
       clearTimeout(
@@ -2954,7 +2775,15 @@
       totalTimeout =
         null;
 
-      cleanupJsonp();
+      var statusFrame =
+        document.getElementById(
+          'status-frame'
+        );
+
+      if (statusFrame) {
+        statusFrame.src =
+          'about:blank';
+      }
     }
 
     function handleServerResponse(
