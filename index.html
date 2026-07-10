@@ -13,7 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
-  <!-- BUILD: REVIEW-POSTMESSAGE-V1 -->
+  <!-- BUILD: DIRECT-POSTMESSAGE-SUMMARY-V2 -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,10 +60,6 @@
       color: var(--text);
       font-family: "Tajawal", Arial, sans-serif;
       background: var(--page);
-    }
-
-    body.modal-open {
-      overflow: hidden;
     }
 
     button,
@@ -1476,13 +1472,20 @@
         </div>
 
         <button
-          id="review-button"
+          id="submit-button"
           class="main-button"
           type="button"
-          onclick="openReview()"
+          onclick="submitOrder()"
         >
-          مراجعة الطلب
+          إرسال الطلب
         </button>
+
+        <div
+          id="sending-status"
+          class="sending-status"
+        >
+          جاري حفظ الطلب واستلام رقم الطلب...
+        </div>
       </div>
     </section>
 
@@ -1600,74 +1603,7 @@
     جميع الحقوق محفوظة
   </footer>
 
-
-  <div
-    id="review-modal"
-    class="modal-overlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="review-title"
-  >
-    <div class="modal-card">
-      <h2 id="review-title" class="modal-title">
-        مراجعة الطلب قبل الإرسال
-      </h2>
-
-      <div class="review-section">
-        <h3>معلومات الاتصال</h3>
-        <div class="review-line"><span>الاسم:</span><strong id="review-name">-</strong></div>
-        <div class="review-line"><span>الهاتف:</span><strong id="review-phone">-</strong></div>
-        <div class="review-line"><span>الهاتف البديل:</span><strong id="review-alt-phone">-</strong></div>
-      </div>
-
-      <div class="review-section">
-        <h3>معلومات التوصيل</h3>
-        <div class="review-line"><span>المحافظة واللواء:</span><strong id="review-location">-</strong></div>
-        <div class="review-line"><span>العنوان:</span><strong id="review-address">-</strong></div>
-        <div class="review-line"><span>الملاحظات:</span><strong id="review-notes">-</strong></div>
-      </div>
-
-      <div class="review-section">
-        <h3>المنتجات والكميات</h3>
-        <ol id="review-products" class="review-products"></ol>
-      </div>
-
-      <div class="review-section">
-        <div class="review-line"><span>إجمالي النسخ:</span><strong id="review-items">0</strong></div>
-        <div class="review-line"><span>إجمالي المجلد:</span><strong id="review-folders">0</strong></div>
-        <div class="review-line"><span>إجمالي الورقي:</span><strong id="review-papers">0</strong></div>
-        <div class="review-line"><span>مجموع المنتجات:</span><strong id="review-products-total">0 د.أ</strong></div>
-        <div class="review-line"><span>رسوم التوصيل:</span><strong id="review-delivery">0 د.أ</strong></div>
-        <div class="review-line summary-grand"><span>الإجمالي الكلي:</span><strong id="review-grand">0 د.أ</strong></div>
-      </div>
-
-      <div id="review-sending-status" class="review-sending-status">
-        جاري حفظ الطلب واستلام رقم الطلب...
-      </div>
-
-      <div class="modal-actions">
-        <button
-          id="confirm-button"
-          class="main-button"
-          type="button"
-          onclick="confirmOrder()"
-        >
-          تأكيد وإرسال الطلب
-        </button>
-
-        <button
-          id="edit-button"
-          class="secondary-button"
-          type="button"
-          onclick="closeReview()"
-        >
-          تعديل الطلب
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div
+<div
     id="toast"
     class="toast"
     role="status"
@@ -2684,7 +2620,7 @@
       };
     }
 
-    function openReview() {
+    function submitOrder() {
       if (
         submitting ||
         !validateForm()
@@ -2692,173 +2628,7 @@
         return;
       }
 
-      pendingOrder =
-        collectOrderData();
-
-      var totals =
-        pendingOrder.clientTotals ||
-        getCurrentTotals();
-
-      document.getElementById(
-        'review-name'
-      ).textContent =
-        pendingOrder.name || '-';
-
-      document.getElementById(
-        'review-phone'
-      ).textContent =
-        pendingOrder.phone || '-';
-
-      document.getElementById(
-        'review-alt-phone'
-      ).textContent =
-        pendingOrder.altPhone || '-';
-
-      document.getElementById(
-        'review-location'
-      ).textContent =
-        pendingOrder.governorate +
-        ' — ' +
-        pendingOrder.district;
-
-      document.getElementById(
-        'review-address'
-      ).textContent =
-        pendingOrder.address || '-';
-
-      document.getElementById(
-        'review-notes'
-      ).textContent =
-        pendingOrder.notes || '-';
-
-      var productsList =
-        document.getElementById(
-          'review-products'
-        );
-
-      productsList.innerHTML = '';
-
-      for (
-        var i = 0;
-        i < pendingOrder.items.length;
-        i++
-      ) {
-        var item =
-          pendingOrder.items[i];
-
-        var product =
-          findProductById(
-            item.productId
-          );
-
-        if (!product) {
-          continue;
-        }
-
-        var text =
-          product.name +
-          ' — العدد: ' +
-          item.qty;
-
-        if (product.splitAllowed) {
-          text +=
-            ' — مجلد: ' +
-            item.folderQty +
-            ' — ورقي: ' +
-            item.paperQty;
-
-        } else if (product.paperOnly) {
-          text +=
-            ' — ورقي فقط';
-        }
-
-        text +=
-          ' — المجموع: ' +
-          (
-            product.price *
-            item.qty
-          ) +
-          ' د.أ';
-
-        var listItem =
-          document.createElement('li');
-
-        listItem.textContent = text;
-        productsList.appendChild(
-          listItem
-        );
-      }
-
-      document.getElementById(
-        'review-items'
-      ).textContent =
-        totals.itemsCount;
-
-      document.getElementById(
-        'review-folders'
-      ).textContent =
-        totals.folderCount;
-
-      document.getElementById(
-        'review-papers'
-      ).textContent =
-        totals.paperCount;
-
-      document.getElementById(
-        'review-products-total'
-      ).textContent =
-        totals.productsTotal +
-        ' د.أ';
-
-      document.getElementById(
-        'review-delivery'
-      ).textContent =
-        totals.deliveryFee +
-        ' د.أ';
-
-      document.getElementById(
-        'review-grand'
-      ).textContent =
-        totals.grandTotal +
-        ' د.أ';
-
-      document.getElementById(
-        'review-modal'
-      ).classList.add('show');
-
-      document.body.classList.add(
-        'modal-open'
-      );
-    }
-
-    function closeReview(forceClose) {
-      if (
-        submitting &&
-        forceClose !== true
-      ) {
-        return;
-      }
-
-      document.getElementById(
-        'review-modal'
-      ).classList.remove('show');
-
-      document.body.classList.remove(
-        'modal-open'
-      );
-    }
-
-    function confirmOrder() {
-      if (
-        submitting ||
-        !pendingOrder
-      ) {
-        return;
-      }
-
       if (!navigator.onLine) {
-        closeReview(true);
-
         showError(
           'لا يوجد اتصال بالإنترنت. تحقق من الشبكة ثم أعد المحاولة.'
         );
@@ -2867,6 +2637,10 @@
       }
 
       hideError();
+
+      pendingOrder =
+        collectOrderData();
+
       submitting = true;
       responseHandled = false;
       setSendingState(true);
@@ -2896,6 +2670,11 @@
         responseTimer
       );
 
+      /*
+       * إرسال واحد فقط داخل iframe المخفي.
+       * رقم الطلب لا يُنشأ في GitHub؛
+       * يصل من Code.gs بعد حفظ الصف في الإكسل.
+       */
       form.submit();
 
       responseTimer =
@@ -2907,11 +2686,10 @@
 
             submitting = false;
             setSendingState(false);
-            closeReview(true);
 
             showError(
-              'تم إرسال الطلب، لكن تعذر استلام رد الخادم. ' +
-              'تحقق من نشر Code.gs الجديد بصلاحية Anyone ثم أعد المحاولة.'
+              'تم إرسال الطلب، لكن تعذر استلام رقم الطلب من الخادم. ' +
+              'تأكد أن Code.gs منشور كإصدار جديد بصلاحية Anyone.'
             );
           },
           45000
@@ -2954,7 +2732,6 @@
         !response ||
         response.result !== 'success'
       ) {
-        closeReview(true);
 
         showError(
           response &&
@@ -3021,7 +2798,6 @@
         );
 
       if (!lastOrderNumber) {
-        closeReview(true);
 
         showError(
           'تم حفظ الطلب، لكن الخادم لم يُرجع رقم الطلب.'
@@ -3029,8 +2805,6 @@
 
         return;
       }
-
-      closeReview(true);
       fillSuccessScreen();
       showScreen('success');
     }
@@ -3106,44 +2880,24 @@
     function setSendingState(
       isSending
     ) {
-      var reviewButton =
+      var submitButton =
         document.getElementById(
-          'review-button'
-        );
-
-      var confirmButton =
-        document.getElementById(
-          'confirm-button'
-        );
-
-      var editButton =
-        document.getElementById(
-          'edit-button'
+          'submit-button'
         );
 
       var status =
         document.getElementById(
-          'review-sending-status'
+          'sending-status'
         );
 
-      if (reviewButton) {
-        reviewButton.disabled =
-          isSending;
-      }
-
-      if (confirmButton) {
-        confirmButton.disabled =
+      if (submitButton) {
+        submitButton.disabled =
           isSending;
 
-        confirmButton.textContent =
+        submitButton.textContent =
           isSending
             ? 'جاري إرسال الطلب...'
-            : 'تأكيد وإرسال الطلب';
-      }
-
-      if (editButton) {
-        editButton.disabled =
-          isSending;
+            : 'إرسال الطلب';
       }
 
       if (status) {
