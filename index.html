@@ -13,7 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
-  <!-- BUILD: GITHUB-SAME-ORIGIN-BRIDGE-V2 -->
+  <!-- BUILD: GITHUB-FIXED-JSONP-V3 -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1641,13 +1641,6 @@
     style="display:none;width:0;height:0;border:0"
   ></iframe>
 
-  <iframe
-    id="status-frame"
-    name="status-frame"
-    title="فحص حالة الطلب"
-    style="display:none;width:0;height:0;border:0"
-  ></iframe>
-
   <script>
     var WEB_APP_URL =
       'https://script.google.com/macros/s/AKfycbwDt7zZSakpbNgJG6HWfcOmwCr85oLmPKX9op0vTjqAtsM0twWqpVhSjJt2TG1i42ZiKA/exec';
@@ -1656,7 +1649,7 @@
       '0798382004';
 
     var REQUIRED_SERVER_VERSION =
-      '2026-07-10-GITHUB-BRIDGE-V2';
+      '2026-07-10-GITHUB-ALL-FEATURES-V1';
 
     var PRODUCTS = [
       {
@@ -2663,79 +2656,23 @@
         );
     }
 
-    function pollOrderStatus(
-      requestId
-    ) {
-      if (
-        !submitting ||
-        !requestId
-      ) {
-        return;
-      }
-
-      var statusFrame =
-        document.getElementById(
-          'status-frame'
-        );
-
-      if (!statusFrame) {
-        submitting = false;
-        setSendingState(
-          false
-        );
-
-        showError(
-          'تعذر تجهيز قناة التحقق من رقم الطلب.'
-        );
-
-        return;
-      }
-
-      statusFrame.src =
-        WEB_APP_URL +
-        '?action=statusBridge' +
-        '&requestId=' +
-        encodeURIComponent(
-          requestId
-        ) +
-        '&_=' +
-        Date.now();
-    }
-
     /*
-     * تستدعيها callback.html بعد أن يصبح iframe
-     * على نفس نطاق GitHub Pages.
+     * دالة ثابتة يستدعيها Apps Script عبر JSONP.
+     * لا نحذفها ولا نغيّر اسمها أثناء الطلب.
      */
-    window.altahdirBridgeReceive =
+    window.altahdirOrderStatusCallback =
       function(payload) {
         if (
           !submitting ||
-          !payload
+          !pendingOrder
         ) {
           return;
         }
 
-        if (
-          payload.version &&
-          payload.version !==
-            REQUIRED_SERVER_VERSION
-        ) {
-          stopStatusPolling();
-
-          submitting = false;
-          setSendingState(
-            false
-          );
-
-          showError(
-            'إصدار Apps Script لا يطابق إصدار الموقع. ' +
-            'أعد نشر Code.gs ثم حدّث الصفحة.'
-          );
-
-          return;
-        }
+        removeStatusScript();
 
         if (
+          payload &&
           payload.ready === true &&
           payload.result
         ) {
@@ -2752,13 +2689,87 @@
           setTimeout(
             function() {
               pollOrderStatus(
-                pendingOrder &&
                 pendingOrder.requestId
               );
             },
-            1300
+            1400
           );
       };
+
+    function pollOrderStatus(
+      requestId
+    ) {
+      if (
+        !submitting ||
+        !requestId
+      ) {
+        return;
+      }
+
+      removeStatusScript();
+
+      var script =
+        document.createElement(
+          'script'
+        );
+
+      script.id =
+        'altahdir-status-script';
+
+      script.async =
+        true;
+
+      script.src =
+        WEB_APP_URL +
+        '?action=orderStatus' +
+        '&requestId=' +
+        encodeURIComponent(
+          requestId
+        ) +
+        '&callback=altahdirOrderStatusCallback' +
+        '&_=' +
+        Date.now();
+
+      script.onerror =
+        function() {
+          removeStatusScript();
+
+          if (!submitting) {
+            return;
+          }
+
+          statusTimer =
+            setTimeout(
+              function() {
+                pollOrderStatus(
+                  requestId
+                );
+              },
+              2000
+            );
+        };
+
+      document.head.appendChild(
+        script
+      );
+    }
+
+    function removeStatusScript() {
+      var oldScript =
+        document.getElementById(
+          'altahdir-status-script'
+        );
+
+      if (
+        oldScript &&
+        oldScript.parentNode
+      ) {
+        oldScript.parentNode
+          .removeChild(
+            oldScript
+          );
+      }
+    }
 
     function stopStatusPolling() {
       clearTimeout(
@@ -2775,15 +2786,7 @@
       totalTimeout =
         null;
 
-      var statusFrame =
-        document.getElementById(
-          'status-frame'
-        );
-
-      if (statusFrame) {
-        statusFrame.src =
-          'about:blank';
-      }
+      removeStatusScript();
     }
 
     function handleServerResponse(
