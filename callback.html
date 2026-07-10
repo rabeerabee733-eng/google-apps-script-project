@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+  <title>استلام نتيجة الطلب</title>
+</head>
+<body>
+<script>
+(function () {
+  try {
+    var encoded =
+      window.location.hash
+        .slice(1);
+
+    if (!encoded) {
+      return;
+    }
+
+    var payload =
+      JSON.parse(
+        decodeURIComponent(
+          encoded
+        )
+      );
+
+    if (
+      window.parent &&
+      window.parent !== window &&
+      typeof window.parent
+        .altahdirBridgeReceive ===
+        'function'
+    ) {
+      window.parent
+        .altahdirBridgeReceive(
+          payload
+        );
+    }
+  } catch (error) {
+    if (
+      window.parent &&
+      window.parent !== window &&
+      typeof window.parent
+        .altahdirBridgeReceive ===
+        'function'
+    ) {
+      window.parent
+        .altahdirBridgeReceive({
+          ready: true,
+          result: {
+            result: 'error',
+            code: 'CALLBACK_PARSE_ERROR',
+            message:
+              'تعذر قراءة نتيجة الطلب.'
+          }
+        });
+    }
+  }
+})();
+</script>
+</body>
+</html>
