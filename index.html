@@ -13,7 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
-  <!-- BUILD: STATIC-PRODUCTS-DIRECT-POSTMESSAGE-V4 -->
+  <!-- BUILD: HYBRID-POST-JSONP-V1 -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1638,6 +1638,7 @@
     id="post-frame"
     name="post-frame"
     title="إرسال الطلب"
+    style="display:none;width:0;height:0;border:0"
   ></iframe>
 
   <script>
@@ -1647,149 +1648,83 @@
     var WHATSAPP_NUMBER =
       '0798382004';
 
-    var CALLBACK_SOURCE =
-      'ALTAHDIR_ORDER_APP';
-
     var PRODUCTS = [
       {
         id: 'grade1_bag',
         name: 'حقيبة الصف الأول',
         price: 10,
         splitAllowed: true,
-        colors: {
-          accent: '#2563eb',
-          dark: '#1e3a8a',
-          bg: '#eff6ff',
-          soft: '#dbeafe',
-          border: '#93c5fd'
-        }
+        paperOnly: false
       },
       {
         id: 'grade2_bag',
         name: 'حقيبة الصف الثاني',
         price: 10,
         splitAllowed: true,
-        colors: {
-          accent: '#7c3aed',
-          dark: '#5b21b6',
-          bg: '#f5f3ff',
-          soft: '#ede9fe',
-          border: '#c4b5fd'
-        }
+        paperOnly: false
       },
       {
         id: 'grade3_bag',
         name: 'حقيبة الصف الثالث',
         price: 10,
         splitAllowed: true,
-        colors: {
-          accent: '#db2777',
-          dark: '#9d174d',
-          bg: '#fdf2f8',
-          soft: '#fce7f3',
-          border: '#f9a8d4'
-        }
+        paperOnly: false
       },
       {
         id: 'prep_grade1',
         name: 'تحضير فقط صف أول',
         price: 7,
         splitAllowed: true,
-        colors: {
-          accent: '#0891b2',
-          dark: '#155e75',
-          bg: '#ecfeff',
-          soft: '#cffafe',
-          border: '#67e8f9'
-        }
+        paperOnly: false
       },
       {
         id: 'prep_grade2',
         name: 'تحضير فقط صف ثاني',
         price: 7,
         splitAllowed: true,
-        colors: {
-          accent: '#059669',
-          dark: '#065f46',
-          bg: '#ecfdf5',
-          soft: '#d1fae5',
-          border: '#6ee7b7'
-        }
+        paperOnly: false
       },
       {
         id: 'prep_grade3',
         name: 'تحضير فقط صف ثالث',
         price: 7,
         splitAllowed: true,
-        colors: {
-          accent: '#65a30d',
-          dark: '#3f6212',
-          bg: '#f7fee7',
-          soft: '#ecfccb',
-          border: '#bef264'
-        }
+        paperOnly: false
       },
       {
         id: 'english_first_three',
-        name:
-          'تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى',
+        name: 'تحضير اللغة الإنجليزية للصفوف الثلاثة الأولى',
         price: 9,
-        paperOnly: true,
-        colors: {
-          accent: '#9333ea',
-          dark: '#6b21a8',
-          bg: '#faf5ff',
-          soft: '#f3e8ff',
-          border: '#d8b4fe'
-        }
+        splitAllowed: false,
+        paperOnly: true
       },
       {
         id: 'active_learning',
         name: 'حقيبة التعلم النشط',
         price: 10,
-        colors: {
-          accent: '#ea580c',
-          dark: '#9a3412',
-          bg: '#fff7ed',
-          soft: '#ffedd5',
-          border: '#fdba74'
-        }
+        splitAllowed: false,
+        paperOnly: false
       },
       {
         id: 'letter_cards',
         name: 'بطاقات الحروف',
         price: 15,
-        colors: {
-          accent: '#dc2626',
-          dark: '#991b1b',
-          bg: '#fef2f2',
-          soft: '#fee2e2',
-          border: '#fca5a5'
-        }
+        splitAllowed: false,
+        paperOnly: false
       },
       {
         id: 'number_cards',
         name: 'بطاقات الأرقام',
         price: 10,
-        colors: {
-          accent: '#ca8a04',
-          dark: '#854d0e',
-          bg: '#fefce8',
-          soft: '#fef9c3',
-          border: '#fde047'
-        }
+        splitAllowed: false,
+        paperOnly: false
       },
       {
         id: 'classroom_rules',
         name: 'بطاقات القوانين الصفية',
         price: 5,
-        colors: {
-          accent: '#475569',
-          dark: '#1e293b',
-          bg: '#f8fafc',
-          soft: '#e2e8f0',
-          border: '#cbd5e1'
-        }
+        splitAllowed: false,
+        paperOnly: false
       }
     ];
 
@@ -1805,7 +1740,6 @@
         'لواء الجيزة',
         'لواء الموقر'
       ],
-
       'إربد': [
         'قصبة إربد',
         'لواء بني عبيد',
@@ -1817,14 +1751,12 @@
         'لواء الطيبة',
         'لواء الوسطية'
       ],
-
       'الزرقاء': [
         'قصبة الزرقاء',
         'لواء الرصيفة',
         'لواء الهاشمية',
         'لواء بيرين'
       ],
-
       'البلقاء': [
         'قصبة السلط',
         'لواء الشونة الجنوبية',
@@ -1832,7 +1764,6 @@
         'لواء عين الباشا',
         'لواء ماحص والفحيص'
       ],
-
       'المفرق': [
         'قصبة المفرق',
         'لواء الرويشد',
@@ -1840,21 +1771,17 @@
         'لواء البادية الشمالية الغربية',
         'لواء بلعما'
       ],
-
       'جرش': [
         'قصبة جرش'
       ],
-
       'عجلون': [
         'قصبة عجلون',
         'لواء كفرنجة'
       ],
-
       'مأدبا': [
         'قصبة مأدبا',
         'لواء ذيبان'
       ],
-
       'الكرك': [
         'قصبة الكرك',
         'لواء المزار الجنوبي',
@@ -1864,20 +1791,17 @@
         'لواء عي',
         'لواء فقوع'
       ],
-
       'الطفيلة': [
         'قصبة الطفيلة',
         'لواء بصيرا',
         'لواء الحسا'
       ],
-
       'معان': [
         'قصبة معان',
         'لواء البتراء (إقليم البتراء)',
         'لواء الشوبك',
         'لواء الحسينية'
       ],
-
       'العقبة': [
         'قصبة العقبة',
         'لواء القويرة',
@@ -1887,101 +1811,113 @@
 
     var pendingOrder = null;
     var lastOrder = null;
-    var lastOrderNumber = null;
+    var lastOrderNumber = '';
     var submitting = false;
-    var responseTimer = null;
-    var responseHandled = false;
+    var statusTimer = null;
+    var totalTimeout = null;
+    var activeJsonpScript = null;
+    var activeJsonpCallback = '';
+    var jsonpTimeout = null;
     var toastTimer = null;
 
+    /*
+     * دعم closest في بعض متصفحات Android القديمة.
+     */
+    if (
+      window.Element &&
+      !Element.prototype.closest
+    ) {
+      Element.prototype.closest =
+        function(selector) {
+          var element = this;
+
+          while (element) {
+            if (
+              element.matches &&
+              element.matches(
+                selector
+              )
+            ) {
+              return element;
+            }
+
+            element =
+              element.parentElement;
+          }
+
+          return null;
+        };
+    }
+
+    function findProductById(
+      productId
+    ) {
+      for (
+        var i = 0;
+        i < PRODUCTS.length;
+        i++
+      ) {
+        if (
+          PRODUCTS[i].id ===
+          productId
+        ) {
+          return PRODUCTS[i];
+        }
+      }
+
+      return null;
+    }
+
     function renderProducts() {
-      var container = document.getElementById('products-container');
+      /*
+       * المنتجات مكتوبة داخل HTML أصلًا.
+       * لا نمسح الحاوية ولا نعيد إنشاءها.
+       */
+      var container =
+        document.getElementById(
+          'products-container'
+        );
+
       if (!container) {
-        console.error('products-container غير موجود.');
         return;
       }
-      var cards = container.querySelectorAll('.product-card');
-      for (var i = 0; i < cards.length; i++) {
-        cards[i].dataset.ready = 'true';
-      }
-    }
 
-    function handleQuantityInput(input) {
-      sanitizeQuantityInput(input);
-      var card = input.closest('.product-card');
-      if (!card) return;
-      updateProductCard(card, input.classList.contains('qty-total'));
-    }
-
-    function fieldHtml(
-      label,
-      className,
-      readonly
-    ) {
-      if (readonly) {
-        return (
-          '<div class="field-mini">' +
-            '<label>' +
-              label +
-            '</label>' +
-
-            '<div class="qty-readonly">' +
-              '<input ' +
-                'class="qty-input ' +
-                className +
-                '" ' +
-                'type="number" ' +
-                'inputmode="numeric" ' +
-                'min="0" ' +
-                'max="99" ' +
-                'value="0" ' +
-                'readonly ' +
-                'aria-readonly="true">' +
-            '</div>' +
-          '</div>'
+      var cards =
+        container.querySelectorAll(
+          '.product-card'
         );
+
+      for (
+        var i = 0;
+        i < cards.length;
+        i++
+      ) {
+        cards[i].dataset.ready =
+          'true';
+      }
+    }
+
+    function handleQuantityInput(
+      input
+    ) {
+      sanitizeQuantityInput(
+        input
+      );
+
+      var card =
+        input.closest(
+          '.product-card'
+        );
+
+      if (!card) {
+        return;
       }
 
-      return (
-        '<div class="field-mini">' +
-          '<label>' +
-            label +
-          '</label>' +
-
-          '<div class="qty-stepper">' +
-            '<button ' +
-              'class="qty-button minus" ' +
-              'type="button" ' +
-              'aria-label="إنقاص ' +
-              label +
-              '" ' +
-              'onclick="changeStepper(this,-1)">' +
-              '−' +
-            '</button>' +
-
-            '<input ' +
-              'class="qty-input ' +
-              className +
-              '" ' +
-              'type="number" ' +
-              'inputmode="numeric" ' +
-              'min="0" ' +
-              'max="99" ' +
-              'value="0" ' +
-              'aria-label="' +
-              label +
-              '">' +
-
-            '<button ' +
-              'class="qty-button plus" ' +
-              'type="button" ' +
-              'aria-label="زيادة ' +
-              label +
-              '" ' +
-              'onclick="changeStepper(this,1)">' +
-              '+' +
-            '</button>' +
-          '</div>' +
-        '</div>'
+      updateProductCard(
+        card,
+        input.classList.contains(
+          'qty-total'
+        )
       );
     }
 
@@ -2006,13 +1942,18 @@
           '.product-card'
         );
 
-      if (!input || !card) {
+      if (
+        !input ||
+        !card
+      ) {
         return;
       }
 
       var current =
         Math.floor(
-          Number(input.value)
+          Number(
+            input.value
+          )
         ) || 0;
 
       var next =
@@ -2020,12 +1961,15 @@
           0,
           Math.min(
             99,
-            current + difference
+            current +
+            difference
           )
         );
 
       input.value =
-        String(next);
+        String(
+          next
+        );
 
       updateProductCard(
         card,
@@ -2035,10 +1979,14 @@
       );
     }
 
-    function sanitizeQuantityInput(input) {
+    function sanitizeQuantityInput(
+      input
+    ) {
       var value =
         Math.floor(
-          Number(input.value)
+          Number(
+            input.value
+          )
         );
 
       if (
@@ -2053,7 +2001,9 @@
       }
 
       input.value =
-        String(value);
+        String(
+          value
+        );
     }
 
     function updateProductCard(
@@ -2065,15 +2015,9 @@
           '.qty-total'
         );
 
-      var folderInput =
-        card.querySelector(
-          '.qty-folder'
-        );
-
-      var paperInput =
-        card.querySelector(
-          '.qty-paper'
-        );
+      if (!totalInput) {
+        return;
+      }
 
       var total =
         Number(
@@ -2081,19 +2025,34 @@
         ) || 0;
 
       if (
-        card.dataset.splitAllowed ===
+        card.dataset
+          .splitAllowed ===
         'true'
       ) {
+        var folderInput =
+          card.querySelector(
+            '.qty-folder'
+          );
+
+        var paperInput =
+          card.querySelector(
+            '.qty-paper'
+          );
+
         var folder =
-          Number(
-            folderInput.value
-          ) || 0;
+          folderInput
+            ? Number(
+                folderInput.value
+              ) || 0
+            : 0;
 
         if (folder > total) {
           folder = total;
 
-          folderInput.value =
-            String(folder);
+          if (folderInput) {
+            folderInput.value =
+              String(folder);
+          }
         }
 
         if (
@@ -2102,17 +2061,22 @@
         ) {
           folder = 0;
 
-          folderInput.value =
-            '0';
+          if (folderInput) {
+            folderInput.value =
+              '0';
+          }
         }
 
-        paperInput.value =
-          String(
-            Math.max(
-              0,
-              total - folder
-            )
-          );
+        if (paperInput) {
+          paperInput.value =
+            String(
+              Math.max(
+                0,
+                total -
+                folder
+              )
+            );
+        }
       }
 
       calculateTotals();
@@ -2120,16 +2084,23 @@
 
     function changeGovernorate() {
       var governorate =
-        getValue('governorate');
+        getValue(
+          'governorate'
+        );
 
       var districtSelect =
         document.getElementById(
           'district'
         );
 
+      if (!districtSelect) {
+        return;
+      }
+
       var districts =
-        DISTRICTS[governorate] ||
-        [];
+        DISTRICTS[
+          governorate
+        ] || [];
 
       districtSelect.innerHTML =
         '<option value="" selected disabled>' +
@@ -2179,14 +2150,20 @@
         i < cards.length;
         i++
       ) {
-        var card = cards[i];
+        var card =
+          cards[i];
+
+        var totalInput =
+          card.querySelector(
+            '.qty-total'
+          );
 
         var qty =
-          Number(
-            card.querySelector(
-              '.qty-total'
-            ).value
-          ) || 0;
+          totalInput
+            ? Number(
+                totalInput.value
+              ) || 0
+            : 0;
 
         var price =
           Number(
@@ -2194,28 +2171,41 @@
           ) || 0;
 
         itemsCount += qty;
-        productsTotal += qty * price;
+        productsTotal +=
+          qty * price;
 
         if (
-          card.dataset.splitAllowed ===
+          card.dataset
+            .splitAllowed ===
           'true'
         ) {
+          var folderInput =
+            card.querySelector(
+              '.qty-folder'
+            );
+
+          var paperInput =
+            card.querySelector(
+              '.qty-paper'
+            );
+
           folderCount +=
-            Number(
-              card.querySelector(
-                '.qty-folder'
-              ).value
-            ) || 0;
+            folderInput
+              ? Number(
+                  folderInput.value
+                ) || 0
+              : 0;
 
           paperCount +=
-            Number(
-              card.querySelector(
-                '.qty-paper'
-              ).value
-            ) || 0;
+            paperInput
+              ? Number(
+                  paperInput.value
+                ) || 0
+              : 0;
 
         } else if (
-          card.dataset.paperOnly ===
+          card.dataset
+            .paperOnly ===
           'true'
         ) {
           paperCount += qty;
@@ -2223,24 +2213,32 @@
       }
 
       var governorate =
-        getValue('governorate');
+        getValue(
+          'governorate'
+        );
 
       var deliveryFee =
         governorate &&
         itemsCount > 0
           ? (
-              governorate === 'عمان'
+              governorate ===
+              'عمان'
                 ? 2
                 : 3
             )
           : 0;
 
       return {
-        itemsCount: itemsCount,
-        folderCount: folderCount,
-        paperCount: paperCount,
-        productsTotal: productsTotal,
-        deliveryFee: deliveryFee,
+        itemsCount:
+          itemsCount,
+        folderCount:
+          folderCount,
+        paperCount:
+          paperCount,
+        productsTotal:
+          productsTotal,
+        deliveryFee:
+          deliveryFee,
         grandTotal:
           productsTotal +
           deliveryFee
@@ -2251,38 +2249,38 @@
       var totals =
         getCurrentTotals();
 
-      document.getElementById(
-        'items-count'
-      ).textContent =
-        totals.itemsCount;
+      setText(
+        'items-count',
+        totals.itemsCount
+      );
 
-      document.getElementById(
-        'folder-count'
-      ).textContent =
-        totals.folderCount;
+      setText(
+        'folder-count',
+        totals.folderCount
+      );
 
-      document.getElementById(
-        'paper-count'
-      ).textContent =
-        totals.paperCount;
+      setText(
+        'paper-count',
+        totals.paperCount
+      );
 
-      document.getElementById(
-        'products-total'
-      ).textContent =
+      setText(
+        'products-total',
         totals.productsTotal +
-        ' د.أ';
+        ' د.أ'
+      );
 
-      document.getElementById(
-        'delivery-fee'
-      ).textContent =
+      setText(
+        'delivery-fee',
         totals.deliveryFee +
-        ' د.أ';
+        ' د.أ'
+      );
 
-      document.getElementById(
-        'grand-total'
-      ).textContent =
+      setText(
+        'grand-total',
         totals.grandTotal +
-        ' د.أ';
+        ' د.أ'
+      );
     }
 
     function collectItems() {
@@ -2298,14 +2296,20 @@
         i < cards.length;
         i++
       ) {
-        var card = cards[i];
+        var card =
+          cards[i];
+
+        var totalInput =
+          card.querySelector(
+            '.qty-total'
+          );
 
         var qty =
-          Number(
-            card.querySelector(
-              '.qty-total'
-            ).value
-          ) || 0;
+          totalInput
+            ? Number(
+                totalInput.value
+              ) || 0
+            : 0;
 
         if (qty <= 0) {
           continue;
@@ -2313,38 +2317,57 @@
 
         var item = {
           productId:
-            card.dataset.productId,
-          qty: qty,
-          folderQty: 0,
-          paperQty: 0
+            card.dataset
+              .productId,
+          qty:
+            qty,
+          folderQty:
+            0,
+          paperQty:
+            0
         };
 
         if (
-          card.dataset.splitAllowed ===
+          card.dataset
+            .splitAllowed ===
           'true'
         ) {
+          var folderInput =
+            card.querySelector(
+              '.qty-folder'
+            );
+
+          var paperInput =
+            card.querySelector(
+              '.qty-paper'
+            );
+
           item.folderQty =
-            Number(
-              card.querySelector(
-                '.qty-folder'
-              ).value
-            ) || 0;
+            folderInput
+              ? Number(
+                  folderInput.value
+                ) || 0
+              : 0;
 
           item.paperQty =
-            Number(
-              card.querySelector(
-                '.qty-paper'
-              ).value
-            ) || 0;
+            paperInput
+              ? Number(
+                  paperInput.value
+                ) || 0
+              : 0;
 
         } else if (
-          card.dataset.paperOnly ===
+          card.dataset
+            .paperOnly ===
           'true'
         ) {
-          item.paperQty = qty;
+          item.paperQty =
+            qty;
         }
 
-        items.push(item);
+        items.push(
+          item
+        );
       }
 
       return items;
@@ -2354,12 +2377,20 @@
       hideError();
 
       var phone =
-        getValue('phone')
-          .replace(/\D/g, '');
+        getValue(
+          'phone'
+        ).replace(
+          /\D/g,
+          ''
+        );
 
       var altPhone =
-        getValue('altPhone')
-          .replace(/\D/g, '');
+        getValue(
+          'altPhone'
+        ).replace(
+          /\D/g,
+          ''
+        );
 
       var items =
         collectItems();
@@ -2378,7 +2409,10 @@
         return false;
       }
 
-      if (!/^07\d{8}$/.test(phone)) {
+      if (
+        !/^07\d{8}$/
+          .test(phone)
+      ) {
         showError(
           'رقم الهاتف الأساسي غير صحيح؛ يجب أن يبدأ بـ 07 ويتكون من 10 خانات.'
         );
@@ -2388,7 +2422,8 @@
 
       if (
         altPhone &&
-        !/^07\d{8}$/.test(altPhone)
+        !/^07\d{8}$/
+          .test(altPhone)
       ) {
         showError(
           'رقم الهاتف البديل غير صحيح أو اتركه فارغًا.'
@@ -2408,7 +2443,7 @@
         return false;
       }
 
-      if (items.length === 0) {
+      if (!items.length) {
         showError(
           'يرجى اختيار منتج واحد على الأقل.'
         );
@@ -2421,7 +2456,8 @@
         i < items.length;
         i++
       ) {
-        var item = items[i];
+        var item =
+          items[i];
 
         var product =
           findProductById(
@@ -2455,34 +2491,47 @@
           createRequestId(),
 
         website:
-          getValue('website'),
+          getValue(
+            'website'
+          ),
 
         name:
-          getValue('name'),
+          getValue(
+            'name'
+          ),
 
         phone:
-          getValue('phone'),
+          getValue(
+            'phone'
+          ),
 
         altPhone:
-          getValue('altPhone'),
+          getValue(
+            'altPhone'
+          ),
 
         governorate:
-          getValue('governorate'),
+          getValue(
+            'governorate'
+          ),
 
         district:
-          getValue('district'),
+          getValue(
+            'district'
+          ),
 
         address:
-          getValue('address'),
+          getValue(
+            'address'
+          ),
 
         notes:
-          getValue('notes'),
+          getValue(
+            'notes'
+          ),
 
         items:
-          collectItems(),
-
-        clientTotals:
-          getCurrentTotals()
+          collectItems()
       };
     }
 
@@ -2502,14 +2551,15 @@
         return;
       }
 
-      hideError();
-
       pendingOrder =
         collectOrderData();
 
       submitting = true;
-      responseHandled = false;
-      setSendingState(true);
+      setSendingState(
+        true
+      );
+      hideError();
+      stopStatusPolling();
 
       var form =
         document.getElementById(
@@ -2520,6 +2570,22 @@
         document.getElementById(
           'post-data'
         );
+
+      if (
+        !form ||
+        !dataInput
+      ) {
+        submitting = false;
+        setSendingState(
+          false
+        );
+
+        showError(
+          'تعذر تجهيز نموذج الإرسال.'
+        );
+
+        return;
+      }
 
       form.action =
         WEB_APP_URL;
@@ -2532,190 +2598,400 @@
           pendingOrder
         );
 
-      clearTimeout(
-        responseTimer
-      );
-
       /*
-       * إرسال واحد فقط داخل iframe المخفي.
-       * رقم الطلب لا يُنشأ في GitHub؛
-       * يصل من Code.gs بعد حفظ الصف في الإكسل.
+       * إرسال POST مرة واحدة فقط.
        */
       form.submit();
 
-      responseTimer =
+      /*
+       * الاستعلام يبدأ بعد مهلة قصيرة،
+       * ولا ينشئ طلبًا جديدًا.
+       */
+      statusTimer =
         setTimeout(
           function() {
-            if (responseHandled) {
-              return;
-            }
-
-            submitting = false;
-            setSendingState(false);
-
-            showError(
-              'تم إرسال الطلب، لكن تعذر استلام رقم الطلب من الخادم. ' +
-              'تأكد أن Code.gs منشور كإصدار جديد بصلاحية Anyone.'
+            pollOrderStatus(
+              pendingOrder
+                .requestId
             );
           },
-          45000
+          700
+        );
+
+      totalTimeout =
+        setTimeout(
+          function() {
+            stopStatusPolling();
+
+            submitting = false;
+            setSendingState(
+              false
+            );
+
+            showError(
+              'تم إرسال الطلب، لكن تعذر استلام النتيجة خلال 60 ثانية. ' +
+              'تأكد من نشر Code.gs الجديد بصلاحية Anyone.'
+            );
+          },
+          60000
         );
     }
 
-    window.addEventListener(
-      'message',
-      function(event) {
-        var data = event.data;
-
-        if (
-          !data ||
-          data.source !== CALLBACK_SOURCE ||
-          !data.result ||
-          responseHandled
-        ) {
-          return;
-        }
-
-        responseHandled = true;
-
-        clearTimeout(
-          responseTimer
-        );
-
-        handleServerResponse(
-          data.result
-        );
+    function pollOrderStatus(
+      requestId
+    ) {
+      if (
+        !submitting ||
+        !requestId
+      ) {
+        return;
       }
-    );
+
+      jsonpOrderStatus(
+        requestId,
+        function(payload) {
+          if (
+            payload &&
+            payload.ready === true &&
+            payload.result
+          ) {
+            stopStatusPolling();
+
+            handleServerResponse(
+              payload.result
+            );
+
+            return;
+          }
+
+          statusTimer =
+            setTimeout(
+              function() {
+                pollOrderStatus(
+                  requestId
+                );
+              },
+              1200
+            );
+        },
+        function() {
+          /*
+           * فشل طلب حالة واحد لا يعيد إرسال الطلب.
+           * ننتظر ثم نستعلم فقط مرة أخرى.
+           */
+          statusTimer =
+            setTimeout(
+              function() {
+                pollOrderStatus(
+                  requestId
+                );
+              },
+              1800
+            );
+        }
+      );
+    }
+
+    function jsonpOrderStatus(
+      requestId,
+      onSuccess,
+      onError
+    ) {
+      cleanupJsonp();
+
+      var callbackName =
+        '__altahdirStatus_' +
+        Date.now() +
+        '_' +
+        Math.random()
+          .toString(36)
+          .slice(2, 9);
+
+      var completed =
+        false;
+
+      activeJsonpCallback =
+        callbackName;
+
+      window[
+        callbackName
+      ] =
+        function(payload) {
+          if (completed) {
+            return;
+          }
+
+          completed =
+            true;
+
+          cleanupJsonp();
+
+          onSuccess(
+            payload
+          );
+        };
+
+      var script =
+        document.createElement(
+          'script'
+        );
+
+      activeJsonpScript =
+        script;
+
+      script.async =
+        true;
+
+      script.src =
+        WEB_APP_URL +
+        '?action=orderStatus' +
+        '&requestId=' +
+        encodeURIComponent(
+          requestId
+        ) +
+        '&callback=' +
+        encodeURIComponent(
+          callbackName
+        ) +
+        '&_=' +
+        Date.now();
+
+      script.onerror =
+        function() {
+          if (completed) {
+            return;
+          }
+
+          completed =
+            true;
+
+          cleanupJsonp();
+
+          if (onError) {
+            onError();
+          }
+        };
+
+      document.head.appendChild(
+        script
+      );
+
+      jsonpTimeout =
+        setTimeout(
+          function() {
+            if (completed) {
+              return;
+            }
+
+            completed =
+              true;
+
+            cleanupJsonp();
+
+            if (onError) {
+              onError();
+            }
+          },
+          10000
+        );
+    }
+
+    function cleanupJsonp() {
+      clearTimeout(
+        jsonpTimeout
+      );
+
+      jsonpTimeout =
+        null;
+
+      if (
+        activeJsonpScript &&
+        activeJsonpScript
+          .parentNode
+      ) {
+        activeJsonpScript
+          .parentNode
+          .removeChild(
+            activeJsonpScript
+          );
+      }
+
+      activeJsonpScript =
+        null;
+
+      if (
+        activeJsonpCallback
+      ) {
+        try {
+          delete window[
+            activeJsonpCallback
+          ];
+        } catch (error) {
+          window[
+            activeJsonpCallback
+          ] = undefined;
+        }
+      }
+
+      activeJsonpCallback =
+        '';
+    }
+
+    function stopStatusPolling() {
+      clearTimeout(
+        statusTimer
+      );
+
+      clearTimeout(
+        totalTimeout
+      );
+
+      statusTimer =
+        null;
+
+      totalTimeout =
+        null;
+
+      cleanupJsonp();
+    }
 
     function handleServerResponse(
       response
     ) {
-      submitting = false;
-      setSendingState(false);
+      submitting =
+        false;
+
+      setSendingState(
+        false
+      );
 
       if (
         !response ||
-        response.result !== 'success'
+        response.result !==
+          'success'
       ) {
-
         showError(
           response &&
           response.message
             ? response.message
             : 'حدث خطأ أثناء معالجة الطلب.',
           response &&
-          (
-            response.whatsappLink ||
-            response.whatsapp
-          )
-            ? (
-                response.whatsappLink ||
-                (
-                  'https://wa.me/962' +
-                  String(response.whatsapp)
-                    .replace(/\D/g, '')
-                    .replace(/^0/, '')
-                )
-              )
+          response
+            .whatsappLink
+            ? response
+                .whatsappLink
             : ''
         );
 
         return;
       }
 
-      lastOrder = pendingOrder;
+      lastOrder =
+        pendingOrder || {};
 
       lastOrder.itemsCount =
         Number(
-          response.itemsCount
+          response
+            .itemsCount
         ) || 0;
 
       lastOrder.folderCount =
         Number(
-          response.folderCount
+          response
+            .folderCount
         ) || 0;
 
       lastOrder.paperCount =
         Number(
-          response.paperCount
+          response
+            .paperCount
         ) || 0;
 
       lastOrder.productsTotal =
         Number(
-          response.productsTotal
+          response
+            .productsTotal
         ) || 0;
 
       lastOrder.deliveryFee =
         Number(
-          response.deliveryFee
+          response
+            .deliveryFee
         ) || 0;
 
       lastOrder.grandTotal =
         Number(
-          response.grandTotal
+          response
+            .grandTotal
         ) || 0;
 
       lastOrderNumber =
         String(
-          response.orderNumber ||
-          response.orderId ||
+          response
+            .orderNumber ||
+          response
+            .orderId ||
           ''
         );
 
       if (!lastOrderNumber) {
-
         showError(
           'تم حفظ الطلب، لكن الخادم لم يُرجع رقم الطلب.'
         );
 
         return;
       }
+
       fillSuccessScreen();
-      showScreen('success');
+      showScreen(
+        'success'
+      );
     }
 
     function fillSuccessScreen() {
-      document.getElementById(
-        'order-number'
-      ).textContent =
-        lastOrderNumber || '-';
+      setText(
+        'order-number',
+        lastOrderNumber ||
+        '-'
+      );
 
-      document.getElementById(
-        'success-items'
-      ).textContent =
-        lastOrder.itemsCount;
+      setText(
+        'success-items',
+        lastOrder.itemsCount
+      );
 
-      document.getElementById(
-        'success-folders'
-      ).textContent =
-        lastOrder.folderCount;
+      setText(
+        'success-folders',
+        lastOrder.folderCount
+      );
 
-      document.getElementById(
-        'success-papers'
-      ).textContent =
-        lastOrder.paperCount;
+      setText(
+        'success-papers',
+        lastOrder.paperCount
+      );
 
-      document.getElementById(
-        'success-products'
-      ).textContent =
+      setText(
+        'success-products',
         lastOrder.productsTotal +
-        ' د.أ';
+        ' د.أ'
+      );
 
-      document.getElementById(
-        'success-delivery'
-      ).textContent =
+      setText(
+        'success-delivery',
         lastOrder.deliveryFee +
-        ' د.أ';
+        ' د.أ'
+      );
 
-      document.getElementById(
-        'success-grand'
-      ).textContent =
+      setText(
+        'success-grand',
         lastOrder.grandTotal +
-        ' د.أ';
+        ' د.أ'
+      );
     }
 
-    function showScreen(name) {
+    function showScreen(
+      name
+    ) {
       var screens =
         document.querySelectorAll(
           '.screen'
@@ -2726,27 +3002,38 @@
         i < screens.length;
         i++
       ) {
-        screens[i].classList.remove(
-          'active'
-        );
+        screens[i]
+          .classList
+          .remove(
+            'active'
+          );
       }
 
-      document
-        .getElementById(
-          name + '-screen'
-        )
-        .classList.add(
-          'active'
+      var screen =
+        document.getElementById(
+          name +
+          '-screen'
         );
 
+      if (screen) {
+        screen
+          .classList
+          .add(
+            'active'
+          );
+      }
+
       hideError();
-      window.scrollTo(0, 0);
+      window.scrollTo(
+        0,
+        0
+      );
     }
 
     function setSendingState(
       isSending
     ) {
-      var submitButton =
+      var button =
         document.getElementById(
           'submit-button'
         );
@@ -2756,11 +3043,11 @@
           'sending-status'
         );
 
-      if (submitButton) {
-        submitButton.disabled =
+      if (button) {
+        button.disabled =
           isSending;
 
-        submitButton.textContent =
+        button.textContent =
           isSending
             ? 'جاري إرسال الطلب...'
             : 'إرسال الطلب';
@@ -2771,6 +3058,11 @@
           isSending
             ? 'block'
             : 'none';
+
+        if (isSending) {
+          status.textContent =
+            'جاري حفظ الطلب واستلام رقم الطلب...';
+        }
       }
     }
 
@@ -2782,118 +3074,134 @@
         return;
       }
 
-      var itemsText =
-        lastOrder.items
-          .map(
-            function(item, index) {
-              var product =
-                findProductById(
-                  item.productId
-                );
+      var items =
+        lastOrder.items ||
+        [];
 
-              if (!product) {
-                return '';
-              }
+      var lines = [];
 
-              var line =
-                (index + 1) +
-                ') ' +
-                product.name +
-                ' — العدد: ' +
-                item.qty;
+      for (
+        var i = 0;
+        i < items.length;
+        i++
+      ) {
+        var item =
+          items[i];
 
-              if (
-                product.splitAllowed
-              ) {
-                line +=
-                  ' — مجلد: ' +
-                  item.folderQty +
-                  ' — ورقي: ' +
-                  item.paperQty;
+        var product =
+          findProductById(
+            item.productId
+          );
 
-              } else if (
-                product.paperOnly
-              ) {
-                line +=
-                  ' — ورقي فقط';
-              }
+        if (!product) {
+          continue;
+        }
 
-              line +=
-                ' — المجموع: ' +
-                (
-                  product.price *
-                  item.qty
-                ) +
-                ' د';
+        var line =
+          (i + 1) +
+          ') ' +
+          product.name +
+          ' — العدد: ' +
+          item.qty;
 
-              return line;
-            }
-          )
-          .filter(Boolean)
-          .join('\n');
+        if (
+          product
+            .splitAllowed
+        ) {
+          line +=
+            ' — مجلد: ' +
+            item.folderQty +
+            ' — ورقي: ' +
+            item.paperQty;
+
+        } else if (
+          product
+            .paperOnly
+        ) {
+          line +=
+            ' — ورقي فقط';
+        }
+
+        line +=
+          ' — المجموع: ' +
+          (
+            product.price *
+            item.qty
+          ) +
+          ' د';
+
+        lines.push(
+          line
+        );
+      }
 
       var message =
         'تم استلام طلب التحضير الإلكتروني بنجاح.\n\n' +
-
         'رقم الطلب: *' +
         lastOrderNumber +
         '*\n' +
-
         'الاسم: ' +
-        lastOrder.name +
+        (
+          lastOrder.name ||
+          '-'
+        ) +
         '\n' +
-
         'الهاتف: ' +
-        lastOrder.phone +
-        '\n' +
-
-        'الهاتف البديل: ' +
         (
-          lastOrder.altPhone ||
+          lastOrder.phone ||
           '-'
         ) +
         '\n' +
-
         'المحافظة: ' +
-        lastOrder.governorate +
-        '\n' +
-
-        'اللواء: ' +
-        lastOrder.district +
-        '\n' +
-
-        'العنوان: ' +
-        lastOrder.address +
-        '\n' +
-
-        'الملاحظات: ' +
         (
-          lastOrder.notes ||
+          lastOrder
+            .governorate ||
+          '-'
+        ) +
+        '\n' +
+        'اللواء: ' +
+        (
+          lastOrder
+            .district ||
+          '-'
+        ) +
+        '\n' +
+        'العنوان: ' +
+        (
+          lastOrder.address ||
           '-'
         ) +
         '\n\n' +
-
         'المنتجات:\n' +
-        itemsText +
+        (
+          lines.length
+            ? lines.join(
+                '\n'
+              )
+            : '-'
+        ) +
         '\n\n' +
-
         'مجموع المنتجات: ' +
-        lastOrder.productsTotal +
+        lastOrder
+          .productsTotal +
         ' د\n' +
-
         'رسوم التوصيل: ' +
-        lastOrder.deliveryFee +
+        lastOrder
+          .deliveryFee +
         ' د\n' +
-
         'الإجمالي الكلي: *' +
-        lastOrder.grandTotal +
+        lastOrder
+          .grandTotal +
         ' د*';
 
       window.open(
         'https://wa.me/962' +
-        WHATSAPP_NUMBER.substring(1) +
+        WHATSAPP_NUMBER
+          .substring(1) +
         '?text=' +
-        encodeURIComponent(message),
+        encodeURIComponent(
+          message
+        ),
         '_blank',
         'noopener'
       );
@@ -2905,14 +3213,18 @@
       }
 
       var text =
-        String(lastOrderNumber);
+        String(
+          lastOrderNumber
+        );
 
       if (
         navigator.clipboard &&
         window.isSecureContext
       ) {
         navigator.clipboard
-          .writeText(text)
+          .writeText(
+            text
+          )
           .then(
             function() {
               showToast(
@@ -2922,30 +3234,40 @@
           )
           .catch(
             function() {
-              fallbackCopy(text);
+              fallbackCopy(
+                text
+              );
             }
           );
 
       } else {
-        fallbackCopy(text);
+        fallbackCopy(
+          text
+        );
       }
     }
 
-    function fallbackCopy(text) {
+    function fallbackCopy(
+      text
+    ) {
       var area =
         document.createElement(
           'textarea'
         );
 
-      area.value = text;
+      area.value =
+        text;
+
       area.style.position =
         'fixed';
+
       area.style.opacity =
         '0';
 
-      document.body.appendChild(
-        area
-      );
+      document.body
+        .appendChild(
+          area
+        );
 
       area.select();
 
@@ -2965,9 +3287,10 @@
         );
       }
 
-      document.body.removeChild(
-        area
-      );
+      document.body
+        .removeChild(
+          area
+        );
     }
 
     function showError(
@@ -2979,62 +3302,85 @@
           'error-box'
         );
 
+      var text =
+        document.getElementById(
+          'error-text'
+        );
+
       var link =
         document.getElementById(
           'error-link'
         );
 
-      document.getElementById(
-        'error-text'
-      ).textContent =
-        message ||
-        'حدث خطأ غير متوقع.';
-
-      if (whatsappLink) {
-        link.href =
-          whatsappLink;
-
-        link.style.display =
-          'inline-block';
-
-      } else {
-        link.removeAttribute(
-          'href'
-        );
-
-        link.style.display =
-          'none';
+      if (text) {
+        text.textContent =
+          message ||
+          'حدث خطأ غير متوقع.';
       }
 
-      box.classList.add(
-        'show'
-      );
+      if (link) {
+        if (whatsappLink) {
+          link.href =
+            whatsappLink;
 
-      box.scrollIntoView(true);
-    }
+          link.style.display =
+            'inline-block';
 
-    function hideError() {
-      document
-        .getElementById(
-          'error-box'
-        )
-        .classList.remove(
+        } else {
+          link.removeAttribute(
+            'href'
+          );
+
+          link.style.display =
+            'none';
+        }
+      }
+
+      if (box) {
+        box.classList.add(
           'show'
         );
 
-      document
-        .getElementById(
-          'error-link'
-        )
-        .style.display =
-          'none';
+        box.scrollIntoView(
+          true
+        );
+      }
     }
 
-    function showToast(message) {
+    function hideError() {
+      var box =
+        document.getElementById(
+          'error-box'
+        );
+
+      var link =
+        document.getElementById(
+          'error-link'
+        );
+
+      if (box) {
+        box.classList.remove(
+          'show'
+        );
+      }
+
+      if (link) {
+        link.style.display =
+          'none';
+      }
+    }
+
+    function showToast(
+      message
+    ) {
       var toast =
         document.getElementById(
           'toast'
         );
+
+      if (!toast) {
+        return;
+      }
 
       toast.textContent =
         message;
@@ -3050,9 +3396,10 @@
       toastTimer =
         setTimeout(
           function() {
-            toast.classList.remove(
-              'show'
-            );
+            toast.classList
+              .remove(
+                'show'
+              );
           },
           2200
         );
@@ -3063,6 +3410,10 @@
         document.getElementById(
           'network-banner'
         );
+
+      if (!banner) {
+        return;
+      }
 
       var message = '';
 
@@ -3092,30 +3443,30 @@
 
       banner.classList.toggle(
         'show',
-        Boolean(message)
+        Boolean(
+          message
+        )
       );
     }
 
-    function findProductById(
-      productId
+    function numbersOnly(
+      element
     ) {
-      for (
-        var i = 0;
-        i < PRODUCTS.length;
-        i++
-      ) {
-        if (
-          PRODUCTS[i].id ===
-          productId
-        ) {
-          return PRODUCTS[i];
-        }
-      }
-
-      return null;
+      element.value =
+        element.value
+          .replace(
+            /\D/g,
+            ''
+          )
+          .slice(
+            0,
+            10
+          );
     }
 
-    function getValue(id) {
+    function getValue(
+      id
+    ) {
       var element =
         document.getElementById(
           id
@@ -3129,11 +3480,19 @@
         : '';
     }
 
-    function numbersOnly(element) {
-      element.value =
-        element.value
-          .replace(/\D/g, '')
-          .slice(0, 10);
+    function setText(
+      id,
+      value
+    ) {
+      var element =
+        document.getElementById(
+          id
+        );
+
+      if (element) {
+        element.textContent =
+          value;
+      }
     }
 
     function createRequestId() {
@@ -3146,16 +3505,6 @@
           .slice(2, 10)
       );
     }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
 
     window.addEventListener(
       'online',
@@ -3176,5 +3525,6 @@
       }
     );
   </script>
+
 </body>
 </html>
