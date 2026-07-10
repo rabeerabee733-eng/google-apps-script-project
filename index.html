@@ -13,7 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
-  <!-- BUILD: DIRECT-POSTMESSAGE-SUMMARY-V2 -->
+  <!-- BUILD: DIRECT-POSTMESSAGE-PRODUCTS-FIX-V3 -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1125,7 +1125,7 @@
   </style>
 </head>
 
-<body data-build="2026-07-10-NO-HEALTH-GATE">
+<body data-build="DIRECT-POSTMESSAGE-PRODUCTS-FIX-V3">
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
@@ -1886,6 +1886,11 @@
         document.getElementById(
           'products-container'
         );
+
+      if (!container) {
+        console.error('products-container غير موجود.');
+        return;
+      }
 
       container.innerHTML = '';
 
@@ -3290,37 +3295,6 @@
         .replace(/'/g, '&#039;');
     }
 
-
-    document.getElementById(
-      'review-modal'
-    ).addEventListener(
-      'click',
-      function(event) {
-        if (
-          event.target === this &&
-          !submitting
-        ) {
-          closeReview();
-        }
-      }
-    );
-
-    document.addEventListener(
-      'keydown',
-      function(event) {
-        if (
-          event.key === 'Escape' &&
-          document.getElementById(
-            'review-modal'
-          ).classList.contains(
-            'show'
-          ) &&
-          !submitting
-        ) {
-          closeReview();
-        }
-      }
-    );
 
     window.addEventListener(
       'online',
