@@ -13,7 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
-  <!-- BUILD: HYBRID-POST-JSONP-V1 -->
+  <!-- BUILD: HYBRID-POST-JSONP-V2-PREFLIGHT -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1643,10 +1643,13 @@
 
   <script>
     var WEB_APP_URL =
-      'https://script.google.com/macros/s/AKfycbxZWeg6C195GdvM-APy9VMgNmhsFO9yWc57zymuj-B4oDe4My8tRgIYVUIl5P0Xspfs/exec';
+      'https://script.google.com/macros/s/AKfycbzXVittruB5P8FTXvsp3coiBgPCdX4j4tt9_EUJ0exxHPRf3V7GrFexwUvIxj9SMjR8/exec';
 
     var WHATSAPP_NUMBER =
       '0798382004';
+
+    var REQUIRED_SERVER_VERSION =
+      '2026-07-10-HYBRID-POST-JSONP-V2';
 
     var PRODUCTS = [
       {
@@ -2561,6 +2564,39 @@
       hideError();
       stopStatusPolling();
 
+      setSendingMessage(
+        'جاري التحقق من اتصال الخادم...'
+      );
+
+      /*
+       * فحص الإصدار قبل إرسال POST.
+       * يمنع حفظ الطلب إذا كان النشر قديمًا ولا يدعم orderStatus.
+       */
+      checkServerVersion(
+        function() {
+          postPendingOrder();
+        },
+        function(message) {
+          submitting = false;
+          setSendingState(
+            false
+          );
+
+          showError(
+            message
+          );
+        }
+      );
+    }
+
+    function postPendingOrder() {
+      if (
+        !submitting ||
+        !pendingOrder
+      ) {
+        return;
+      }
+
       var form =
         document.getElementById(
           'post-form'
@@ -2598,15 +2634,15 @@
           pendingOrder
         );
 
+      setSendingMessage(
+        'جاري حفظ الطلب واستلام رقم الطلب...'
+      );
+
       /*
-       * إرسال POST مرة واحدة فقط.
+       * إرسال POST مرة واحدة فقط بعد نجاح فحص الخادم.
        */
       form.submit();
 
-      /*
-       * الاستعلام يبدأ بعد مهلة قصيرة،
-       * ولا ينشئ طلبًا جديدًا.
-       */
       statusTimer =
         setTimeout(
           function() {
@@ -2629,12 +2665,60 @@
             );
 
             showError(
-              'تم إرسال الطلب، لكن تعذر استلام النتيجة خلال 60 ثانية. ' +
-              'تأكد من نشر Code.gs الجديد بصلاحية Anyone.'
+              'تم إرسال الطلب، لكن تعذر استلام النتيجة. ' +
+              'افتح سجل التنفيذ في Apps Script للتحقق من خطأ doPost أو doGet.'
             );
           },
-          60000
+          45000
         );
+    }
+
+    function checkServerVersion(
+      onReady,
+      onError
+    ) {
+      jsonpRequest(
+        'ping',
+        '',
+        function(payload) {
+          if (
+            !payload ||
+            payload.ok !== true
+          ) {
+            onError(
+              'رابط Apps Script لا يعيد استجابة صحيحة.'
+            );
+
+            return;
+          }
+
+          if (
+            payload.version !==
+            REQUIRED_SERVER_VERSION
+          ) {
+            onError(
+              'النشر الحالي قديم. الإصدار الموجود: ' +
+              (
+                payload.version ||
+                'غير معروف'
+              ) +
+              '، والمطلوب: ' +
+              REQUIRED_SERVER_VERSION +
+              '. افتح Manage deployments واختر New version ثم Deploy.'
+            );
+
+            return;
+          }
+
+          onReady();
+        },
+        function() {
+          onError(
+            'تعذر التحقق من إصدار Apps Script. ' +
+            'تأكد أن الوصول مضبوط على Anyone وأنك نشرت New version.'
+          );
+        }
+      );
     }
 
     function pollOrderStatus(
@@ -2650,6 +2734,27 @@
       jsonpOrderStatus(
         requestId,
         function(payload) {
+          if (
+            payload &&
+            payload.version &&
+            payload.version !==
+              REQUIRED_SERVER_VERSION
+          ) {
+            stopStatusPolling();
+
+            submitting = false;
+            setSendingState(
+              false
+            );
+
+            showError(
+              'إصدار Apps Script تغيّر أثناء الإرسال. ' +
+              'أعد نشر Code.gs ثم حدّث الصفحة.'
+            );
+
+            return;
+          }
+
           if (
             payload &&
             payload.ready === true &&
@@ -2697,10 +2802,24 @@
       onSuccess,
       onError
     ) {
+      jsonpRequest(
+        'orderStatus',
+        requestId,
+        onSuccess,
+        onError
+      );
+    }
+
+    function jsonpRequest(
+      action,
+      requestId,
+      onSuccess,
+      onError
+    ) {
       cleanupJsonp();
 
       var callbackName =
-        '__altahdirStatus_' +
+        '__altahdirJsonp_' +
         Date.now() +
         '_' +
         Math.random()
@@ -2708,6 +2827,9 @@
           .slice(2, 9);
 
       var completed =
+        false;
+
+      var loadedWithoutCallback =
         false;
 
       activeJsonpCallback =
@@ -2742,12 +2864,11 @@
       script.async =
         true;
 
-      script.src =
+      var source =
         WEB_APP_URL +
-        '?action=orderStatus' +
-        '&requestId=' +
+        '?action=' +
         encodeURIComponent(
-          requestId
+          action
         ) +
         '&callback=' +
         encodeURIComponent(
@@ -2755,6 +2876,17 @@
         ) +
         '&_=' +
         Date.now();
+
+      if (requestId) {
+        source +=
+          '&requestId=' +
+          encodeURIComponent(
+            requestId
+          );
+      }
+
+      script.src =
+        source;
 
       script.onerror =
         function() {
@@ -2770,6 +2902,38 @@
           if (onError) {
             onError();
           }
+        };
+
+      /*
+       * قد يُحمّل النشر القديم HTML أو نصًا بدل callback.
+       * onload وحده لا يعني نجاح JSONP، لذلك ننتظر لحظة
+       * ثم نعدّه فشلًا إذا لم تُنفذ دالة callback.
+       */
+      script.onload =
+        function() {
+          loadedWithoutCallback =
+            true;
+
+          setTimeout(
+            function() {
+              if (
+                completed ||
+                !loadedWithoutCallback
+              ) {
+                return;
+              }
+
+              completed =
+                true;
+
+              cleanupJsonp();
+
+              if (onError) {
+                onError();
+              }
+            },
+            600
+          );
         };
 
       document.head.appendChild(
@@ -2792,7 +2956,7 @@
               onError();
             }
           },
-          10000
+          8000
         );
     }
 
@@ -3030,6 +3194,20 @@
       );
     }
 
+    function setSendingMessage(
+      message
+    ) {
+      var status =
+        document.getElementById(
+          'sending-status'
+        );
+
+      if (status) {
+        status.textContent =
+          message;
+      }
+    }
+
     function setSendingState(
       isSending
     ) {
@@ -3059,9 +3237,17 @@
             ? 'block'
             : 'none';
 
-        if (isSending) {
+        if (
+          isSending &&
+          !status.textContent
+        ) {
           status.textContent =
-            'جاري حفظ الطلب واستلام رقم الطلب...';
+            'جاري إرسال الطلب...';
+        }
+
+        if (!isSending) {
+          status.textContent =
+            '';
         }
       }
     }
