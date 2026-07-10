@@ -13,7 +13,7 @@
   >
 
   <title>حجز التحضير الإلكتروني</title>
-  <!-- BUILD: GITHUB-ALL-FEATURES-V1 -->
+  <!-- BUILD: GITHUB-ALL-FEATURES-V2-NO-PREFLIGHT -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2572,29 +2572,7 @@
       hideError();
       stopStatusPolling();
 
-      setSendingMessage(
-        'جاري التحقق من اتصال الخادم...'
-      );
-
-      /*
-       * فحص الإصدار قبل إرسال POST.
-       * يمنع حفظ الطلب إذا كان النشر قديمًا ولا يدعم orderStatus.
-       */
-      checkServerVersion(
-        function() {
-          postPendingOrder();
-        },
-        function(message) {
-          submitting = false;
-          setSendingState(
-            false
-          );
-
-          showError(
-            message
-          );
-        }
-      );
+      postPendingOrder();
     }
 
     function postPendingOrder() {
@@ -2679,54 +2657,6 @@
           },
           45000
         );
-    }
-
-    function checkServerVersion(
-      onReady,
-      onError
-    ) {
-      jsonpRequest(
-        'ping',
-        '',
-        function(payload) {
-          if (
-            !payload ||
-            payload.ok !== true
-          ) {
-            onError(
-              'رابط Apps Script لا يعيد استجابة صحيحة.'
-            );
-
-            return;
-          }
-
-          if (
-            payload.version !==
-            REQUIRED_SERVER_VERSION
-          ) {
-            onError(
-              'النشر الحالي قديم. الإصدار الموجود: ' +
-              (
-                payload.version ||
-                'غير معروف'
-              ) +
-              '، والمطلوب: ' +
-              REQUIRED_SERVER_VERSION +
-              '. افتح Manage deployments واختر New version ثم Deploy.'
-            );
-
-            return;
-          }
-
-          onReady();
-        },
-        function() {
-          onError(
-            'تعذر التحقق من إصدار Apps Script. ' +
-            'تأكد أن الوصول مضبوط على Anyone وأنك نشرت New version.'
-          );
-        }
-      );
     }
 
     function pollOrderStatus(
