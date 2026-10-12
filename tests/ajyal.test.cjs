@@ -4,7 +4,9 @@ const teacher={teacherName:'ربيع',grade:'صف أول',phone:'0798382004'};
 const items=[{productId:'grade1_bag',qty:2},{productId:'prep_grade2',qty:5},{productId:'letter_cards',qty:3}];
 assert.equal(ctx.normalizeAjyal_({enabled:false},items).length,0);
 assert.equal(ctx.normalizeAjyal_({enabled:true,teachers:[teacher,teacher]},items).length,2);
-assert.throws(()=>ctx.normalizeAjyal_({enabled:true,teachers:[teacher]},items));
+assert.equal(ctx.normalizeAjyal_({enabled:true,teachers:[teacher]},items).length,1);
+assert.equal(ctx.normalizeAjyal_({enabled:true,teachers:[]},items).length,0);
+assert.throws(()=>ctx.normalizeAjyal_({enabled:true,teachers:[teacher,teacher,teacher]},items));
 assert.throws(()=>ctx.normalizeAjyal_({enabled:true,teachers:[teacher]},[{productId:'prep_grade1',qty:1}]));
 assert.throws(()=>ctx.normalizeAjyal_({enabled:true,teachers:[{...teacher,grade:'صف رابع'}]},[{productId:'grade1_bag',qty:1}]));
 assert.throws(()=>ctx.normalizeAjyal_({enabled:true,teachers:[{...teacher,phone:'123'}]},[{productId:'grade1_bag',qty:1}]));
@@ -26,3 +28,5 @@ assert.ok(!html.includes('innerHTML'));
 const front=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');vm.runInContext(front.slice(front.indexOf('    function fullBagGrades()'),front.indexOf('    function collectAjyalTeachers()')),ctx);
 ctx.collectItems=()=>items;assert.deepEqual(Array.from(ctx.fullBagGrades()),['صف أول','صف أول']);
 console.log('PASS: complete-bag counts, multiple teacher records, independent WhatsApp numbers, validation, retry deduplication, authorization, 10,005-record pagination, and message text.');
+
+const priced=ctx.calculateTotals_([{qty:10,price:10,folderQty:10,paperQty:0}],'عمان',5);assert.equal(priced.ajyalTotal,15);assert.equal(priced.productsTotal,100);assert.equal(priced.grandTotal,117);assert.equal(ctx.calculateTotals_([{qty:10,price:10,folderQty:10,paperQty:0}],'عمان',0).grandTotal,102);console.log('PASS: optional 0/5 participants for 10 bags and server-calculated 3 JOD fee.');

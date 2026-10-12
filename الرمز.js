@@ -1,7 +1,7 @@
 var SHEET_ID = '1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w';
 var SHEET_NAME = 'الطلبات';
 var WA_NUMBER = '0798382004';
-var APP_VERSION = '2026-10-12-AJYAL-TEACHERS-V2';
+var APP_VERSION = '2026-10-12-AJYAL-PRICING-V3';
 var ADMIN_VERSION = '2026-08-29-ADMIN-V2';
 var ADMIN_EMAILS = ['rabeerabee733@gmail.com'];
 var ADMIN_LOG_SHEET_NAME = 'سجل الإدارة';
@@ -747,7 +747,8 @@ function saveOrder_(data) {
     var totals =
       calculateTotals_(
         items,
-        governorate
+        governorate,
+        ajyal.length
       );
 
     var orderNumber =
@@ -773,10 +774,10 @@ function saveOrder_(data) {
       totals.itemsCount,                  // I
       totals.folderCount,                 // J
       totals.paperCount,                  // K
-      totals.productsTotal,               // L
+      totals.productsTotal + totals.ajyalTotal, // L: products and services
       totals.deliveryFee,                 // M
       totals.grandTotal,                  // N
-      itemsText_(items),                  // O
+      itemsText_(items) + (totals.ajyalCount ? '\nخدمة أجيال — عدد المعلمين: '+totals.ajyalCount+' — المجموع: '+totals.ajyalTotal+' د.أ' : ''), // O
       notes,                              // P
       requestId                           // Q
     ]];
@@ -838,6 +839,8 @@ function saveOrder_(data) {
     var successResult = {
       result: 'success',
       code: 'ORDER_SAVED',
+      ajyalCount:totals.ajyalCount,
+      ajyalTotal:totals.ajyalTotal,
       orderId: orderNumber,
       orderNumber: orderNumber,
       itemsCount:
@@ -960,7 +963,11 @@ function findResultByRequestId_(
       )
       .getDisplayValues()[0];
 
+  var serviceMatch=String(values[14]||'').match(/خدمة أجيال — عدد المعلمين: (\d+) — المجموع: (\d+)/);
+  var ajyalCount=serviceMatch?Number(serviceMatch[1]):0,ajyalTotal=serviceMatch?Number(serviceMatch[2]):0;
   return {
+    ajyalCount:ajyalCount,
+    ajyalTotal:ajyalTotal,
     result: 'success',
     code: 'ORDER_SAVED',
     orderId:
@@ -982,7 +989,7 @@ function findResultByRequestId_(
     productsTotal:
       numberFromDisplay_(
         values[11]
-      ),
+      ) - ajyalTotal,
     deliveryFee:
       numberFromDisplay_(
         values[12]
@@ -1211,7 +1218,8 @@ function sanitizeItems_(
 
 function calculateTotals_(
   items,
-  governorate
+  governorate,
+  ajyalCount
 ) {
   var itemsCount = 0;
   var folderCount = 0;
@@ -1242,6 +1250,8 @@ function calculateTotals_(
       ? 2
       : 3;
 
+  ajyalCount=Number(ajyalCount)||0;
+  var ajyalTotal=ajyalCount*3;
   return {
     itemsCount:
       itemsCount,
@@ -1253,9 +1263,11 @@ function calculateTotals_(
       productsTotal,
     deliveryFee:
       deliveryFee,
+    ajyalCount:ajyalCount,
+    ajyalTotal:ajyalTotal,
     grandTotal:
       productsTotal +
-      deliveryFee
+      deliveryFee + ajyalTotal
   };
 }
 
@@ -2724,7 +2736,7 @@ function normalizeAjyal_(value, items) {
       count+=qty;
     }
   });
-  if(!count || !Array.isArray(value.teachers) || value.teachers.length!==count) throw new Error('عدد بيانات المعلمين يجب أن يطابق عدد الحقائب الكاملة فقط.');
+  if(!Array.isArray(value.teachers) || value.teachers.length>count) throw new Error('عدد المشتركين في أجيال يجب ألا يتجاوز عدد الحقائب الكاملة.');
   return value.teachers.map(function(t){
     t=t||{};
     var name=cleanText_(t.teacherName,100),grade=cleanText_(t.grade,30),phone=canonicalPhone_(cleanText_(t.phone,30));
