@@ -1265,7 +1265,11 @@
           <p>الأولوية حسب رقم الحجز، ويجري التواصل وفق الطاقة الاستيعابية دون تحديد موعد.</p>
           <div id="ajyal-count-fields" hidden>
             <label class="field-label" for="ajyal-count">عدد المعلمين / المعلمات المشتركين في أجيال (اختياري)</label>
-            <input id="ajyal-count" type="number" min="0" max="0" step="1" value="0" inputmode="numeric" oninput="calculateTotals()">
+            <div class="qty-stepper" style="max-width:240px;grid-template-columns:48px minmax(48px,1fr) 48px">
+              <button id="ajyal-count-minus" class="qty-button minus" type="button" aria-label="إنقاص عدد المعلمين المشتركين في أجيال" onclick="changeAjyalCount(-1)">−</button>
+              <input id="ajyal-count" class="qty-input" style="width:100%;min-width:0;border:0" type="number" min="0" max="0" step="1" value="0" inputmode="numeric" oninput="calculateTotals()">
+              <button id="ajyal-count-plus" class="qty-button plus" type="button" aria-label="زيادة عدد المعلمين المشتركين في أجيال" onclick="changeAjyalCount(1)">+</button>
+            </div>
             <p>سعر الخدمة 3 دنانير لكل معلم/معلمة. يمكنك اختيار أي عدد من صفر حتى عدد الحقائب الكاملة.</p>
           </div>
           <div id="ajyal-fields" hidden></div>
@@ -2533,6 +2537,11 @@ function buildWizardReview(){
       return enabled ? Math.min(fullBagGrades().length,Math.max(0,Math.floor(Number(getValue('ajyal-count'))||0))) : 0;
     }
     function toggleAjyal() { calculateTotals(); }
+    function changeAjyalCount(delta) {
+      var input=document.getElementById('ajyal-count');
+      input.value=String(Math.min(fullBagGrades().length,Math.max(0,selectedAjyalCount()+delta)));
+      calculateTotals();
+    }
     function renderAjyalTeachers() {
       var grades=fullBagGrades(),checkbox=document.getElementById('ajyal-enabled'),container=document.getElementById('ajyal-fields');
       checkbox.disabled=grades.length===0;
@@ -2542,6 +2551,8 @@ function buildWizardReview(){
       if(Number(countInput.value)>grades.length)countInput.value=String(grades.length);
       document.getElementById('ajyal-count-fields').hidden=!checkbox.checked;
       var count=selectedAjyalCount();
+      document.getElementById('ajyal-count-minus').disabled=count===0;
+      document.getElementById('ajyal-count-plus').disabled=count>=grades.length;
       setText('ajyal-count-note',grades.length ? 'يمكن اختيار حتى '+grades.length+' معلم/معلمة. العدد المشترك حاليًا: '+count+'.' : 'اختر حقيبة كاملة للصف الأول أو الثاني أو الثالث لتفعيل خدمة أجيال.');
       grades=grades.slice(0,count);
       container.hidden=!checkbox.checked || count===0;
