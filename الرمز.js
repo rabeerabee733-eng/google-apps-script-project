@@ -2710,87 +2710,13 @@ function adminLog_(email, action, orderNumber, requestId, rowNumber, before, aft
   ]);
 }
 
-// Ajyal records also serve as customer records; verification codes are never stored.
 var AJYAL_SHEET = 'عملاء خدمة أجيال';
-var AJYAL_STATUSES = ['جديد', 'تم التواصل', 'قيد التنفيذ', 'مكتمل', 'ملغي'];
-function normalizeAjyal_(value) {
-  value = value || {};
-  if (value.enabled !== true) return null;
-  var teacherName = cleanText_(value.teacherName, 100);
-  var account = cleanText_(value.account, 150);
-  if (!teacherName || !account) throw new Error('اسم المعلم وحساب أجيال مطلوبان.');
-  return {teacherName: teacherName, account: account};
-}
-function ajyalSheet_() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var sheet = ss.getSheetByName(AJYAL_SHEET);
-  if (!sheet) {
-    sheet = ss.insertSheet(AJYAL_SHEET);
-    sheet.appendRow(['معرّف الحجز','رقم الحجز','اسم المعلم','حساب أجيال','الهاتف','الحالة','ملاحظات العميل','تاريخ الإنشاء','آخر تعديل']);
-    sheet.setFrozenRows(1);
-  }
-  return sheet;
-}
-function ajyalCell_(value) {
-  var text = String(value || '');
-  return /^[=+@-]/.test(text) ? "'" + text : text;
-}
-function saveAjyal_(data, orderNumber, requestId) {
-  var a = normalizeAjyal_(data.ajyal);
-  if (!a) return;
-  var sheet = ajyalSheet_();
-  if (ajyalFind_(sheet, requestId)) return;
-  var row = sheet.getLastRow() + 1;
-  sheet.getRange(row,1,1,9).setNumberFormat('@').setValues([[
-    requestId, String(orderNumber), ajyalCell_(a.teacherName), ajyalCell_(a.account),
-    displayPhone_(canonicalPhone_(data.phone)), 'جديد', '', new Date().toISOString(), new Date().toISOString()
-  ]]);
-}
-function ajyalFind_(sheet, requestId) {
-  if (sheet.getLastRow() < 2) return null;
-  var match = sheet.getRange(2,1,sheet.getLastRow()-1,1).createTextFinder(requestId).matchEntireCell(true).findNext();
-  return match ? match.getRow() : null;
-}
-function serveAjyalAdmin_() {
-  requireAdmin_();
-  return HtmlService.createHtmlOutputFromFile('AjyalAdmin').setTitle('إدارة خدمة أجيال')
-    .addMetaTag('viewport','width=device-width,initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
-}
-function ajyalAdminList(filters) {
-  requireAdmin_();
-  filters = filters || {};
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var sheet = ss.getSheetByName(AJYAL_SHEET);
-  var rows = sheet && sheet.getLastRow() > 1 ? sheet.getRange(2,1,sheet.getLastRow()-1,9).getDisplayValues() : [];
-  var query = cleanText_(filters.query,150).toLowerCase();
-  var status = cleanText_(filters.status,30);
-  rows = rows.filter(function(r) { return (!status || r[5] === status) && (!query || [r[1],r[2],r[3],r[4]].join(' ').toLowerCase().indexOf(query) !== -1); });
-  rows.sort(function(a,b) { return Number(a[1])-Number(b[1]) || a[0].localeCompare(b[0]); });
-  var offset = Math.max(0,Math.floor(Number(filters.offset)||0));
-  return {total:rows.length, statuses:AJYAL_STATUSES, rows:rows.slice(offset,offset+100).map(function(r) {
-    return {requestId:r[0],orderNumber:r[1],teacherName:r[2],account:r[3],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8]};
-  })};
-}
-function ajyalAdminUpdate(payload) {
-  requireAdmin_();
-  payload = payload || {};
-  var id = cleanId_(payload.requestId,80);
-  var name = cleanText_(payload.teacherName,100);
-  var account = cleanText_(payload.account,150);
-  var status = cleanText_(payload.status,30);
-  if (!id || !name || !account || AJYAL_STATUSES.indexOf(status) === -1) throw new Error('بيانات غير صحيحة.');
-  var lock = LockService.getScriptLock();
-  if (!lock.tryLock(20000)) throw new Error('النظام مشغول، حاول مجددًا.');
-  try {
-    var sheet = ajyalSheet_();
-    var row = ajyalFind_(sheet,id);
-    if (!row) throw new Error('لم يتم العثور على العميل.');
-    var old = sheet.getRange(row,1,1,9).getDisplayValues()[0];
-    if (old[8] !== String(payload.updatedAt || '')) throw new Error('تم تعديل السجل، حدّث القائمة أولًا.');
-    old[2]=ajyalCell_(name); old[3]=ajyalCell_(account); old[5]=status;
-    old[6]=ajyalCell_(cleanText_(payload.notes,1000)); old[8]=new Date().toISOString();
-    sheet.getRange(row,1,1,9).setNumberFormat('@').setValues([old]);
-    return {ok:true};
-  } finally { lock.releaseLock(); }
-}
+var AJYAL_STATUSES = ['جديد','تم التواصل','قيد التنفيذ','مكتمل','ملغي'];
+function normalizeAjyal_(value){value=value||{};if(value.enabled!==true)return null;var teacherName=cleanText_(value.teacherName,100),account=cleanText_(value.account,150);if(!teacherName||!account)throw new Error('اسم المعلم وحساب أجيال مطلوبان.');return {teacherName:teacherName,account:account};}
+function ajyalSheet_(){var ss=SpreadsheetApp.openById(SHEET_ID),sheet=ss.getSheetByName(AJYAL_SHEET);if(!sheet){sheet=ss.insertSheet(AJYAL_SHEET);sheet.appendRow(['معرّف الحجز','رقم الحجز','اسم المعلم','حساب أجيال','الهاتف','الحالة','ملاحظات العميل','تاريخ الإنشاء','آخر تعديل']);sheet.setFrozenRows(1);}return sheet;}
+function ajyalCell_(value){var text=String(value||'');return /^[=+@-]/.test(text)?"'"+text:text;}
+function ajyalFind_(sheet,id){if(sheet.getLastRow()<2)return null;var m=sheet.getRange(2,1,sheet.getLastRow()-1,1).createTextFinder(id).matchEntireCell(true).findNext();return m?m.getRow():null;}
+function saveAjyal_(data,number,id){var a=normalizeAjyal_(data.ajyal);if(!a)return;var sheet=ajyalSheet_();if(ajyalFind_(sheet,id))return;sheet.getRange(sheet.getLastRow()+1,1,1,9).setNumberFormat('@').setValues([[id,String(number),ajyalCell_(a.teacherName),ajyalCell_(a.account),displayPhone_(canonicalPhone_(data.phone)),'جديد','',new Date().toISOString(),new Date().toISOString()]]);}
+function serveAjyalAdmin_(){requireAdmin_();return HtmlService.createHtmlOutputFromFile('AjyalAdmin').setTitle('إدارة خدمة أجيال').addMetaTag('viewport','width=device-width,initial-scale=1').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);}
+function ajyalAdminList(filters){requireAdmin_();filters=filters||{};var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(AJYAL_SHEET);var rows=sheet&&sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,9).getDisplayValues():[];var query=cleanText_(filters.query,150).toLowerCase(),status=cleanText_(filters.status,30);rows=rows.filter(function(r){return(!status||r[5]===status)&&(!query||[r[1],r[2],r[3],r[4]].join(' ').toLowerCase().indexOf(query)!==-1);});rows.sort(function(a,b){return Number(a[1])-Number(b[1])||a[0].localeCompare(b[0]);});var offset=Math.max(0,Math.floor(Number(filters.offset)||0));return {total:rows.length,statuses:AJYAL_STATUSES,rows:rows.slice(offset,offset+100).map(function(r){return {requestId:r[0],orderNumber:r[1],teacherName:r[2],account:r[3],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8]};})};}
+function ajyalAdminUpdate(payload){requireAdmin_();payload=payload||{};var id=cleanId_(payload.requestId,80),name=cleanText_(payload.teacherName,100),account=cleanText_(payload.account,150),status=cleanText_(payload.status,30);if(!id||!name||!account||AJYAL_STATUSES.indexOf(status)===-1)throw new Error('بيانات غير صحيحة.');var lock=LockService.getScriptLock();if(!lock.tryLock(20000))throw new Error('النظام مشغول، حاول مجددًا.');try{var sheet=ajyalSheet_(),row=ajyalFind_(sheet,id);if(!row)throw new Error('لم يتم العثور على العميل.');var old=sheet.getRange(row,1,1,9).getDisplayValues()[0];if(old[8]!==String(payload.updatedAt||''))throw new Error('تم تعديل السجل، حدّث القائمة أولًا.');old[2]=ajyalCell_(name);old[3]=ajyalCell_(account);old[5]=status;old[6]=ajyalCell_(cleanText_(payload.notes,1000));old[8]=new Date().toISOString();sheet.getRange(row,1,1,9).setNumberFormat('@').setValues([old]);return {ok:true};}finally{lock.releaseLock();}}
