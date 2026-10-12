@@ -1850,6 +1850,10 @@ function adminDashboardData() {
   var todayKey = Utilities.formatDate(new Date(), timezone, 'yyyy-MM-dd');
 
   var result = {
+    sentOrders: 0,
+    sentValue: 0,
+    todaySentOrders: 0,
+    todaySentValue: 0,
     totalOrders: 0,
     totalValue: 0,
     todayOrders: 0,
@@ -1870,6 +1874,7 @@ function adminDashboardData() {
   var raw = sheet.getRange(2, 1, count, 17).getValues();
   var display = sheet.getRange(2, 1, count, 17).getDisplayValues();
 
+  var stickerSent=stickerSentMap_(stickerExportLedger_()),sentTodayKey=Utilities.formatDate(new Date(),'Asia/Amman','yyyy-MM-dd');
   for (var i = 0; i < display.length; i++) {
     var row = display[i];
     var requestId = String(row[16] || '');
@@ -1878,6 +1883,8 @@ function adminDashboardData() {
     var paid = Number(meta.amountPaid) || 0;
     var dateKey = adminDateKey_(raw[i][1], timezone);
 
+    var firstExport=stickerSent[stickerExportKey_(row)];
+    if(firstExport){result.sentOrders++;result.sentValue+=grand;if(Utilities.formatDate(new Date(firstExport),'Asia/Amman','yyyy-MM-dd')===sentTodayKey){result.todaySentOrders++;result.todaySentValue+=grand;}}
     result.totalOrders++;
     result.totalValue += grand;
     result.statusCounts[meta.status] = (result.statusCounts[meta.status] || 0) + 1;
@@ -1893,6 +1900,8 @@ function adminDashboardData() {
     }
   }
 
+  result.sentValue=adminRound2_(result.sentValue);
+  result.todaySentValue=adminRound2_(result.todaySentValue);
   result.totalValue = adminRound2_(result.totalValue);
   result.todayValue = adminRound2_(result.todayValue);
   result.outstandingValue = adminRound2_(result.outstandingValue);
@@ -2840,3 +2849,5 @@ function adminRecordStickerExport(payload){
     return adminStickerExportSummary();
   }finally{lock.releaseLock();}
 }
+
+function stickerSentMap_(ledger){var sent={};ledger.forEach(function(r){var key=String(r[0]),date=String(r[3]);if(!sent[key]||date<sent[key])sent[key]=date;});return sent;}
