@@ -2797,7 +2797,7 @@ function ajyalAdminUpdate(payload) {
 
 function adminStickerSettings(){requireAdmin_();return JSON.parse(PropertiesService.getScriptProperties().getProperty('STICKER_BARCODE_ANCHOR')||'null');}
 function adminSaveStickerSettings(payload){
-  requireAdmin_();payload=payload||{};var order=Number(payload.order),barcode=String(payload.barcode||'').trim();
+  requireAdmin_();payload=payload||{};var order=1,barcode=String(payload.barcode||'').trim();
   if(!Number.isSafeInteger(order)||order<1||!/^\d{1,12}$/.test(barcode))throw new Error('أدخل رقم طلب مرجعي صحيح وباركود من 1 إلى 12 رقمًا.');
   var lock=LockService.getScriptLock();lock.waitLock(20000);
   try{var props=PropertiesService.getScriptProperties(),old=props.getProperty('STICKER_BARCODE_ANCHOR');if(String(payload.previous||'')!==String(old||''))throw new Error('تغيرت إعدادات الباركود. أعد تحميل الصفحة.');
