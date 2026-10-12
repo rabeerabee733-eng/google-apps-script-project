@@ -8,11 +8,14 @@ function ajyalConfig_() {
 }
 function ajyalSetPublicKey(jwk) {
   requireAdmin_();
+  var lock=LockService.getScriptLock();lock.waitLock(20000);
+  try {
   var p=PropertiesService.getScriptProperties();
   if(p.getProperty('AJYAL_PUBLIC_KEY')) throw Error('المفتاح مسجل مسبقًا. تغيير المفاتيح يحتاج ترحيلًا مدروسًا للطلبات المفتوحة.');
   if(!jwk || jwk.kty!=='RSA' || jwk.d || jwk.p || jwk.q || jwk.e!=='AQAB' || typeof jwk.n!=='string' || jwk.n.length!==512) throw Error('مفتاح عام RSA-3072 غير صالح.');
   p.setProperties({AJYAL_PUBLIC_KEY:JSON.stringify({kty:'RSA',n:jwk.n,e:jwk.e,alg:'RSA-OAEP-256',ext:true}),AJYAL_KEY_ID:Utilities.getUuid()});
   return {ok:true};
+  } finally { lock.releaseLock(); }
 }
 function ajyalSheet_() {
   var ss=SpreadsheetApp.openById(SHEET_ID),sh=ss.getSheetByName(AJYAL_SHEET_);
@@ -53,7 +56,7 @@ function ajyalFeeFor_(requestId){
   return 3*sh.getRange(2,2,sh.getLastRow()-1,1).createTextFinder(requestId).matchEntireCell(true).findAll().length;
 }
 function ajyalServe_(){
-  requireAdmin_();return HtmlService.createHtmlOutputFromFile('AjyalAdmin').setTitle('إدارة خدمة أجيال').addMetaTag('viewport','width=device-width,initial-scale=1');
+  requireAdmin_();return HtmlService.createTemplateFromFile('AjyalAdmin').evaluate().setTitle('إدارة خدمة أجيال').addMetaTag('viewport','width=device-width,initial-scale=1');
 }
 function ajyalBootstrap(){return {email:requireAdmin_().email,config:ajyalConfig_(),statuses:AJYAL_STATUSES_};}
 function ajyalList(filters){
@@ -64,8 +67,8 @@ function ajyalList(filters){
   var q=String(filters.q||'').trim().toLowerCase();
   rows=rows.filter(function(r){return (!filters.status||r.status===filters.status)&&(!filters.grade||r.productId==='grade'+filters.grade+'_bag')&&(!q||[r.name,r.username,r.phone,r.orderNumber].join(' ').toLowerCase().indexOf(q)!==-1);});
   rows.sort(function(a,b){return a.orderNumber-b.orderNumber||a.productId.localeCompare(b.productId)||a.slot-b.slot;});
-  if(filters.customers){var map={};rows.forEach(function(r){var k=r.username; if(!map[k])map[k]={name:r.name,username:r.username,phone:r.phone,orders:[],services:0};map[k].services++;if(map[k].orders.indexOf(r.orderNumber)<0)map[k].orders.push(r.orderNumber);});rows=Object.keys(map).map(function(k){return map[k];});}
-  var count=rows.length,page=Math.max(0,Math.floor(Number(filters.page)||0));
+  if(filters.customers){var map=Object.create(null);rows.forEach(function(r){var k=r.username; if(!map[k])map[k]={name:r.name,username:r.username,phone:r.phone,orders:[],services:0};map[k].services++;if(map[k].orders.indexOf(r.orderNumber)<0)map[k].orders.push(r.orderNumber);});rows=Object.keys(map).map(function(k){return map[k];});}
+  var count=rows.length,page=Math.max(0,Math.min(Math.max(0,Math.ceil(count/50)-1),Math.floor(Number(filters.page)||0)));
   return {rows:rows.slice(page*50,page*50+50),count:count,total:total,completed:completed,page:page};
 }
 function ajyalFind_(id){var sh=ajyalSheet_();if(sh.getLastRow()<2)throw Error('المهمة غير موجودة.');var found=sh.getRange(2,1,sh.getLastRow()-1,1).createTextFinder(String(id)).matchEntireCell(true).findNext();if(!found)throw Error('المهمة غير موجودة.');return {sheet:sh,row:found.getRow(),data:sh.getRange(found.getRow(),1,1,16).getDisplayValues()[0]};}

@@ -4,6 +4,11 @@ const rows=Array.from({length:10000},(_,i)=>['id'+i,'req'+i,String(10000-i),'gra
 context.ajyalSheet_=()=>({getLastRow:()=>10001,getRange:()=>({getDisplayValues:()=>rows})});context.adminOrdersSheet_=()=>({getLastRow:()=>10001,getRange:()=>({getDisplayValues:()=>rows.map(r=>[r[1]])})});
 let r=context.ajyalList({page:0});assert.equal(r.total,10000);assert.equal(r.rows.length,50);assert.equal(r.rows[0].orderNumber,1);assert(!JSON.stringify(r).includes('ENCRYPTED'));assert.equal(context.ajyalList({page:199}).rows.length,50);
 assert.equal(context.ajyalList({q:'user9999'}).count,1);
+assert.equal(context.ajyalList({page:999}).page,199);
+assert.equal(context.ajyalList({q:'no-matching-teacher',page:999}).page,0);
+rows[0][6]='__proto__';rows[1][6]='constructor';
+assert.equal(context.ajyalList({customers:true,q:'__proto__'}).rows[0].services,1);
+assert.equal(context.ajyalList({customers:true,q:'constructor'}).rows[0].services,1);
 let record=['id','req','1','grade1_bag','1','Teacher','user','0791234567','ENCRYPTED','key','بانتظار التواصل','','','','',1];context.ajyalFind_=()=>({row:2,data:record.slice(),sheet:{getRange:()=>({setValues:v=>record=v[0]})}});context.findResultByRequestId_=()=>({orderNumber:1});
 assert.throws(()=>context.ajyalSecret('id'));context.ajyalUpdate({id:'id',revision:1,status:'جارٍ التنفيذ'});assert.equal(record[11],'operator@example.test');assert.equal(context.ajyalSecret('id').cipher,'ENCRYPTED');assert.throws(()=>context.ajyalUpdate({id:'id',revision:1,status:'مكتمل',verified:true}));assert.throws(()=>context.ajyalUpdate({id:'id',revision:2,status:'مكتمل'}));
 context.requireAdmin_=()=>({email:'other@example.test'});assert.throws(()=>context.ajyalSecret('id'));assert.throws(()=>context.ajyalUpdate({id:'id',revision:2,status:'مكتمل',verified:true}));context.requireAdmin_=()=>({email:'operator@example.test'});context.ajyalUpdate({id:'id',revision:2,status:'مكتمل',verified:true});assert.equal(record[8],'');assert.throws(()=>context.ajyalSecret('id'));

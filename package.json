@@ -1,1 +1,1 @@
-{"name":"altahdir-ajyal-booking","private":true,"scripts":{"test":"node tests/dom.test.cjs && node tests/admin.test.cjs","test:browser":"node tests/ajyal.test.cjs"},"devDependencies":{"jsdom":"26.1.0","playwright":"1.61.1"}}
+{"name":"altahdir-ajyal-booking","private":true,"scripts":{"test":"node tests/dom.test.cjs && node tests/admin.test.cjs && node tests/deployment.test.cjs","test:browser":"node tests/ajyal.test.cjs"},"devDependencies":{"jsdom":"26.1.0","playwright":"1.61.1"}}
