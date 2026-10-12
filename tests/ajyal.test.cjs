@@ -25,6 +25,16 @@ ctx.saveAjyal_({ajyal:{enabled:true,teachers:[teacher,teacher]},items},45,'req_o
 const html=fs.readFileSync(path.join(__dirname,'../AjyalAdmin.html'),'utf8');vm.runInContext(html.slice(html.indexOf('function whatsappMessage'),html.indexOf('function render')),ctx);
 const url=ctx.whatsappUrl({...teacher,orderNumber:'45'});assert.ok(url.startsWith('https://wa.me/962798382004?text='));const msg=decodeURIComponent(url.split('?text=')[1]);for(const value of ['ربيع','45','صف أول','حساب أجيال','كلمة السر','تحليل المحتوى','رمز تأكيد'])assert.ok(msg.includes(value));assert.equal(ctx.whatsappUrl({...teacher,phone:'bad'}),'');
 assert.ok(!html.includes('innerHTML'));
+assert.equal(ctx.PRODUCTS.active_learning.soldOut,false);assert.equal(ctx.PRODUCTS.classroom_rules.soldOut,false);
+let customer=['req_worker','45','معلم','','0798382004','جديد','','created','updated','صف أول','parent',''];
+ctx.ajyalSheet_=()=>({getRange:()=>({getDisplayValues:()=>[customer.slice()],setNumberFormat(){return this;},setValues(rows){customer=rows[0];}})});
+ctx.ajyalFind_=()=>2;ctx.LockService={getScriptLock:()=>({tryLock:()=>true,releaseLock(){}})};
+const completion={requestId:'req_worker',...teacher,status:'مكتمل',updatedAt:'updated'};
+assert.throws(()=>ctx.ajyalAdminUpdate(completion),/اختر الموظف/);
+assert.throws(()=>ctx.ajyalAdminUpdate({...completion,completedBy:'غير معروف'}),/اختر الموظف/);
+for(const employee of ['ربيع','ابو الليث','اسراء','وليد','موظف جديد 1','موظف جديد 2']){ctx.ajyalAdminUpdate({...completion,updatedAt:customer[8],completedBy:employee});assert.equal(customer[11],employee);}
+ctx.ajyalAdminUpdate({...completion,status:'قيد التنفيذ',updatedAt:customer[8],completedBy:'ربيع'});assert.equal(customer[11],'');
+console.log('PASS: reopened products and required completion employee, all six choices, and clearing attribution when reopened.');
 const front=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');vm.runInContext(front.slice(front.indexOf('    function fullBagGrades()'),front.indexOf('    function collectAjyalTeachers()')),ctx);
 ctx.collectItems=()=>items;assert.deepEqual(Array.from(ctx.fullBagGrades()),['صف أول','صف أول']);
 console.log('PASS: complete-bag counts, multiple teacher records, independent WhatsApp numbers, validation, retry deduplication, authorization, 10,005-record pagination, and message text.');
