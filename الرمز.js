@@ -2810,5 +2810,5 @@ function adminStickerOrders(selector){
   var anchor=adminStickerSettings();if(!anchor)throw new Error('ثبّت رقم بداية الباركود أولًا.');if(JSON.stringify(anchor)!==String(selector.anchor||''))throw new Error('تغيرت إعدادات الباركود. أعد تحميلها قبل التصدير.');
   var sheet=adminOrdersSheet_(),rows=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues():[];
   var selected=rows.filter(function(r){var n=adminOrderNumber_(r[0]);return n>=from&&n<=to;}).sort(function(a,b){return adminOrderNumber_(a[0])-adminOrderNumber_(b[0]);});
-  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-anchor.order;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
+  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
 }
