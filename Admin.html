@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{--bg:#0b0b0b;--card:#171717;--card2:#111;--line:#343434;--gold:#d4af37;--text:#f7f7f7;--muted:#aaa;--danger:#d95363;--ok:#38b27a;--blue:#4b8bd8;--orange:#d98b32}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(145deg,#080808,#18130a);color:var(--text);font-family:Arial,"Tahoma",sans-serif;min-height:100vh}
+    button,input,select,textarea{font:inherit}.wrap{max-width:1380px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:14px}.brand h1{margin:0;color:var(--gold);font-size:25px}.brand p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .card{background:rgba(23,23,23,.97);border:1px solid #3b321c;border-radius:16px;padding:16px;box-shadow:0 12px 35px #0006}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tabBtn{background:#222;color:#ddd;border:1px solid #3b3b3b}.tabBtn.active{background:var(--gold);color:#111;border-color:var(--gold)}
+    .view{display:none}.view.active{display:block}.topActions{display:flex;gap:8px;flex-wrap:wrap}.gold{background:var(--gold);color:#111}.dark{background:#292929;color:#fff;border:1px solid #444}.danger{background:#5b252c;color:#fff;border:1px solid #803640}.okBtn{background:#174a34;color:#c7ffe2;border:1px solid #26724f}.blueBtn{background:#1d3d63;color:#d8eaff;border:1px solid #315d8e}.btn{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}.btn:disabled{opacity:.5;cursor:not-allowed}
+    input,select,textarea{width:100%;background:#0f0f0f;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--gold)}textarea{min-height:85px;resize:vertical}.readonly{opacity:.72}.field label{display:block;color:#ddd;margin:0 0 6px;font-size:13px}
+    .statusBox{margin:12px 0 0;padding:10px;border-radius:10px;display:none}.statusBox.show{display:block}.statusBox.ok{background:#123b2a;color:#aaf5cf}.statusBox.err{background:#4b2027;color:#ffc2c8}.statusBox.wait{background:#443a18;color:#ffe58c}
+    .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.stat{padding:14px;background:#111;border:1px solid #333;border-radius:13px}.stat b{display:block;color:var(--gold);font-size:23px;margin-top:6px}.stat span{color:#bbb;font-size:13px}.statusGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.statusCard{background:#111;border:1px solid #333;border-radius:12px;padding:12px;display:flex;justify-content:space-between;gap:10px}
+    .filters{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px}.filters2{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:10px}.toolbarLine{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.toolbarLine select{width:auto;min-width:170px}.tiny{font-size:12px;color:var(--muted)}
+    .results{margin-top:14px;display:grid;gap:9px}.result{border:1px solid #353535;border-radius:12px;padding:12px;display:grid;grid-template-columns:34px 75px 1.5fr 1fr 1fr 120px 105px auto;gap:10px;align-items:center;background:#111}.result.selected{border-color:var(--gold);box-shadow:0 0 0 1px #d4af3755}.orderNo{color:var(--gold);font-weight:800;font-size:17px}.muted{color:var(--muted);font-size:12px}.money{font-weight:800}.rowActions{display:flex;gap:6px;flex-wrap:wrap}.rowActions .btn{padding:8px 10px;font-size:12px}
+    .badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:700;border:1px solid #444;background:#222}.badge.new{color:#eaeaea}.badge.prep{color:#ffe19a;border-color:#735d25;background:#332a13}.badge.ready{color:#b9f4d5;border-color:#246342;background:#123625}.badge.out{color:#c8e3ff;border-color:#315d8e;background:#152c45}.badge.done{color:#bff5c4;border-color:#32763a;background:#18391c}.badge.cancel{color:#ffc3c7;border-color:#7e333b;background:#431d22}.badge.urgent{color:#ffd0a1;border-color:#8b5521;background:#40260e}.badge.pay{margin-inline-start:4px}
+    .specials{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.special{font-size:10px;padding:3px 6px;border-radius:7px;background:#332a13;color:#ffe39d;border:1px solid #695522}
+    .panel{margin-top:14px;display:none}.panel.show{display:block}.panelHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.panelHead h2{margin:0;color:var(--gold)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}.span2{grid-column:span 2}.span4{grid-column:span 4}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.duplicate{display:none;margin-top:7px;padding:8px;background:#422f12;color:#ffe099;border-radius:8px;font-size:12px}.duplicate.show{display:block}
+    .history{margin-top:14px;border-top:1px solid #333;padding-top:12px}.historyItem{padding:9px;border:1px solid #333;background:#101010;border-radius:9px;margin-top:7px}.historyItem b{color:var(--gold)}
+    .confirm{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.confirm.show{display:flex}.dialog{max-width:700px;width:100%;max-height:88vh;overflow:auto}.changes{display:grid;gap:7px;margin:12px 0}.change{padding:9px;background:#101010;border:1px solid #333;border-radius:9px}.change b{color:var(--gold)}
+    .summaryControls{display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px}.summaryBox{margin-top:15px}.summaryTop{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.summaryMetric{background:#111;border:1px solid #333;border-radius:10px;padding:10px}.summaryMetric b{display:block;color:var(--gold);font-size:18px;margin-top:5px}.twoCols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.listBox{background:#111;border:1px solid #333;border-radius:12px;padding:12px}.listBox h3{margin-top:0;color:var(--gold)}.productRow,.trashRow,.deliveryRow{display:grid;gap:9px;align-items:center;border-bottom:1px solid #2b2b2b;padding:9px 0}.productRow{grid-template-columns:1fr 90px}.trashRow{grid-template-columns:80px 1.4fr 1fr 1fr 1fr auto}.deliveryRow{grid-template-columns:80px 1.3fr 1fr 1fr 100px auto}.trashRow:last-child,.deliveryRow:last-child,.productRow:last-child{border-bottom:0}
+    .sectionTitle{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}.sectionTitle h2{margin:0;color:var(--gold)}.empty{padding:25px;text-align:center;color:#999;border:1px dashed #444;border-radius:12px}
+    .checkWrap{display:flex;align-items:center;gap:6px}.checkWrap input{width:auto}.nowrap{white-space:nowrap}.countText{color:#ccc;font-size:13px}
+    @media(max-width:1100px){.stats{grid-template-columns:repeat(3,1fr)}.filters{grid-template-columns:repeat(3,1fr)}.filters2{grid-template-columns:repeat(3,1fr)}.result{grid-template-columns:34px 70px 1.6fr 1fr 110px auto}.result .wideHide{display:none}.grid{grid-template-columns:repeat(2,1fr)}.span4{grid-column:span 2}.summaryTop{grid-template-columns:repeat(4,1fr)}.trashRow,.deliveryRow{grid-template-columns:80px 1.5fr 1fr auto}.trashRow .wideHide,.deliveryRow .wideHide{display:none}}
+    @media(max-width:650px){.wrap{padding:10px}.top{align-items:flex-start;flex-direction:column}.stats,.statusGrid,.filters,.filters2,.grid,.summaryTop,.twoCols,.summaryControls{grid-template-columns:1fr}.span2,.span4{grid-column:span 1}.result{grid-template-columns:30px 65px 1fr auto}.result .mobileHide{display:none}.rowActions{grid-column:1/-1}.toolbarLine select{width:100%}.trashRow,.deliveryRow{grid-template-columns:70px 1fr auto}.trashRow .mobileHide,.deliveryRow .mobileHide{display:none}.actions{flex-direction:column}.actions .btn{width:100%}}
+    @media print{body{background:#fff;color:#000}.top,.tabs,#ordersView,#dashboardView,#deliveryView,#trashView,#editor,#mainStatus,.noPrint{display:none!important}#prepView{display:block!important}.card,.listBox,.summaryMetric{box-shadow:none;border:1px solid #bbb;background:#fff;color:#000}.sectionTitle h2,.listBox h3,.summaryMetric b{color:#000}.muted,.tiny{color:#555}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="brand"><h1>إدارة طلبات التحضير الإلكتروني</h1><p id="adminInfo">جاري التحقق من صلاحية الدخول…</p></div>
+    <div class="topActions"><button class="btn gold" id="newBtn" disabled>＋ إضافة طلب جديد</button><button class="btn dark" id="refreshAllBtn">تحديث البيانات</button></div>
+  </header>
+
+  <nav class="tabs noPrint">
+    <button class="btn tabBtn active" data-view="dashboardView">لوحة التحكم</button>
+    <button class="btn tabBtn" data-view="ordersView">الطلبات</button>
+    <button class="btn tabBtn" data-view="prepView">التجهيز والطباعة</button>
+    <button class="btn tabBtn" data-view="deliveryView">التوصيل</button>
+    <button class="btn tabBtn" data-view="trashView">المحذوفات</button>
+  </nav>
+
+  <div id="mainStatus" class="statusBox"></div>
+
+  <section id="dashboardView" class="view active">
+    <div class="card">
+      <div class="sectionTitle"><h2>ملخص العمل</h2><span class="tiny">يتم الحساب من الطلبات الحالية دون تغيير الشيت الأساسي</span></div>
+      <div id="stats" class="stats"></div>
+      <div id="statusGrid" class="statusGrid"></div>
+    </div>
+  </section>
+
+  <section id="ordersView" class="view">
+    <div class="card">
+      <div class="sectionTitle"><h2>البحث والفلاتر</h2><span id="resultCount" class="countText"></span></div>
+      <div class="filters">
+        <div class="field"><label>بحث عام</label><input id="searchInput" placeholder="رقم الطلب، الاسم، الهاتف، العنوان"></div>
+        <div class="field"><label>من رقم طلب</label><input id="minOrder" type="number" min="1"></div>
+        <div class="field"><label>إلى رقم طلب</label><input id="maxOrder" type="number" min="1"></div>
+        <div class="field"><label>من تاريخ</label><input id="dateFrom" type="date"></div>
+        <div class="field"><label>إلى تاريخ</label><input id="dateTo" type="date"></div>
+      </div>
+      <div class="filters2">
+        <div class="field"><label>المحافظة</label><select id="filterGovernorate"></select></div>
+        <div class="field"><label>اللواء</label><select id="filterDistrict"></select></div>
+        <div class="field"><label>الحالة</label><select id="filterStatus"></select></div>
+        <div class="field"><label>شكل التحضير</label><select id="filterPrepType"><option value="">الكل</option><option>مجلد</option><option>ورقي</option><option>مختلط</option></select></div>
+        <div class="field"><label>حالة الدفع</label><select id="filterPayment"></select></div>
+        <div class="field"><label>اسم منتج/تفصيل</label><input id="filterProduct" placeholder="مثال: الصف الأول"></div>
+      </div>
+      <div class="toolbarLine">
+        <button class="btn gold" id="searchBtn">تطبيق الفلاتر</button>
+        <button class="btn dark" id="todayBtn">طلبات اليوم</button>
+        <button class="btn dark" id="clearBtn">مسح الفلاتر</button>
+        <label class="checkWrap"><input type="checkbox" id="selectAll"> تحديد النتائج الظاهرة</label>
+        <select id="bulkStatus"></select><button class="btn blueBtn" id="bulkStatusBtn">تغيير حالة المحدد</button>
+        <button class="btn dark" id="prepSelectedBtn">تجهيز المحدد</button>
+        <button class="btn dark" id="exportBtn">تصدير CSV</button>
+      </div>
+      <div id="results" class="results"></div>
+    </div>
+  </section>
+
+  <section id="prepView" class="view">
+    <div class="card">
+      <div class="sectionTitle"><h2>صفحة التجهيز والطباعة</h2><span class="tiny">يمكن استخدام الطلبات المحددة أو نطاق أرقام</span></div>
+      <div class="summaryControls noPrint">
+        <input id="prepFrom" type="number" min="1" placeholder="من رقم الطلب">
+        <input id="prepTo" type="number" min="1" placeholder="إلى رقم الطلب">
+        <button class="btn gold" id="prepRangeBtn">إنشاء الإحصائية</button>
+        <button class="btn dark" id="printPrepBtn">طباعة</button>
+      </div>
+      <div id="prepOutput" class="summaryBox"><div class="empty">لم يتم إنشاء إحصائية تجهيز بعد.</div></div>
+    </div>
+  </section>
+
+  <section id="deliveryView" class="view">
+    <div class="card">
+      <div class="sectionTitle"><h2>إدارة التوصيل</h2><button class="btn dark noPrint" id="refreshDeliveryBtn">تحديث</button></div>
+      <div class="twoCols">
+        <div class="listBox"><h3>جاهزة للتوصيل</h3><div id="deliveryReady"></div></div>
+        <div class="listBox"><h3>خرجت للتوصيل</h3><div id="deliveryOut"></div></div>
+      </div>
+      <div class="listBox" style="margin-top:12px"><h3>تم تسليمها اليوم</h3><div id="deliveryDone"></div></div>
+    </div>
+  </section>
+
+  <section id="trashView" class="view">
+    <div class="card">
+      <div class="sectionTitle"><h2>محذوفات الإدارة</h2><button class="btn dark noPrint" id="refreshTrashBtn">تحديث</button></div>
+      <p class="tiny">الحذف من الطلبات ينقل نسخة هنا أولًا ثم يحذف الصف الأصلي من ورقة الطلبات. يمكن الاستعادة أو الحذف النهائي.</p>
+      <div id="trashList"></div>
+    </div>
+  </section>
+
+  <section id="editor" class="card panel noPrint">
+    <div class="panelHead"><h2 id="editorTitle">تفاصيل الطلب</h2><button class="btn dark" id="closeEditor">إغلاق</button></div>
+    <form id="orderForm">
+      <input type="hidden" id="rowNumber"><input type="hidden" id="requestId"><input type="hidden" id="mode">
+      <div class="grid">
+        <div class="field"><label>رقم الطلب</label><input id="orderNumber" class="readonly" readonly placeholder="يُنشأ تلقائيًا"></div>
+        <div class="field"><label>تاريخ الطلب</label><input id="orderDate" class="readonly" readonly placeholder="يُسجل تلقائيًا"></div>
+        <div class="field"><label>حالة الطلب</label><select id="statusField"></select></div>
+        <div class="field"><label>الأولوية</label><select id="priorityField"></select></div>
+        <div class="field"><label>الاسم *</label><input id="name" required></div>
+        <div class="field"><label>رقم الهاتف الأساسي *</label><input id="phone" inputmode="numeric" required><div id="duplicateWarning" class="duplicate"></div></div>
+        <div class="field"><label>رقم الهاتف البديل</label><input id="altPhone" inputmode="numeric"></div>
+        <div class="field"><label>حالة الدفع</label><select id="paymentField"></select></div>
+        <div class="field"><label>المبلغ المدفوع</label><input id="amountPaid" type="number" min="0" step="0.01"></div>
+        <div class="field"><label>المحافظة *</label><select id="governorate" required></select></div>
+        <div class="field"><label>اللواء *</label><select id="district" required></select></div>
+        <div class="field span2"><label>العنوان التفصيلي *</label><input id="address" required></div>
+        <div class="field"><label>إجمالي النسخ *</label><input id="itemsCount" type="number" min="0" step="1" required></div>
+        <div class="field"><label>إجمالي المجلد *</label><input id="folderCount" type="number" min="0" step="1" required></div>
+        <div class="field"><label>إجمالي الورقي *</label><input id="paperCount" type="number" min="0" step="1" required></div>
+        <div class="field"><label>مجموع المنتجات *</label><input id="productsTotal" type="number" min="0" step="0.01" required></div>
+        <div class="field"><label>رسوم التوصيل *</label><input id="deliveryFee" type="number" min="0" step="0.01" required></div>
+        <div class="field"><label>الإجمالي الكلي</label><input id="grandTotal" class="readonly" readonly></div>
+        <div class="field span4"><label>تفاصيل المنتجات *</label><textarea id="itemsText" required></textarea></div>
+        <div class="field span4"><label>الملاحظات</label><textarea id="notes"></textarea></div>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn gold" id="saveBtn">مراجعة وحفظ</button>
+        <button type="button" class="btn blueBtn" id="copyBtn" hidden>نسخ كطلب جديد</button>
+        <button type="button" class="btn okBtn" id="whatsappBtn" hidden>فتح واتساب</button>
+        <button type="button" class="btn danger" id="deleteBtn" hidden>نقل إلى المحذوفات</button>
+        <button type="button" class="btn dark" id="cancelBtn">إلغاء</button>
+      </div>
+    </form>
+    <div id="historyBox" class="history" hidden><h3 style="color:var(--gold);margin:0">سجل الطلب</h3><div id="historyList"></div></div>
+  </section>
+</main>
+
+<div id="confirmBox" class="confirm noPrint"><section class="card dialog"><h2 style="color:var(--gold);margin-top:0">تأكيد العملية</h2><p id="confirmText"></p><div id="changes" class="changes"></div><div class="actions"><button id="confirmSave" class="btn gold">تأكيد الحفظ</button><button id="backEdit" class="btn dark">رجوع للتعديل</button></div></section></div>
+
+<script>
+  const $=id=>document.getElementById(id);
+  let config=null,currentOriginal=null,pendingPayload=null,busy=false,currentRows=[];
+  const selected=new Set();
+  let todayMode=false;
+  const fields=['name','phone','altPhone','governorate','district','address','itemsCount','folderCount','paperCount','productsTotal','deliveryFee','grandTotal','itemsText','notes'];
+  const labels={name:'الاسم',phone:'الهاتف الأساسي',altPhone:'الهاتف البديل',governorate:'المحافظة',district:'اللواء',address:'العنوان',itemsCount:'إجمالي النسخ',folderCount:'إجمالي المجلد',paperCount:'إجمالي الورقي',productsTotal:'مجموع المنتجات',deliveryFee:'رسوم التوصيل',grandTotal:'الإجمالي الكلي',itemsText:'تفاصيل المنتجات',notes:'الملاحظات',status:'الحالة',paymentStatus:'حالة الدفع',amountPaid:'المبلغ المدفوع',priority:'الأولوية'};
+
+  function statusMsg(text,type='wait'){const el=$('mainStatus');el.textContent=text;el.className='statusBox show '+type}
+  function clearStatus(){const el=$('mainStatus');el.className='statusBox';el.textContent=''}
+  function fail(err){busy=false;toggleButtons(false);statusMsg((err&&err.message)||String(err),'err')}
+  function toggleButtons(disabled){busy=disabled;['newBtn','searchBtn','bulkStatusBtn','prepSelectedBtn','prepRangeBtn','refreshAllBtn','refreshDeliveryBtn','refreshTrashBtn','saveBtn','copyBtn','whatsappBtn','deleteBtn','confirmSave'].forEach(id=>{if($(id))$(id).disabled=disabled||!config})}
+  function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+  function call(name,args,onSuccess,silent=false){if(!silent)toggleButtons(true);let runner=google.script.run.withSuccessHandler(r=>{if(!silent)toggleButtons(false);onSuccess(r)}).withFailureHandler(e=>{if(!silent)fail(e);else statusMsg((e&&e.message)||String(e),'err')});runner[name].apply(runner,args||[])}
+  function money(v){const n=Number(String(v??0).replace(/[^\d.-]/g,''))||0;return n.toFixed(2)+' د'}
+  function statusClass(s){return {'جديد':'new','قيد التجهيز':'prep','جاهز':'ready','خرج للتوصيل':'out','تم التسليم':'done','ملغي':'cancel'}[s]||'new'}
+  function statusBadge(s){return `<span class="badge ${statusClass(s)}">${esc(s||'جديد')}</span>`}
+  function paymentBadge(s){return `<span class="badge pay">${esc(s||'غير مدفوع')}</span>`}
+  function specialBadges(r){const t=(String(r.notes||'')+' '+String(r.itemsText||'')).toLowerCase();const keys=['كامل المحتويات','لا أريد إنجليزي','بدون انجليزي','غير ملون','اتصال قبل التوصيل','مستعجل'];return keys.filter(k=>t.includes(k.toLowerCase())).map(k=>`<span class="special">${esc(k)}</span>`).join('')}
+  function phoneWa(phone){let d=String(phone||'').replace(/\D/g,'');if(d.startsWith('0'))d='962'+d.slice(1);else if(!d.startsWith('962'))d='962'+d;return d}
+  function openWhatsApp(order,msgType='general'){if(!order)return;let msg='مرحباً '+(order.name||'')+'، بخصوص طلب التحضير رقم '+order.orderNumber+'.';if(msgType==='out')msg='مرحباً '+(order.name||'')+'، طلب التحضير رقم '+order.orderNumber+' خرج للتوصيل.';if(msgType==='ready')msg='مرحباً '+(order.name||'')+'، طلب التحضير رقم '+order.orderNumber+' أصبح جاهزاً.';window.open('https://wa.me/'+phoneWa(order.phone)+'?text='+encodeURIComponent(msg),'_blank')}
+
+  function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tabBtn').forEach(b=>b.classList.toggle('active',b.dataset.view===id));$(id).classList.add('active');if(id==='dashboardView')loadDashboard();if(id==='deliveryView')loadDelivery();if(id==='trashView')loadTrash()}
+  document.querySelectorAll('.tabBtn').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+
+  function fillSelect(id,items,first='الكل'){const s=$(id);s.innerHTML=`<option value="">${esc(first)}</option>`+items.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}
+  function fillGovernorates(){const gs=Object.keys(config.districts);fillSelect('governorate',gs,'اختر المحافظة');fillSelect('filterGovernorate',gs,'كل المحافظات');fillDistricts('');fillFilterDistricts()}
+  function fillDistricts(selected){const g=$('governorate').value,list=(config&&config.districts[g])||[];$('district').innerHTML='<option value="">اختر اللواء</option>'+list.map(x=>`<option${x===selected?' selected':''}>${esc(x)}</option>`).join('')}
+  function fillFilterDistricts(){const g=$('filterGovernorate').value,list=(config&&config.districts[g])||[];fillSelect('filterDistrict',list,'كل الألوية')}
+  function fillAdminSelects(){fillSelect('filterStatus',config.statuses,'كل الحالات');fillSelect('filterPayment',config.paymentStatuses,'كل حالات الدفع');fillSelect('bulkStatus',config.statuses,'اختر الحالة');$('statusField').innerHTML=config.statuses.map(x=>`<option>${esc(x)}</option>`).join('');$('paymentField').innerHTML=config.paymentStatuses.map(x=>`<option>${esc(x)}</option>`).join('');$('priorityField').innerHTML=config.priorities.map(x=>`<option>${esc(x)}</option>`).join('')}
+
+  function load(){call('adminBootstrap',[],r=>{config=r;$('adminInfo').textContent='الحساب المصرح: '+r.email+' | الإصدار: '+r.version;fillGovernorates();fillAdminSelects();toggleButtons(false);clearStatus();loadDashboard();searchOrders()})}
+  function loadDashboard(){call('adminDashboardData',[],d=>{renderDashboard(d)},true)}
+  function renderDashboard(d){const stats=[['طلبات اليوم',d.todayOrders],['قيمة اليوم',money(d.todayValue)],['إجمالي الطلبات',d.totalOrders],['إجمالي القيمة',money(d.totalValue)],['مجلد اليوم',d.todayFolders],['ورقي اليوم',d.todayPaper],['نسخ اليوم',d.todayItems],['المبلغ المتبقي',money(d.outstandingValue)]];$('stats').innerHTML=stats.map(x=>`<div class="stat"><span>${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join('');$('statusGrid').innerHTML=config.statuses.map(s=>`<div class="statusCard"><span>${statusBadge(s)}</span><b>${esc(d.statusCounts[s]||0)}</b></div>`).join('')}
+
+  function filtersPayload(){return {query:$('searchInput').value.trim(),minOrder:$('minOrder').value,maxOrder:$('maxOrder').value,dateFrom:$('dateFrom').value,dateTo:$('dateTo').value,governorate:$('filterGovernorate').value,district:$('filterDistrict').value,status:$('filterStatus').value,prepType:$('filterPrepType').value,paymentStatus:$('filterPayment').value,productText:$('filterProduct').value.trim(),todayOnly:todayMode,limit:500}}
+  function searchOrders(){statusMsg('جاري تحميل الطلبات…');call('adminListOrders',[filtersPayload()],r=>{currentRows=r.rows||[];renderResults(currentRows);$('resultCount').textContent='النتائج: '+r.totalMatched+(r.totalMatched>currentRows.length?' (المعروض '+currentRows.length+')':'');statusMsg(currentRows.length?'تم تحميل الطلبات.':'لا توجد نتائج مطابقة.',currentRows.length?'ok':'err')})}
+  function renderResults(rows){$('results').innerHTML=rows.length?rows.map(r=>`<article class="result ${selected.has(r.requestId)?'selected':''}" data-id="${esc(r.requestId)}"><div><input class="rowCheck" type="checkbox" ${selected.has(r.requestId)?'checked':''} data-id="${esc(r.requestId)}"></div><div class="orderNo">#${esc(r.orderNumber)}</div><div><b>${esc(r.name)}</b><div class="muted">${esc(r.orderDate)}</div><div class="specials">${r.priority==='مستعجل'?'<span class="badge urgent">مستعجل</span>':''}${specialBadges(r)}</div></div><div class="mobileHide">${esc(r.phone)}</div><div class="wideHide mobileHide">${esc(r.governorate)} – ${esc(r.district)}</div><div>${statusBadge(r.status)}<br>${paymentBadge(r.paymentStatus)}</div><div class="money mobileHide">${money(r.grandTotal)}</div><div class="rowActions"><button class="btn gold openOrder" data-id="${esc(r.requestId)}" data-row="${esc(r.rowNumber)}">فتح</button><button class="btn dark waOrder" data-id="${esc(r.requestId)}">واتساب</button></div></article>`).join(''):'<div class="empty">لا توجد نتائج.</div>';document.querySelectorAll('.rowCheck').forEach(c=>c.onchange=()=>{if(c.checked)selected.add(c.dataset.id);else selected.delete(c.dataset.id);renderResults(currentRows)});document.querySelectorAll('.openOrder').forEach(b=>b.onclick=()=>openExisting(b.dataset.row,b.dataset.id));document.querySelectorAll('.waOrder').forEach(b=>b.onclick=()=>openWhatsApp(currentRows.find(r=>r.requestId===b.dataset.id)))}
+
+  function openExisting(row,requestId){statusMsg('جاري تحميل الطلب…');call('adminGetOrder',[row,requestId],order=>{clearStatus();openEditor(order,'edit');loadHistory(order.requestId)})}
+  function openEditor(order,mode){currentOriginal=order?JSON.parse(JSON.stringify(order)):null;$('mode').value=mode;$('editorTitle').textContent=mode==='create'?'إضافة طلب جديد':'تعديل الطلب رقم '+order.orderNumber;$('rowNumber').value=order?.rowNumber||'';$('requestId').value=order?.requestId||'';$('orderNumber').value=mode==='create'?'':order?.orderNumber||'';$('orderDate').value=mode==='create'?'':order?.orderDate||'';fields.forEach(f=>{if($(f))$(f).value=order?.[f]??(['itemsCount','folderCount','paperCount','productsTotal','deliveryFee'].includes(f)?0:'')});$('statusField').value=mode==='create'?'جديد':order?.status||'جديد';$('paymentField').value=mode==='create'?'غير مدفوع':order?.paymentStatus||'غير مدفوع';$('amountPaid').value=mode==='create'?0:order?.amountPaid||0;$('priorityField').value=mode==='create'?'عادي':order?.priority||'عادي';$('governorate').value=order?.governorate||'';fillDistricts(order?.district||'');calculateGrand();$('deleteBtn').hidden=mode!=='edit';$('copyBtn').hidden=mode!=='edit';$('whatsappBtn').hidden=mode!=='edit';$('historyBox').hidden=mode!=='edit';$('duplicateWarning').className='duplicate';$('editor').classList.add('show');$('editor').scrollIntoView({behavior:'smooth'})}
+  function closeEditor(){$('editor').classList.remove('show');$('orderForm').reset();currentOriginal=null;pendingPayload=null;$('historyBox').hidden=true;$('historyList').innerHTML=''}
+  function calculateGrand(){const p=Number($('productsTotal').value)||0,d=Number($('deliveryFee').value)||0;$('grandTotal').value=(p+d).toFixed(2)}
+  function payload(){const p={rowNumber:$('rowNumber').value,requestId:$('requestId').value,status:$('statusField').value,paymentStatus:$('paymentField').value,amountPaid:$('amountPaid').value,priority:$('priorityField').value};fields.filter(x=>x!=='grandTotal').forEach(f=>p[f]=$(f).value.trim());return p}
+  function review(e){e.preventDefault();if(!$('orderForm').reportValidity())return;calculateGrand();pendingPayload=payload();const create=$('mode').value==='create';const nowMeta={status:pendingPayload.status,paymentStatus:pendingPayload.paymentStatus,amountPaid:pendingPayload.amountPaid,priority:pendingPayload.priority};$('confirmText').textContent=create?'سيُنشأ طلب جديد ورقم طلب جديد. راجع البيانات قبل التأكيد.':'سيتم تعديل الطلب الحالي دون إنشاء رقم جديد.';let changes=[];if(create){fields.forEach(f=>{const v=$(f).value;if(v!=='')changes.push(`<div class="change"><b>${labels[f]}</b><br>${esc(v)}</div>`)});Object.keys(nowMeta).forEach(k=>changes.push(`<div class="change"><b>${labels[k]}</b><br>${esc(nowMeta[k])}</div>`))}else{fields.forEach(f=>{const old=String(currentOriginal?.[f]??''),now=String($(f).value??'');if(old!==now)changes.push(`<div class="change"><b>${labels[f]}</b><br><span class="muted">قديم:</span> ${esc(old||'فارغ')}<br><span class="muted">جديد:</span> ${esc(now||'فارغ')}</div>`)});[['status','statusField'],['paymentStatus','paymentField'],['amountPaid','amountPaid'],['priority','priorityField']].forEach(([k,id])=>{const old=String(currentOriginal?.[k]??''),now=String($(id).value??'');if(old!==now)changes.push(`<div class="change"><b>${labels[k]}</b><br><span class="muted">قديم:</span> ${esc(old||'فارغ')}<br><span class="muted">جديد:</span> ${esc(now||'فارغ')}</div>`)})}if(!create&&!changes.length){statusMsg('لم تغيّر أي بيانات.','err');return}$('changes').innerHTML=changes.join('');$('confirmBox').classList.add('show')}
+  function save(){if(busy||!pendingPayload)return;$('confirmBox').classList.remove('show');statusMsg('جاري حفظ الطلب…');const fn=$('mode').value==='create'?'adminCreateOrder':'adminUpdateOrder';call(fn,[pendingPayload],r=>{statusMsg(r.message,'ok');closeEditor();loadDashboard();todayMode=false;$('searchInput').value=r.order.orderNumber;showView('ordersView');searchOrders()})}
+  function duplicateCheck(){const phone=$('phone').value.trim();if(phone.length<8)return;$('duplicateWarning').className='duplicate';call('adminDuplicateCheck',[phone,$('requestId').value],rows=>{if(rows.length){$('duplicateWarning').innerHTML='تنبيه: يوجد طلب سابق بهذا الرقم: '+rows.map(r=>'#'+esc(r.orderNumber)+' '+esc(r.name)).join('، ');$('duplicateWarning').className='duplicate show'}},true)}
+  function copyCurrent(){if(!currentOriginal)return;const copy=JSON.parse(JSON.stringify(currentOriginal));copy.requestId='';copy.rowNumber='';copy.orderNumber='';copy.orderDate='';copy.status='جديد';copy.paymentStatus='غير مدفوع';copy.amountPaid=0;openEditor(copy,'create');$('editorTitle').textContent='نسخ الطلب #'+currentOriginal.orderNumber+' كطلب جديد'}
+  function deleteCurrent(){if(!currentOriginal)return;const ok=confirm('سيتم نقل الطلب رقم '+currentOriginal.orderNumber+' إلى المحذوفات ثم حذف الصف الأصلي من ورقة الطلبات. هل تريد المتابعة؟');if(!ok)return;const ok2=confirm('تأكيد نهائي: متابعة نقل الطلب إلى المحذوفات؟');if(!ok2)return;const deletedId=currentOriginal.requestId;statusMsg('جاري نقل الطلب إلى المحذوفات…');call('adminDeleteOrder',[currentOriginal.rowNumber,currentOriginal.requestId],r=>{closeEditor();selected.delete(deletedId);statusMsg(r.message,'ok');loadDashboard();searchOrders();loadTrash()})}
+  function loadHistory(requestId){call('adminOrderHistory',[requestId],rows=>{$('historyList').innerHTML=rows.length?rows.map(h=>`<div class="historyItem"><b>${esc(h.action)}</b> <span class="muted">${esc(h.date)} — ${esc(h.email)}</span>${h.details?`<div class="tiny" style="margin-top:5px">${esc(h.details)}</div>`:''}</div>`).join(''):'<div class="tiny">لا يوجد سجل سابق.</div>'},true)}
+
+  function bulkStatus(){const ids=[...selected],s=$('bulkStatus').value;if(!ids.length){statusMsg('حدد طلبًا واحدًا على الأقل.','err');return}if(!s){statusMsg('اختر الحالة الجديدة.','err');return}if(!confirm('تغيير حالة '+ids.length+' طلب إلى «'+s+'»؟'))return;call('adminBulkSetStatus',[ids,s],r=>{statusMsg(r.message,'ok');loadDashboard();searchOrders();loadDelivery()})}
+  function prepSelected(){const ids=[...selected];if(!ids.length){statusMsg('حدد طلبات من قائمة الطلبات أولًا.','err');return}showView('prepView');generatePrep({requestIds:ids})}
+  function generatePrep(selector){statusMsg('جاري إعداد إحصائية التجهيز…');call('adminPreparationSummary',[selector],s=>{renderPrep(s);statusMsg('تم إعداد إحصائية التجهيز.','ok')})}
+  function renderPrep(s){const metrics=[['عدد الطلبات',s.orderCount],['إجمالي النسخ',s.itemsCount],['المجلد',s.folderCount],['الورقي',s.paperCount],['المنتجات',money(s.productsTotal)],['التوصيل',money(s.deliveryTotal)],['الإجمالي',money(s.grandTotal)]];$('prepOutput').innerHTML=`<div class="summaryTop">${metrics.map(x=>`<div class="summaryMetric"><span>${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join('')}</div><div class="twoCols"><div class="listBox"><h3>تجميع المنتجات</h3>${s.products.length?s.products.map(p=>`<div class="productRow"><span>${esc(p.name)}</span><b>${esc(p.qty)}</b></div>`).join(''):'<div class="empty">لا توجد منتجات قابلة للتجميع.</div>'}</div><div class="listBox"><h3>الملاحظات الخاصة</h3>${s.notes.length?s.notes.map(n=>`<div class="historyItem"><b>#${esc(n.orderNumber)} — ${esc(n.name)}</b><div>${esc(n.notes)}</div></div>`).join(''):'<div class="empty">لا توجد ملاحظات.</div>'}</div></div>`}
+
+  function exportCsv(){const rows=[...selected].length?currentRows.filter(r=>selected.has(r.requestId)):currentRows;if(!rows.length){statusMsg('لا توجد بيانات للتصدير.','err');return}const headers=['رقم الطلب','التاريخ','الاسم','الهاتف','المحافظة','اللواء','الحالة','الدفع','المدفوع','الإجمالي','تفاصيل المنتجات','الملاحظات'];const body=rows.map(r=>[r.orderNumber,r.orderDate,r.name,r.phone,r.governorate,r.district,r.status,r.paymentStatus,r.amountPaid,r.grandTotal,r.itemsText,r.notes]);const csv='\ufeff'+[headers,...body].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='طلبات_التحضير.csv';a.click();URL.revokeObjectURL(a.href)}
+
+  function renderDeliveryList(id,rows,type){$(id).innerHTML=rows.length?rows.map(r=>`<div class="deliveryRow"><b class="orderNo">#${esc(r.orderNumber)}</b><div><b>${esc(r.name)}</b><div class="muted">${esc(r.address)}</div></div><div class="mobileHide">${esc(r.phone)}</div><div class="wideHide mobileHide">${esc(r.governorate)} – ${esc(r.district)}</div><div class="mobileHide">${money(r.grandTotal)}</div><div class="rowActions">${type==='ready'?`<button class="btn blueBtn deliveryStatus" data-id="${esc(r.requestId)}" data-status="خرج للتوصيل">خرج للتوصيل</button>`:''}${type==='out'?`<button class="btn okBtn deliveryStatus" data-id="${esc(r.requestId)}" data-status="تم التسليم">تم التسليم</button>`:''}<button class="btn dark deliveryWa" data-id="${esc(r.requestId)}" data-type="${type}">واتساب</button></div></div>`).join(''):'<div class="empty">لا توجد طلبات.</div>';document.querySelectorAll('#'+id+' .deliveryStatus').forEach(b=>b.onclick=()=>setOneStatus(b.dataset.id,b.dataset.status));document.querySelectorAll('#'+id+' .deliveryWa').forEach(b=>{b.onclick=()=>{const all=[...qCache.ready,...qCache.out,...qCache.deliveredToday];const r=all.find(x=>x.requestId===b.dataset.id);openWhatsApp(r,b.dataset.type==='ready'?'ready':b.dataset.type==='out'?'out':'general')}})}
+  let qCache={ready:[],out:[],deliveredToday:[]};
+  function loadDelivery(){call('adminDeliveryQueue',[],q=>{qCache=q;renderDeliveryList('deliveryReady',q.ready,'ready');renderDeliveryList('deliveryOut',q.out,'out');renderDeliveryList('deliveryDone',q.deliveredToday,'done')},true)}
+  function setOneStatus(id,s){call('adminSetOrderMeta',[id,{status:s}],r=>{statusMsg(r.message,'ok');loadDashboard();loadDelivery();searchOrders()})}
+
+  function loadTrash(){call('adminListTrash',[],rows=>{renderTrash(rows)},true)}
+  function renderTrash(rows){$('trashList').innerHTML=rows.length?rows.map(r=>`<div class="trashRow"><b class="orderNo">#${esc(r.orderNumber)}</b><div><b>${esc(r.name)}</b><div class="muted">حُذف: ${esc(r.deletedAt)}</div></div><div class="mobileHide">${esc(r.phone)}</div><div class="wideHide mobileHide">${esc(r.governorate)} – ${esc(r.district)}</div><div class="mobileHide">${money(r.grandTotal)}</div><div class="rowActions"><button class="btn okBtn restoreBtn" data-id="${esc(r.requestId)}">استعادة</button><button class="btn danger permanentBtn" data-id="${esc(r.requestId)}" data-order="${esc(r.orderNumber)}">حذف نهائي</button></div></div>`).join(''):'<div class="empty">المحذوفات فارغة.</div>';document.querySelectorAll('.restoreBtn').forEach(b=>b.onclick=()=>{if(confirm('استعادة هذا الطلب إلى ورقة الطلبات؟'))call('adminRestoreDeleted',[b.dataset.id],r=>{statusMsg(r.message,'ok');loadTrash();loadDashboard();searchOrders()})});document.querySelectorAll('.permanentBtn').forEach(b=>b.onclick=()=>{if(confirm('حذف الطلب #'+b.dataset.order+' نهائيًا من المحذوفات؟ لا يمكن التراجع.'))call('adminPermanentDelete',[b.dataset.id],r=>{statusMsg(r.message,'ok');loadTrash()})})}
+
+  function resetFilters(){$('searchInput').value='';$('minOrder').value='';$('maxOrder').value='';$('dateFrom').value='';$('dateTo').value='';$('filterGovernorate').value='';fillFilterDistricts();$('filterStatus').value='';$('filterPrepType').value='';$('filterPayment').value='';$('filterProduct').value='';todayMode=false;selected.clear();$('selectAll').checked=false;searchOrders()}
+  function refreshAll(){loadDashboard();searchOrders();loadDelivery();loadTrash();statusMsg('تم تحديث البيانات.','ok')}
+
+  $('searchBtn').onclick=()=>{todayMode=false;searchOrders()};$('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();todayMode=false;searchOrders()}});$('todayBtn').onclick=()=>{todayMode=true;searchOrders()};$('clearBtn').onclick=resetFilters;$('filterGovernorate').onchange=fillFilterDistricts;$('selectAll').onchange=e=>{if(e.target.checked)currentRows.forEach(r=>selected.add(r.requestId));else currentRows.forEach(r=>selected.delete(r.requestId));renderResults(currentRows)};$('bulkStatusBtn').onclick=bulkStatus;$('prepSelectedBtn').onclick=prepSelected;$('exportBtn').onclick=exportCsv;
+  $('prepRangeBtn').onclick=()=>generatePrep({fromOrder:$('prepFrom').value,toOrder:$('prepTo').value});$('printPrepBtn').onclick=()=>window.print();$('refreshDeliveryBtn').onclick=loadDelivery;$('refreshTrashBtn').onclick=loadTrash;$('refreshAllBtn').onclick=refreshAll;
+  $('newBtn').onclick=()=>{showView('ordersView');openEditor(null,'create')};$('closeEditor').onclick=closeEditor;$('cancelBtn').onclick=closeEditor;$('governorate').onchange=()=>fillDistricts('');$('productsTotal').oninput=calculateGrand;$('deliveryFee').oninput=calculateGrand;$('phone').onblur=duplicateCheck;$('orderForm').onsubmit=review;$('backEdit').onclick=()=>$('confirmBox').classList.remove('show');$('confirmSave').onclick=save;$('copyBtn').onclick=copyCurrent;$('whatsappBtn').onclick=()=>openWhatsApp(currentOriginal);$('deleteBtn').onclick=deleteCurrent;
+  load();
+</script>
+</body>
+</html>
