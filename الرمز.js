@@ -2723,7 +2723,7 @@ function adminLog_(email, action, orderNumber, requestId, rowNumber, before, aft
 }
 
 var AJYAL_SHEET = 'عملاء خدمة أجيال';
-var AJYAL_STATUSES = ['جديد','تم التواصل','قيد التنفيذ','مكتمل','ملغي'];
+var AJYAL_STATUSES = ['جديد','تم التواصل','بانتظار بيانات الحساب','قيد التنفيذ','مكتمل','ملغي'];
 var AJYAL_EMPLOYEES = ['ربيع','ابو الليث','اسراء','وليد','موظف جديد 1','موظف جديد 2'];
 var AJYAL_GRADES = ['صف أول','صف ثاني','صف ثالث'];
 function normalizeAjyal_(value, items) {
@@ -2777,11 +2777,13 @@ function ajyalAdminList(filters) {
   var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(AJYAL_SHEET);
   var width=sheet?Math.min(12,sheet.getLastColumn()):12;
   var rows=sheet&&sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,width).getDisplayValues():[];
+  var employeeCounts={};AJYAL_EMPLOYEES.forEach(function(name){employeeCounts[name]=0;});rows.forEach(function(r){if(r[5]==='مكتمل'&&employeeCounts.hasOwnProperty(r[11]))employeeCounts[r[11]]++;});
+  var employee=cleanText_(filters.employee,100);
   var query=cleanText_(filters.query,150).toLowerCase(),status=cleanText_(filters.status,30);
-  rows=rows.filter(function(r){return(!status||r[5]===status)&&(!query||[r[1],r[2],r[4],r[9],r[11]].join(' ').toLowerCase().indexOf(query)!==-1);});
+  rows=rows.filter(function(r){return(!employee||(r[5]==='مكتمل'&&r[11]===employee))&&(!status||r[5]===status)&&(!query||[r[1],r[2],r[4],r[9],r[11]].join(' ').toLowerCase().indexOf(query)!==-1);});
   rows.sort(function(a,b){return Number(a[1])-Number(b[1])||a[0].localeCompare(b[0],undefined,{numeric:true});});
   var offset=Math.max(0,Math.floor(Number(filters.offset)||0));
-  return {total:rows.length,statuses:AJYAL_STATUSES,grades:AJYAL_GRADES,employees:AJYAL_EMPLOYEES,rows:rows.slice(offset,offset+100).map(function(r){return {requestId:r[0],orderNumber:r[1],teacherName:r[2],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8],grade:r[9]||'',parentRequestId:r[10]||r[0],completedBy:r[5]==='مكتمل'?(r[11]||''):''};})};
+  return {employeeCounts:employeeCounts,total:rows.length,statuses:AJYAL_STATUSES,grades:AJYAL_GRADES,employees:AJYAL_EMPLOYEES,rows:rows.slice(offset,offset+100).map(function(r){return {requestId:r[0],orderNumber:r[1],teacherName:r[2],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8],grade:r[9]||'',parentRequestId:r[10]||r[0],completedBy:r[5]==='مكتمل'?(r[11]||''):''};})};
 }
 function ajyalAdminUpdate(payload) {
   requireAdmin_();payload=payload||{};

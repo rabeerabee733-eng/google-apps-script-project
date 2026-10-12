@@ -1167,7 +1167,9 @@
 @media(min-width:769px) and (max-width:1150px){.products-list{grid-template-columns:repeat(2,minmax(0,1fr))}.wizard-layout{grid-template-columns:minmax(0,1fr) 300px}.wizard-sidebar{padding:18px}}
 @media(max-width:768px){.header-inner{padding:12px 0;gap:8px}.brand-title{font-size:17px}.brand-subtitle{font-size:11px}.brand img,.logo-fallback{width:42px;height:42px;flex-basis:42px}.header-phone{font-size:12px;padding:8px 10px}.page-shell{width:calc(100% - 24px);padding-top:20px;padding-bottom:125px}.hero{padding:0 0 20px}.hero h1{font-size:27px}.hero p{font-size:12px}.wizard-progress{gap:5px;margin-bottom:18px}.wizard-step-button{font-size:11px;padding:9px 3px;min-height:48px;line-height:1.8}.wizard-layout{display:block}.card{padding:16px;border-radius:15px}.products-list{grid-template-columns:1fr;gap:14px}.product-card{padding:16px}.product-name{font-size:19px}.field-mini label{font-size:12px;min-height:24px}.qty-stepper{grid-template-columns:44px minmax(36px,1fr) 44px}.qty-button{min-width:44px;min-height:48px}.product-split-row{gap:10px}.product-tab{font-size:12px;padding:10px 4px}.wizard-sidebar{position:static}.wizard-layout[data-step="1"] .wizard-sidebar,.wizard-layout[data-step="2"] .wizard-sidebar{padding:0;border:0;box-shadow:none;background:transparent;margin:0}.wizard-layout[data-step="1"] .wizard-sidebar>.section-title,.wizard-layout[data-step="2"] .wizard-sidebar>.section-title,.wizard-layout[data-step="1"] .wizard-sidebar>.selected-products,.wizard-layout[data-step="2"] .wizard-sidebar>.selected-products,.wizard-layout[data-step="1"] .wizard-sidebar>.summary-layout,.wizard-layout[data-step="2"] .wizard-sidebar>.summary-layout{display:none}.wizard-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;border-top:1px solid #e5dccb;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;margin:0;box-shadow:0 -4px 22px rgba(30,20,10,.06)}.wizard-nav-total{display:flex;flex-direction:column;gap:4px;min-width:90px;font-size:11px;color:#837969}.wizard-nav-total strong{font-size:22px;color:#9b7729;white-space:nowrap}.wizard-controls{flex:1}.wizard-controls .main-button{font-size:13px}.wizard-assurance{display:none}.wizard-prev{font-size:12px;padding:8px 12px}.form-grid{grid-template-columns:1fr}.summary-row{font-size:14px}.wizard-sidebar .info-box{display:none}.review-heading h3{font-size:16px}.section-title{font-size:18px}.wizard-ajyal-choice>label{font-size:16px}.teacher-fields-body{padding:14px}.contact-field{padding:13px}.header-phone{white-space:nowrap}}
 
-  </style>
+  
+.product-details{margin-top:12px;font-size:12px;line-height:1.9}.product-details summary{cursor:pointer;min-height:44px;padding:8px;color:#876719}.product-details p{margin:0;padding:8px}
+</style>
 </head>
 
 <body data-build="DIRECT-POSTMESSAGE-PRODUCTS-FIX-V3">
@@ -1566,6 +1568,7 @@
       class="screen"
     >
       <div class="card success-card">
+        <p id="success-ajyal-confirmation" style="background:#fbf6e8;padding:16px;border-radius:12px;line-height:1.9"></p>
         <div class="check-icon">✓</div>
 
         <h2>تم استلام طلبك بنجاح</h2>
@@ -3116,6 +3119,7 @@ function buildWizardReview(){
         return;
       }
 
+      clearBookingDraft();
       fillSuccessScreen();
       formOpenedAt =
         Date.now();
@@ -3126,6 +3130,7 @@ function buildWizardReview(){
     }
 
     function fillSuccessScreen() {
+      setText('success-ajyal-confirmation','عدد المشتركين في أجيال: '+(lastOrder.ajyalCount||0)+' — قيمة الخدمة: '+(lastOrder.ajyalTotal||0)+' د.أ. الأولوية حسب رقم الحجز، وسنتواصل مع المعلمين عبر واتساب.');
       setText('success-ajyal-count',lastOrder.ajyalCount||0);
       setText('success-ajyal-total',(lastOrder.ajyalTotal||0)+' د.أ');
       setText(
@@ -3703,6 +3708,24 @@ function buildWizardReview(){
       }
     }
 
+
+    var bookingDraftKey='altahdir_booking_draft_v1',draftTimer=null;
+    function saveBookingDraft(){
+      if(document.getElementById('success-screen').classList.contains('active'))return;
+      try{var fields={};['name','phone','altPhone','governorate','district','address','notes'].forEach(function(id){fields[id]=getValue(id);});
+        localStorage.setItem(bookingDraftKey,JSON.stringify({savedAt:Date.now(),fields:fields,items:collectItems(),ajyalEnabled:document.getElementById('ajyal-enabled').checked,ajyalCount:selectedAjyalCount(),teachers:collectAjyalTeachers()}));
+      }catch(e){}
+    }
+    function clearBookingDraft(){clearTimeout(draftTimer);try{localStorage.removeItem(bookingDraftKey);}catch(e){}}
+    function restoreBookingDraft(){try{var draft=JSON.parse(localStorage.getItem(bookingDraftKey)||'null');if(!draft)return;if(Date.now()-draft.savedAt>7*86400000){clearBookingDraft();return;}
+      (draft.items||[]).forEach(function(item){var card=document.querySelector('[data-product-id="'+item.productId+'"]');if(!card)return;card.querySelector('.qty-total').value=item.qty;var f=card.querySelector('.qty-folder'),p=card.querySelector('.qty-paper');if(f)f.value=item.folderQty||0;if(p)p.value=item.paperQty||0;updateProductCard(card,false);});
+      var fields=draft.fields||{};['name','phone','altPhone','governorate','address','notes'].forEach(function(id){if(fields[id]!==undefined)document.getElementById(id).value=fields[id];});changeGovernorate();document.getElementById('district').value=fields.district||'';
+      ajyalDrafts=Array.isArray(draft.teachers)?draft.teachers:[];document.getElementById('ajyal-enabled').checked=!!draft.ajyalEnabled;document.getElementById('ajyal-count').value=draft.ajyalCount||0;calculateTotals();
+      var note=document.createElement('p');note.textContent='تم استعادة الحجز غير المكتمل المحفوظ على هذا الجهاز.';document.getElementById('main-screen').prepend(note);
+    }catch(e){clearBookingDraft();}}
+    function initializeDraftSaving(){restoreBookingDraft();['input','change','click'].forEach(function(event){document.getElementById('main-screen').addEventListener(event,function(){clearTimeout(draftTimer);draftTimer=setTimeout(saveBookingDraft,250);});});window.addEventListener('pagehide',saveBookingDraft);}
+    function addProductDetails(){document.querySelectorAll('.product-card').forEach(function(card){var id=card.dataset.productId;var text=/^grade[123]_bag$/.test(id)?'تحضير يومي، خطط فصلية، تحليل محتوى، أوراق عمل، سلالم تقدير، دفتر علامات جانبي، اختبارات تشخيصية وخطط علاجية.':/^prep_grade/.test(id)?'التحضير اليومي للصف المحدد، مع اختيار مجلد أو غير مجلد.':id==='letter_cards'?'بطاقات تعليمية للحروف العربية وأشكالها، مع تمييز حروف المد.':id==='number_cards'?'بطاقات الأعداد من 0 إلى 100 للتعلم والأنشطة الصفية.':id==='active_learning'?'حقيبة وسائل وأنشطة للتعلم النشط.':'بطاقات القوانين الصفية لتنظيم السلوك داخل الصف.';var details=document.createElement('details');details.className='product-details';var summary=document.createElement('summary');summary.textContent='محتويات المنتج';var p=document.createElement('p');p.textContent=text;details.append(summary,p);card.append(details);});}
+
     function getOrCreateClientId() {
       var storageKey =
         'altahdir_client_id';
@@ -3774,8 +3797,10 @@ function buildWizardReview(){
       function() {
         renderProducts();
         initializeWizard();
+        addProductDetails();
         calculateTotals();
         updateNetworkStatus();
+        initializeDraftSaving();
       }
     );
   </script>
