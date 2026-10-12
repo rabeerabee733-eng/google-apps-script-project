@@ -1255,14 +1255,10 @@
         </div>
 
         <div class="contact-field" style="margin-bottom:18px">
-          <label><input id="ajyal-enabled" type="checkbox" style="width:auto;min-height:0" onchange="toggleAjyal()"> إضافة خدمة تنزيل الخطط على أجيال</label>
+          <label><input id="ajyal-enabled" type="checkbox" style="width:auto;min-height:0" onchange="toggleAjyal()"> إضافة خدمة تنزيل الخطط وتحليل المحتوى على أجيال</label>
+          <p id="ajyal-count-note">الخدمة متاحة مع الحقائب الكاملة فقط، نموذج واحد لكل حقيبة كاملة.</p>
           <p>الأولوية حسب رقم الحجز، ويجري التواصل وفق الطاقة الاستيعابية دون تحديد موعد.</p>
-          <div id="ajyal-fields" hidden>
-            <label class="field-label" for="teacher-name">اسم المعلم *</label>
-            <input id="teacher-name" maxlength="100" autocomplete="name">
-            <label class="field-label" for="ajyal-account">حساب أجيال *</label>
-            <input id="ajyal-account" maxlength="150" dir="auto" autocomplete="off">
-          </div>
+          <div id="ajyal-fields" hidden></div>
         </div>
         <div class="form-grid">
           <div class="contact-field field-name">
@@ -1697,7 +1693,7 @@
       '0798382004';
 
     var REQUIRED_SERVER_VERSION =
-      '2026-10-12-AJYAL-DRAFT-V1';
+      '2026-10-12-AJYAL-TEACHERS-V2';
 
     var PRODUCTS = [
       {
@@ -2270,6 +2266,7 @@
     }
 
     function calculateTotals() {
+      renderAjyalTeachers();
       var totals =
         getCurrentTotals();
 
@@ -2414,17 +2411,57 @@
       return items;
     }
 
-    function toggleAjyal() {
-      var enabled = document.getElementById('ajyal-enabled').checked;
-      document.getElementById('ajyal-fields').hidden = !enabled;
+    var ajyalDrafts = [];
+    function fullBagGrades() {
+      var grades = {grade1_bag:'صف أول',grade2_bag:'صف ثاني',grade3_bag:'صف ثالث'};
+      var result = [];
+      collectItems().forEach(function(item) {
+        if (grades[item.productId]) for (var i=0;i<item.qty;i++) result.push(grades[item.productId]);
+      });
+      return result;
     }
-
+    function collectAjyalTeachers() {
+      return Array.from(document.querySelectorAll('.ajyal-teacher')).map(function(card) {
+        return {teacherName:card.querySelector('.ajyal-name').value.trim(),
+          grade:card.querySelector('.ajyal-grade').value,phone:card.querySelector('.ajyal-phone').value.trim()};
+      });
+    }
+    function toggleAjyal() { renderAjyalTeachers(); }
+    function renderAjyalTeachers() {
+      var grades=fullBagGrades(),checkbox=document.getElementById('ajyal-enabled'),container=document.getElementById('ajyal-fields');
+      checkbox.disabled=grades.length===0;
+      if (!grades.length) checkbox.checked=false;
+      setText('ajyal-count-note',grades.length ? 'عدد نماذج المعلمين/المعلمات: '+grades.length+'، بحسب عدد الحقائب الكاملة فقط.' : 'اختر حقيبة كاملة للصف الأول أو الثاني أو الثالث لتفعيل خدمة أجيال.');
+      container.hidden=!checkbox.checked;
+      if (Number(container.dataset.count||0)===grades.length) return;
+      collectAjyalTeachers().forEach(function(t,i){ajyalDrafts[i]=t;});
+      container.replaceChildren(); container.dataset.count=String(grades.length);
+      grades.forEach(function(grade,i) {
+        var value=ajyalDrafts[i]||{teacherName:'',grade:grade,phone:''};
+        var card=document.createElement('div'); card.className='ajyal-teacher';
+        card.style.cssText='border:1px solid #ccd5df;border-radius:12px;padding:14px;margin-top:12px;background:#fff';
+        var heading=document.createElement('h3');heading.textContent='بيانات المعلم/المعلمة '+(i+1);card.append(heading);
+        function field(labelText,element,suffix){var label=document.createElement('label');label.className='field-label';element.id='ajyal-'+i+'-'+suffix;label.htmlFor=element.id;label.textContent=labelText;card.append(label,element);}
+        var name=document.createElement('input');name.className='ajyal-name';name.maxLength=100;name.autocomplete='name';name.value=value.teacherName;
+        field('اسم المعلم / المعلمة *',name,'name');
+        var select=document.createElement('select');select.className='ajyal-grade';['صف أول','صف ثاني','صف ثالث'].forEach(function(g){select.add(new Option(g,g));});select.value=value.grade;
+        field('الصف *',select,'grade');
+        var phone=document.createElement('input');phone.className='ajyal-phone';phone.type='tel';phone.inputMode='tel';phone.maxLength=20;phone.autocomplete='tel';phone.placeholder='07XXXXXXXX';phone.dir='ltr';phone.value=value.phone;
+        field('رقم واتساب للمعلم / المعلمة *',phone,'phone');
+        container.append(card);
+      });
+    }
     function validateForm() {
-      if (document.getElementById('ajyal-enabled').checked && (!getValue('teacher-name') || !getValue('ajyal-account'))) {
-        showError('يرجى إدخال اسم المعلم وحساب أجيال.'); return false;
-      }
-
       hideError();
+      if (document.getElementById('ajyal-enabled').checked) {
+        var teachers=collectAjyalTeachers();
+        if (!teachers.length || teachers.length!==fullBagGrades().length) {showError('بيانات خدمة أجيال يجب أن تطابق عدد الحقائب الكاملة.');return false;}
+        for(var t=0;t<teachers.length;t++) {
+          if(!teachers[t].teacherName || ['صف أول','صف ثاني','صف ثالث'].indexOf(teachers[t].grade)===-1 || !/^(?:07\d{8}|(?:\+?962)7\d{8})$/.test(teachers[t].phone.replace(/[\s()-]/g,''))) {
+            showError('يرجى إكمال الاسم والصف ورقم واتساب الصحيح للمعلم/المعلمة '+(t+1)+'.');return false;
+          }
+        }
+      }
 
       var phone =
         getValue(
@@ -2566,7 +2603,7 @@
     function collectOrderData() {
       return {
         ajyal: { enabled: document.getElementById('ajyal-enabled').checked,
-          teacherName: getValue('teacher-name'), account: getValue('ajyal-account') },
+          teachers: document.getElementById('ajyal-enabled').checked ? collectAjyalTeachers() : [] },
         requestId:
           createRequestId(),
 
@@ -3232,7 +3269,7 @@
         ' د*';
 
       if (lastOrder.ajyal && lastOrder.ajyal.enabled) {
-        message += '\n\nخدمة أجيال\nاسم المعلم: ' + lastOrder.ajyal.teacherName + '\nحساب أجيال: ' + lastOrder.ajyal.account + '\nالأولوية حسب رقم الحجز دون تحديد موعد.';
+        message += '\n\nخدمة أجيال\n' + lastOrder.ajyal.teachers.map(function(t,i){return (i+1)+') '+t.teacherName+' — '+t.grade+' — واتساب: '+t.phone;}).join('\n') + '\nالأولوية حسب رقم الحجز دون تحديد موعد.';
       }
 
       window.open(
