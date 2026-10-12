@@ -1,7 +1,7 @@
 var SHEET_ID = '1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w';
 var SHEET_NAME = 'الطلبات';
 var WA_NUMBER = '0798382004';
-var APP_VERSION = '2026-10-12-AJYAL-PRICING-V3';
+var APP_VERSION = '2026-10-12-BOOKING-STAFF-V4';
 var ADMIN_VERSION = '2026-08-29-ADMIN-V2';
 var ADMIN_EMAILS = ['rabeerabee733@gmail.com'];
 var ADMIN_LOG_SHEET_NAME = 'سجل الإدارة';
@@ -83,7 +83,7 @@ var PRODUCTS = {
     price: 10,
     splitAllowed: false,
     paperOnly: false,
-    soldOut: true
+    soldOut: false
   },
 
   letter_cards: {
@@ -105,7 +105,7 @@ var PRODUCTS = {
     price: 5,
     splitAllowed: false,
     paperOnly: false,
-    soldOut: true
+    soldOut: false
   }
 };
 
@@ -2724,6 +2724,7 @@ function adminLog_(email, action, orderNumber, requestId, rowNumber, before, aft
 
 var AJYAL_SHEET = 'عملاء خدمة أجيال';
 var AJYAL_STATUSES = ['جديد','تم التواصل','قيد التنفيذ','مكتمل','ملغي'];
+var AJYAL_EMPLOYEES = ['ربيع','ابو الليث','اسراء','وليد','موظف جديد 1','موظف جديد 2'];
 var AJYAL_GRADES = ['صف أول','صف ثاني','صف ثالث'];
 function normalizeAjyal_(value, items) {
   value=value||{};
@@ -2748,10 +2749,10 @@ function ajyalSheet_() {
   var ss=SpreadsheetApp.openById(SHEET_ID),sheet=ss.getSheetByName(AJYAL_SHEET);
   if(!sheet) {
     sheet=ss.insertSheet(AJYAL_SHEET);
-    sheet.appendRow(['معرّف العميل','رقم الحجز','اسم المعلم','حساب أجيال السابق','الهاتف','الحالة','ملاحظات العميل','تاريخ الإنشاء','آخر تعديل','الصف','معرّف الحجز الأصلي']);
+    sheet.appendRow(['معرّف العميل','رقم الحجز','اسم المعلم','حساب أجيال السابق','الهاتف','الحالة','ملاحظات العميل','تاريخ الإنشاء','آخر تعديل','الصف','معرّف الحجز الأصلي','الموظف الذي أنجز الطلب']);
     sheet.setFrozenRows(1);
   } else {
-    sheet.getRange(1,10,1,2).setValues([['الصف','معرّف الحجز الأصلي']]);
+    sheet.getRange(1,10,1,3).setValues([['الصف','معرّف الحجز الأصلي','الموظف الذي أنجز الطلب']]);
   }
   return sheet;
 }
@@ -2774,24 +2775,26 @@ function serveAjyalAdmin_(){requireAdmin_();return HtmlService.createHtmlOutputF
 function ajyalAdminList(filters) {
   requireAdmin_();filters=filters||{};
   var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(AJYAL_SHEET);
-  var width=sheet?Math.min(11,sheet.getLastColumn()):11;
+  var width=sheet?Math.min(12,sheet.getLastColumn()):12;
   var rows=sheet&&sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,width).getDisplayValues():[];
   var query=cleanText_(filters.query,150).toLowerCase(),status=cleanText_(filters.status,30);
-  rows=rows.filter(function(r){return(!status||r[5]===status)&&(!query||[r[1],r[2],r[4],r[9]].join(' ').toLowerCase().indexOf(query)!==-1);});
+  rows=rows.filter(function(r){return(!status||r[5]===status)&&(!query||[r[1],r[2],r[4],r[9],r[11]].join(' ').toLowerCase().indexOf(query)!==-1);});
   rows.sort(function(a,b){return Number(a[1])-Number(b[1])||a[0].localeCompare(b[0],undefined,{numeric:true});});
   var offset=Math.max(0,Math.floor(Number(filters.offset)||0));
-  return {total:rows.length,statuses:AJYAL_STATUSES,grades:AJYAL_GRADES,rows:rows.slice(offset,offset+100).map(function(r){return {requestId:r[0],orderNumber:r[1],teacherName:r[2],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8],grade:r[9]||'',parentRequestId:r[10]||r[0]};})};
+  return {total:rows.length,statuses:AJYAL_STATUSES,grades:AJYAL_GRADES,employees:AJYAL_EMPLOYEES,rows:rows.slice(offset,offset+100).map(function(r){return {requestId:r[0],orderNumber:r[1],teacherName:r[2],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8],grade:r[9]||'',parentRequestId:r[10]||r[0],completedBy:r[5]==='مكتمل'?(r[11]||''):''};})};
 }
 function ajyalAdminUpdate(payload) {
   requireAdmin_();payload=payload||{};
   var id=cleanId_(payload.requestId,120),name=cleanText_(payload.teacherName,100),grade=cleanText_(payload.grade,30),phone=canonicalPhone_(payload.phone),status=cleanText_(payload.status,30);
   if(!id||!name||AJYAL_GRADES.indexOf(grade)===-1||!phone||AJYAL_STATUSES.indexOf(status)===-1)throw new Error('بيانات غير صحيحة.');
+  var completedBy=status==='مكتمل'?cleanText_(payload.completedBy,100):'';
+  if(status==='مكتمل'&&AJYAL_EMPLOYEES.indexOf(completedBy)===-1)throw new Error('اختر الموظف الذي أنجز الطلب قبل تحديد الحالة مكتمل.');
   var lock=LockService.getScriptLock();if(!lock.tryLock(20000))throw new Error('النظام مشغول، حاول مجددًا.');
   try {
     var sheet=ajyalSheet_(),row=ajyalFind_(sheet,id);if(!row)throw new Error('لم يتم العثور على العميل.');
-    var old=sheet.getRange(row,1,1,11).getDisplayValues()[0];
+    var old=sheet.getRange(row,1,1,12).getDisplayValues()[0];
     if(old[8]!==String(payload.updatedAt||''))throw new Error('تم تعديل السجل، حدّث القائمة أولًا.');
-    old[2]=ajyalCell_(name);old[4]=displayPhone_(phone);old[5]=status;old[6]=ajyalCell_(cleanText_(payload.notes,1000));old[8]=new Date().toISOString();old[9]=grade;
-    sheet.getRange(row,1,1,11).setNumberFormat('@').setValues([old]);return {ok:true};
+    old[2]=ajyalCell_(name);old[4]=displayPhone_(phone);old[5]=status;old[6]=ajyalCell_(cleanText_(payload.notes,1000));old[8]=new Date().toISOString();old[9]=grade;old[11]=completedBy;
+    sheet.getRange(row,1,1,12).setNumberFormat('@').setValues([old]);return {ok:true};
   } finally {lock.releaseLock();}
 }
