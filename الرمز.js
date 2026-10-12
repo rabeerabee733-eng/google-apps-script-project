@@ -2800,15 +2800,17 @@ function adminSaveStickerSettings(payload){
   requireAdmin_();payload=payload||{};var order=1,barcode=String(payload.barcode||'').trim();
   if(!Number.isSafeInteger(order)||order<1||!/^\d{1,12}$/.test(barcode))throw new Error('أدخل رقم طلب مرجعي صحيح وباركود من 1 إلى 12 رقمًا.');
   var lock=LockService.getScriptLock();lock.waitLock(20000);
-  try{var props=PropertiesService.getScriptProperties(),old=props.getProperty('STICKER_BARCODE_ANCHOR');if(String(payload.previous||'')!==String(old||''))throw new Error('تغيرت إعدادات الباركود. أعد تحميل الصفحة.');
+  try{var props=PropertiesService.getScriptProperties(),old=props.getProperty('STICKER_BARCODE_ANCHOR');if(!stickerAnchorEqual_(payload.previous,old))throw new Error('تغيرت إعدادات الباركود. أعد تحميل الصفحة.');
     var value={order:order,barcode:barcode};props.setProperty('STICKER_BARCODE_ANCHOR',JSON.stringify(value));return value;
   }finally{lock.releaseLock();}
 }
 function adminStickerOrders(selector){
   requireAdmin_();selector=selector||{};var from=Number(selector.from),to=Number(selector.to),offset=Number(selector.offset)||0;
   if(!Number.isSafeInteger(from)||!Number.isSafeInteger(to)||from<1||to<from||to-from>1999||!Number.isSafeInteger(offset)||offset<0)throw new Error('حدد نطاقًا صحيحًا حتى 2000 رقم طلب لكل ملف.');
-  var anchor=adminStickerSettings();if(!anchor)throw new Error('ثبّت رقم بداية الباركود أولًا.');if(JSON.stringify(anchor)!==String(selector.anchor||''))throw new Error('تغيرت إعدادات الباركود. أعد تحميلها قبل التصدير.');
+  var anchor=adminStickerSettings();if(!anchor)throw new Error('ثبّت رقم بداية الباركود أولًا.');if(!stickerAnchorEqual_(selector.anchor,JSON.stringify(anchor)))throw new Error('تغيرت إعدادات الباركود. أعد تحميلها قبل التصدير.');
   var sheet=adminOrdersSheet_(),rows=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues():[];
   var selected=rows.filter(function(r){var n=adminOrderNumber_(r[0]);return n>=from&&n<=to;}).sort(function(a,b){return adminOrderNumber_(a[0])-adminOrderNumber_(b[0]);});
   return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
 }
+
+function stickerAnchorEqual_(left,right){try{var a=left?JSON.parse(String(left)):null,b=right?JSON.parse(String(right)):null;return !a&&!b||!!a&&!!b&&Number(a.order)===Number(b.order)&&String(a.barcode)===String(b.barcode);}catch(e){return false;}}
