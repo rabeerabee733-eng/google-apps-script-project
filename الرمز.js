@@ -1493,15 +1493,9 @@ function itemsText_(
     if (
       item.splitAllowed
     ) {
-      parts.push(
-        'مجلد: ' +
-        item.folderQty
-      );
+      if (Number(item.folderQty) > 0) parts.push('مجلد: ' + item.folderQty);
 
-      parts.push(
-        'ورقي: ' +
-        item.paperQty
-      );
+      if (Number(item.paperQty) > 0) parts.push('ورقي: ' + item.paperQty);
 
     } else if (
       item.paperOnly
