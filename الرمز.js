@@ -2856,7 +2856,7 @@ function adminCourierBatch(batch){
   requireAdmin_();batch=cleanId_(batch,100);if(!batch)throw new Error('اختر دفعة تصدير أولًا.');
   var ledger=stickerExportLedger_().filter(function(r){return r[4]===batch;}),wanted={};ledger.forEach(function(r){wanted[r[0]]={parcels:Number(r[7])||1,date:r[3]};});
   var sheet=adminOrdersSheet_(),rows=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues():[],meta=adminMetaMap_();
-  var result=rows.filter(function(r){return wanted[stickerExportKey_(r)];}).map(function(r){var order=adminRowToObject_(r,0),m=meta[order.requestId]||{};return {key:stickerExportKey_(r),orderNumber:order.orderNumber,name:order.name,phone:order.phone,due:adminRound2_(Math.max(0,numberFromDisplay_(order.grandTotal)-(Number(m.amountPaid)||0))),parcels:wanted[stickerExportKey_(r)].parcels};}).sort(function(a,b){return Number(a.orderNumber)-Number(b.orderNumber);});
+  var result=rows.filter(function(r){return wanted[stickerExportKey_(r)];}).map(function(r){var order=adminRowToObject_(r,0),m=meta[order.requestId]||{};return {key:stickerExportKey_(r),orderNumber:order.orderNumber,name:order.name,phone:order.phone,governorate:String(r[5]||''),due:adminRound2_(Math.max(0,numberFromDisplay_(order.grandTotal)-(Number(m.amountPaid)||0))),parcels:wanted[stickerExportKey_(r)].parcels};}).sort(function(a,b){return Number(a.orderNumber)-Number(b.orderNumber);});
   return {batch:batch,date:ledger.length?Utilities.formatDate(new Date(ledger[0][3]),'Asia/Amman','yyyy/MM/dd HH:mm:ss'):'',rows:result};
 }
 function adminSaveCourierParcels(payload){
