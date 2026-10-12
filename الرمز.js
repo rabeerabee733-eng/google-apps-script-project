@@ -2827,8 +2827,8 @@ function stickerAnchorEqual_(left,right){try{var a=left?JSON.parse(String(left))
 
 var STICKER_EXPORT_SHEET='سجل تصدير الستكرات';
 function stickerExportKey_(row){return String(row[16]||'order:'+adminOrderNumber_(row[0]));}
-function stickerExportLedger_(){var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(STICKER_EXPORT_SHEET);return sheet&&sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,7).getDisplayValues():[];}
-function adminStickerExportSummary(){requireAdmin_();var rows=stickerExportLedger_();if(!rows.length)return {lastOrder:null,lastExportAt:'',lastExportDisplay:'',ordersCount:0};var ids={},max=0;rows.forEach(function(r){ids[r[0]]=true;max=Math.max(max,Number(r[1])||0);});var last=rows[rows.length-1];return {lastOrder:Number(last[1]),lastBarcode:last[2],highestOrder:max,lastExportAt:last[3],lastExportDisplay:Utilities.formatDate(new Date(last[3]),'Asia/Amman','yyyy/MM/dd HH:mm:ss'),ordersCount:Object.keys(ids).length};}
+function stickerExportLedger_(){var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(STICKER_EXPORT_SHEET);return sheet&&sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,8).getDisplayValues():[];}
+function adminStickerExportSummary(){requireAdmin_();var rows=stickerExportLedger_();if(!rows.length)return {lastOrder:null,lastExportAt:'',lastExportDisplay:'',ordersCount:0};var ids={},max=0;rows.forEach(function(r){ids[r[0]]=true;max=Math.max(max,Number(r[1])||0);});var last=rows[rows.length-1];return {lastBatch:last[4],lastOrder:Number(last[1]),lastBarcode:last[2],highestOrder:max,lastExportAt:last[3],lastExportDisplay:Utilities.formatDate(new Date(last[3]),'Asia/Amman','yyyy/MM/dd HH:mm:ss'),ordersCount:Object.keys(ids).length};}
 function adminRecordStickerExport(payload){
   var auth=requireAdmin_();payload=payload||{};var ids=payload.ids||[],batch=cleanId_(payload.batch,100),from=Number(payload.from),to=Number(payload.to);
   if(!batch||!Array.isArray(ids)||!ids.length||ids.length>2000||!Number.isSafeInteger(from)||!Number.isSafeInteger(to)||from<1||to<from||to-from>1999)throw new Error('بيانات سجل التصدير غير صحيحة.');
@@ -2851,3 +2851,18 @@ function adminRecordStickerExport(payload){
 }
 
 function stickerSentMap_(ledger){var sent={};ledger.forEach(function(r){var key=String(r[0]),date=String(r[3]);if(!sent[key]||date<sent[key])sent[key]=date;});return sent;}
+
+function adminCourierBatch(batch){
+  requireAdmin_();batch=cleanId_(batch,100);if(!batch)throw new Error('اختر دفعة تصدير أولًا.');
+  var ledger=stickerExportLedger_().filter(function(r){return r[4]===batch;}),wanted={};ledger.forEach(function(r){wanted[r[0]]={parcels:Number(r[7])||1,date:r[3]};});
+  var sheet=adminOrdersSheet_(),rows=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues():[],meta=adminMetaMap_();
+  var result=rows.filter(function(r){return wanted[stickerExportKey_(r)];}).map(function(r){var order=adminRowToObject_(r,0),m=meta[order.requestId]||{};return {key:stickerExportKey_(r),orderNumber:order.orderNumber,name:order.name,phone:order.phone,due:adminRound2_(Math.max(0,numberFromDisplay_(order.grandTotal)-(Number(m.amountPaid)||0))),parcels:wanted[stickerExportKey_(r)].parcels};}).sort(function(a,b){return Number(a.orderNumber)-Number(b.orderNumber);});
+  return {batch:batch,date:ledger.length?Utilities.formatDate(new Date(ledger[0][3]),'Asia/Amman','yyyy/MM/dd HH:mm:ss'):'',rows:result};
+}
+function adminSaveCourierParcels(payload){
+  requireAdmin_();payload=payload||{};var batch=cleanId_(payload.batch,100),values=payload.rows||[],map={};if(!batch||!Array.isArray(values)||values.length>2000)throw new Error('بيانات الدفعة غير صحيحة.');
+  values.forEach(function(r){var n=Number(r.parcels);if(!Number.isInteger(n)||n<1||n>99)throw new Error('عدد الطرود بين 1 و99.');map[String(r.key)]=n;});
+  var lock=LockService.getScriptLock();lock.waitLock(20000);try{var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(STICKER_EXPORT_SHEET);if(!sheet||sheet.getLastRow()<2)throw new Error('لا يوجد سجل لهذه الدفعة.');var rows=sheet.getRange(2,1,sheet.getLastRow()-1,8).getDisplayValues(),found=0;
+    var out=rows.map(function(r){if(r[4]===batch&&Object.prototype.hasOwnProperty.call(map,r[0])){found++;return [map[r[0]]];}return [r[7]||1];});if(found!==values.length)throw new Error('تغيرت بيانات الدفعة. أعد تحميل الكشف.');sheet.getRange(1,8).setValue('عدد الطرود');sheet.getRange(2,8,out.length,1).setValues(out);return {ok:true};
+  }finally{lock.releaseLock();}
+}
