@@ -2809,8 +2809,34 @@ function adminStickerOrders(selector){
   if(!Number.isSafeInteger(from)||!Number.isSafeInteger(to)||from<1||to<from||to-from>1999||!Number.isSafeInteger(offset)||offset<0)throw new Error('حدد نطاقًا صحيحًا حتى 2000 رقم طلب لكل ملف.');
   var anchor=adminStickerSettings();if(!anchor)throw new Error('ثبّت رقم بداية الباركود أولًا.');if(!stickerAnchorEqual_(selector.anchor,JSON.stringify(anchor)))throw new Error('تغيرت إعدادات الباركود. أعد تحميلها قبل التصدير.');
   var sheet=adminOrdersSheet_(),rows=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues():[];
-  var selected=rows.filter(function(r){var n=adminOrderNumber_(r[0]);return n>=from&&n<=to;}).sort(function(a,b){return adminOrderNumber_(a[0])-adminOrderNumber_(b[0]);});
-  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
+  var exported={};stickerExportLedger_().forEach(function(r){exported[r[0]]=true;});
+  var selected=rows.filter(function(r){var n=adminOrderNumber_(r[0]);return n>=from&&n<=to&&(selector.includeExported||!exported[stickerExportKey_(r)]);}).sort(function(a,b){return adminOrderNumber_(a[0])-adminOrderNumber_(b[0]);});
+  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.stickerKey=stickerExportKey_(r);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
 }
 
 function stickerAnchorEqual_(left,right){try{var a=left?JSON.parse(String(left)):null,b=right?JSON.parse(String(right)):null;return !a&&!b||!!a&&!!b&&Number(a.order)===Number(b.order)&&String(a.barcode)===String(b.barcode);}catch(e){return false;}}
+
+var STICKER_EXPORT_SHEET='سجل تصدير الستكرات';
+function stickerExportKey_(row){return String(row[16]||'order:'+adminOrderNumber_(row[0]));}
+function stickerExportLedger_(){var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(STICKER_EXPORT_SHEET);return sheet&&sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,7).getDisplayValues():[];}
+function adminStickerExportSummary(){requireAdmin_();var rows=stickerExportLedger_();if(!rows.length)return {lastOrder:null,lastExportAt:'',lastExportDisplay:'',ordersCount:0};var ids={},max=0;rows.forEach(function(r){ids[r[0]]=true;max=Math.max(max,Number(r[1])||0);});var last=rows[rows.length-1];return {lastOrder:Number(last[1]),lastBarcode:last[2],highestOrder:max,lastExportAt:last[3],lastExportDisplay:Utilities.formatDate(new Date(last[3]),'Asia/Amman','yyyy/MM/dd HH:mm:ss'),ordersCount:Object.keys(ids).length};}
+function adminRecordStickerExport(payload){
+  var auth=requireAdmin_();payload=payload||{};var ids=payload.ids||[],batch=cleanId_(payload.batch,100),from=Number(payload.from),to=Number(payload.to);
+  if(!batch||!Array.isArray(ids)||!ids.length||ids.length>2000||!Number.isSafeInteger(from)||!Number.isSafeInteger(to)||from<1||to<from||to-from>1999)throw new Error('بيانات سجل التصدير غير صحيحة.');
+  var lock=LockService.getScriptLock();lock.waitLock(20000);
+  try{
+    var ledger=stickerExportLedger_();if(ledger.some(function(r){return r[4]===batch;}))return adminStickerExportSummary();
+    var seen={},wanted={};ledger.forEach(function(r){seen[r[0]]=true;});ids.forEach(function(id){wanted[String(id)]=true;});
+    var anchor=adminStickerSettings();if(!anchor||!stickerAnchorEqual_(payload.anchor,JSON.stringify(anchor)))throw new Error('تغيرت بداية الباركود. أعد تجهيز الملف.');
+    var sheet=adminOrdersSheet_(),rows=sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues(),chosen=[];
+    rows.forEach(function(row,i){var key=stickerExportKey_(row),num=adminOrderNumber_(row[0]);if(wanted[key]){if(num<from||num>to)throw new Error('طلب خارج نطاق التصدير.');if(seen[key]&&!payload.includeExported)throw new Error('صُدّرت ستكرات بعض الطلبات من جلسة أخرى. حدّث الصفحة وأعد التصدير.');chosen.push({key:key,num:num,row:i+2});}});
+    if(chosen.length!==ids.length)throw new Error('تغيرت قائمة الطلبات. أعد تجهيز الملف.');
+    chosen.sort(function(a,b){return a.num-b.num;});
+    var ss=SpreadsheetApp.openById(SHEET_ID),log=ss.getSheetByName(STICKER_EXPORT_SHEET);if(!log){log=ss.insertSheet(STICKER_EXPORT_SHEET);log.getRange(1,1,1,7).setValues([['معرف الطلب','رقم الطلب','الباركود','وقت التصدير','معرف دفعة التصدير','عدد ستكرات الملف','الموظف']]);log.setFrozenRows(1);}
+    var now=new Date().toISOString(),records=chosen.map(function(r){return[r.key,String(r.num),String(Number(anchor.barcode)+r.num-1).padStart(anchor.barcode.length,'0'),now,batch,String(payload.pages||''),auth.email||''];});
+    var sortedRows=chosen.slice().sort(function(a,b){return a.row-b.row;}),ranges=[],start=sortedRows[0].row,end=start;sortedRows.slice(1).forEach(function(r){if(r.row===end+1)end=r.row;else{ranges.push('A'+start+':Q'+end);start=end=r.row;}});ranges.push('A'+start+':Q'+end);
+    sheet.getRangeList(ranges).setBackground('#dff4e4');
+    log.getRange(log.getLastRow()+1,1,records.length,7).setNumberFormat('@').setValues(records);
+    return adminStickerExportSummary();
+  }finally{lock.releaseLock();}
+}
