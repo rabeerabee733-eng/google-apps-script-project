@@ -2,7 +2,7 @@ var SHEET_ID = '1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w';
 var SHEET_NAME = 'الطلبات';
 var WA_NUMBER = '0798382004';
 var APP_VERSION = '2026-10-12-BOOKING-STAFF-V4';
-var ADMIN_VERSION = '2026-10-13-ADMIN-REVIEW-V4';
+var ADMIN_VERSION = '2026-10-13-OPERATIONS-V5';
 var ADMIN_EMAILS = ['rabeerabee733@gmail.com'];
 var ADMIN_LOG_SHEET_NAME = 'سجل الإدارة';
 var ADMIN_META_SHEET_NAME = 'بيانات الإدارة';
@@ -219,6 +219,7 @@ function doGet(e) {
       50
     );
 
+  if (action === 'track') { return serveCustomerTracking_(); }
   if (action === 'employee') { return serveAdmin_(true); }
   if (action === 'ajyalAdmin') { return serveAjyalAdmin_(); }
 
@@ -2768,12 +2769,13 @@ function ajyalAdminList(filters) {
   var width=sheet?Math.min(12,sheet.getLastColumn()):12;
   var rows=sheet&&sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,width).getDisplayValues():[];
   var employeeCounts={};AJYAL_EMPLOYEES.forEach(function(name){employeeCounts[name]=0;});rows.forEach(function(r){if(r[5]==='مكتمل'&&employeeCounts.hasOwnProperty(r[11]))employeeCounts[r[11]]++;});
+  var statusCounts={};AJYAL_STATUSES.forEach(function(s){statusCounts[s]=0;});rows.forEach(function(r){if(statusCounts.hasOwnProperty(r[5]))statusCounts[r[5]]++;});
   var employee=cleanText_(filters.employee,100);
   var query=cleanText_(filters.query,150).toLowerCase(),status=cleanText_(filters.status,30);
-  rows=rows.filter(function(r){return(!employee||(r[5]==='مكتمل'&&r[11]===employee))&&(!status||r[5]===status)&&(!query||[r[1],r[2],r[4],r[9],r[11]].join(' ').toLowerCase().indexOf(query)!==-1);});
+  rows=rows.filter(function(r){return(!filters.followup||['مكتمل','ملغي'].indexOf(r[5])<0)&&(!employee||(r[5]==='مكتمل'&&r[11]===employee))&&(!status||r[5]===status)&&(!query||[r[1],r[2],r[4],r[9],r[11]].join(' ').toLowerCase().indexOf(query)!==-1);});
   rows.sort(function(a,b){return Number(a[1])-Number(b[1])||a[0].localeCompare(b[0],undefined,{numeric:true});});
   var offset=Math.max(0,Math.floor(Number(filters.offset)||0));
-  return {employeeCounts:employeeCounts,total:rows.length,statuses:AJYAL_STATUSES,grades:AJYAL_GRADES,employees:AJYAL_EMPLOYEES,rows:rows.slice(offset,offset+100).map(function(r){return {requestId:r[0],orderNumber:r[1],teacherName:r[2],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8],grade:r[9]||'',parentRequestId:r[10]||r[0],completedBy:r[5]==='مكتمل'?(r[11]||''):''};})};
+  return {statusCounts:statusCounts,employeeCounts:employeeCounts,total:rows.length,statuses:AJYAL_STATUSES,grades:AJYAL_GRADES,employees:AJYAL_EMPLOYEES,rows:rows.slice(offset,offset+100).map(function(r){return {requestId:r[0],orderNumber:r[1],teacherName:r[2],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8],grade:r[9]||'',parentRequestId:r[10]||r[0],completedBy:r[5]==='مكتمل'?(r[11]||''):''};})};
 }
 function ajyalAdminUpdate(payload) {
   var actor=requireAdmin_();payload=payload||{};
