@@ -1,0 +1,56 @@
+// Accounts apply only to the integrated Ajyal/sticker portal. Existing order RPCs
+// continue to require an allowlisted Google administrator.
+var PORTAL_PERMISSIONS_=['ajyalRead','ajyalEdit','stickerRead','stickerExport'];
+var portalContext_=null;
+function portalAccounts_(){return JSON.parse(PropertiesService.getScriptProperties().getProperty('ADMIN_PORTAL_ACCOUNTS_V1')||'[]');}
+function portalPublic_(a){return {id:a.id,username:a.username,employee:a.employee,active:a.active,permissions:a.permissions,version:a.version};}
+function portalDigest_(s){return Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,s));}
+function portalPassword_(password,salt){
+  // PBKDF2-HMAC-SHA256, 32 bytes, unique salt. Passwords never persisted.
+  var key=Utilities.newBlob(password).getBytes(),bytes=Utilities.newBlob(salt).getBytes().concat([0,0,0,1]);
+  var u=Utilities.computeHmacSha256Signature(bytes,key),out=u.slice();
+  for(var i=1;i<20000;i++){u=Utilities.computeHmacSha256Signature(u,key);for(var j=0;j<out.length;j++)out[j]=(out[j]^u[j]);}
+  return Utilities.base64EncodeWebSafe(out.map(function(v){return v>127?v-256:v;}));
+}
+function portalEqual_(a,b){var mismatch=a.length^b.length;for(var i=0;i<Math.max(a.length,b.length);i++)mismatch|=(a.charCodeAt(i)||0)^(b.charCodeAt(i)||0);return mismatch===0;}
+function adminPortalLogin(payload){
+  payload=payload||{};var username=String(payload.username||'').trim().toLowerCase(),password=String(payload.password||'');
+  if(!/^[a-z0-9_.-]{3,40}$/.test(username)||password.length>128)throw new Error('بيانات الدخول غير صحيحة.');
+  var lock=LockService.getScriptLock();lock.waitLock(20000);
+  try{var cache=CacheService.getScriptCache(),key='portal-attempt:'+portalDigest_(username),attempts=Number(cache.get(key)||0);if(attempts>=5)throw new Error('محاولات كثيرة. انتظر 15 دقيقة.');cache.put(key,String(attempts+1),900);
+    var a=portalAccounts_().filter(function(a){return a.username===username;})[0];
+    var hash=portalPassword_(password,a?a.salt:'unrecognized-username-salt');
+    if(!a||!a.active||!portalEqual_(hash,a.hash))throw new Error('بيانات الدخول غير صحيحة.');
+    cache.remove(key);var token=Utilities.getUuid()+Utilities.getUuid();cache.put('portal-session:'+portalDigest_(token),JSON.stringify({id:a.id,version:a.version}),21600);return {token:token,user:portalPublic_(a)};
+  }finally{lock.releaseLock();}
+}
+function portalIdentity_(token){
+  if(!token){var native=adminAuth_();if(native.ok)return {native:true,email:native.email,employee:'المدير',permissions:PORTAL_PERMISSIONS_.slice()};throw new Error('سجل الدخول أولًا.');}
+  var session=JSON.parse(CacheService.getScriptCache().get('portal-session:'+portalDigest_(String(token)))||'null');
+  var a=session&&portalAccounts_().filter(function(a){return a.id===session.id&&a.active&&a.version===session.version;})[0];if(!a)throw new Error('انتهت الجلسة أو تغيرت صلاحياتك. سجل الدخول مجددًا.');
+  var result=portalPublic_(a);result.email='employee:'+a.username;return result;
+}
+function adminPortalSession(token){var a=portalIdentity_(token);return {native:!!a.native,user:a};}
+function adminPortalLogout(token){if(token)CacheService.getScriptCache().remove('portal-session:'+portalDigest_(String(token)));return {ok:true};}
+function adminPortalAccounts(){requireAdmin_();return portalAccounts_().map(portalPublic_);}
+function adminPortalSaveAccount(payload){
+  // Only the existing allowlisted Google manager can administer credentials.
+  requireAdmin_();payload=payload||{};var username=String(payload.username||'').trim().toLowerCase(),employee=cleanText_(payload.employee,100),password=String(payload.password||'');
+  if(!/^[a-z0-9_.-]{3,40}$/.test(username)||AJYAL_EMPLOYEES.indexOf(employee)===-1)throw new Error('اختر موظفًا واسم مستخدم صحيحًا (3–40 حرفًا إنجليزيًا أو رقمًا).');
+  var permissions=payload.permissions;if(!Array.isArray(permissions)||permissions.some(function(p){return PORTAL_PERMISSIONS_.indexOf(p)===-1;}))throw new Error('صلاحيات غير صحيحة.');
+  if(permissions.indexOf('ajyalEdit')!==-1&&permissions.indexOf('ajyalRead')===-1||permissions.indexOf('stickerExport')!==-1&&permissions.indexOf('stickerRead')===-1)throw new Error('صلاحية التعديل أو التصدير تتطلب صلاحية العرض.');
+  var lock=LockService.getScriptLock();lock.waitLock(20000);
+  try{var rows=portalAccounts_(),id=String(payload.id||''),a=rows.filter(function(a){return a.id===id;})[0];if(id&&!a)throw new Error('الحساب غير موجود.');if(rows.some(function(r){return r.username===username&&r.id!==id;}))throw new Error('اسم المستخدم مستخدم.');if(a&&String(payload.version)!==a.version)throw new Error('تغير الحساب. حدّث القائمة.');if((!a||password)&& (password.length<10||password.length>128))throw new Error('كلمة المرور من 10 إلى 128 حرفًا.');if(!a){if(rows.length>=12)throw new Error('الحد الأقصى 12 حسابًا.');a={id:Utilities.getUuid()};rows.push(a);}a.username=username;a.employee=employee;a.active=payload.active!==false;a.permissions=permissions.slice();a.version=Utilities.getUuid();if(password){a.salt=Utilities.getUuid()+Utilities.getUuid();a.hash=portalPassword_(password,a.salt);}var serialized=JSON.stringify(rows);if(Utilities.newBlob(serialized).getBytes().length>8500)throw new Error('بلغت مساحة الحسابات حدّها.');PropertiesService.getScriptProperties().setProperty('ADMIN_PORTAL_ACCOUNTS_V1',serialized);return rows.map(portalPublic_);
+  }finally{lock.releaseLock();}
+}
+function adminPortalRpc(token,method,args){
+  var permissions={ajyalAdminList:'ajyalRead',ajyalAdminUpdate:'ajyalEdit',adminStickerSettings:'stickerRead',adminStickerOrders:'stickerRead',adminStickerExportSummary:'stickerRead',adminRecordStickerExport:'stickerExport'};
+  if(!Object.prototype.hasOwnProperty.call(permissions,method))throw new Error('عملية غير مسموحة.');
+  var user=portalIdentity_(token);if(!user.native&&user.permissions.indexOf(permissions[method])===-1)throw new Error('ليس لديك صلاحية لهذه العملية.');
+  args=Array.isArray(args)?args:[];if(args.length>1)throw new Error('معاملات غير صحيحة.');
+  var handlers={ajyalAdminList:ajyalAdminList,ajyalAdminUpdate:ajyalAdminUpdate,adminStickerSettings:adminStickerSettings,adminStickerOrders:adminStickerOrders,adminStickerExportSummary:adminStickerExportSummary,adminRecordStickerExport:adminRecordStickerExport};
+  if(method==='ajyalAdminUpdate'&&!user.native&&args[0]&&args[0].status==='مكتمل')args[0].completedBy=user.employee;
+  portalContext_=user;try{return handlers[method].apply(null,args);}finally{portalContext_=null;}
+}
+
+function portalStickerMeta_(){var ss=SpreadsheetApp.openById(SHEET_ID),sheet=ss.getSheetByName(ADMIN_META_SHEET_NAME),map={};if(!sheet||sheet.getLastRow()<2)return map;var timezone=ss.getSpreadsheetTimeZone();sheet.getRange(2,1,sheet.getLastRow()-1,10).getValues().forEach(function(r){var m=adminMetaToObject_(r,timezone);if(m.requestId)map[m.requestId]=m;});return map;}

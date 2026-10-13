@@ -1681,21 +1681,6 @@ var ADMIN_PRIORITIES = ['عادي', 'مستعجل'];
 function serveAdmin_() {
   var auth = adminAuth_();
 
-  if (!auth.ok) {
-    return HtmlService
-      .createHtmlOutput(
-        '<!doctype html><html lang="ar" dir="rtl"><head>' +
-        '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
-        '<title>دخول غير مسموح</title></head>' +
-        '<body style="font-family:Arial;background:#111;color:#fff;text-align:center;padding:60px 20px">' +
-        '<h2 style="color:#d4af37">دخول غير مسموح</h2>' +
-        '<p>افتح الرابط بعد تسجيل الدخول بالحساب الإداري المصرح له.</p>' +
-        '</body></html>'
-      )
-      .setTitle('دخول غير مسموح')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
-  }
-
   return HtmlService
     .createTemplateFromFile('Admin')
     .evaluate()
@@ -1716,6 +1701,7 @@ function adminAuth_() {
 }
 
 function requireAdmin_() {
+  if (typeof portalContext_ !== 'undefined' && portalContext_) return portalContext_;
   var auth = adminAuth_();
   if (!auth.ok) {
     throw new Error('ليس لديك تصريح لاستخدام واجهة الإدارة.');
@@ -2820,7 +2806,8 @@ function adminStickerOrders(selector){
   var sheet=adminOrdersSheet_(),rows=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues():[];
   var exported={};stickerExportLedger_().forEach(function(r){exported[r[0]]=true;});
   var selected=rows.filter(function(r){var n=adminOrderNumber_(r[0]);return n>=from&&n<=to&&(selector.includeExported||!exported[stickerExportKey_(r)]);}).sort(function(a,b){return adminOrderNumber_(a[0])-adminOrderNumber_(b[0]);});
-  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.stickerKey=stickerExportKey_(r);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
+  var portalMeta=portalStickerMeta_();
+  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.amountPaid=Number((portalMeta[order.requestId]||{}).amountPaid)||0;order.stickerKey=stickerExportKey_(r);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
 }
 
 function stickerAnchorEqual_(left,right){try{var a=left?JSON.parse(String(left)):null,b=right?JSON.parse(String(right)):null;return !a&&!b||!!a&&!!b&&Number(a.order)===Number(b.order)&&String(a.barcode)===String(b.barcode);}catch(e){return false;}}
@@ -2882,3 +2869,4 @@ function adminCourierBatches(){requireAdmin_();var groups={},snapshots=courierSn
 function adminCourierHandover(payload){var auth=requireAdmin_();payload=payload||{};var batch=cleanId_(payload.batch,100),lock=LockService.getScriptLock();lock.waitLock(20000);try{var snapshots=courierSnapshots_();if(snapshots.some(function(r){return r.batch===batch;}))return adminCourierBatch(batch);var data=courierCurrentBatch_(batch),seen={};snapshots.forEach(function(r){seen[r.key]=true;});var duplicates=data.rows.filter(function(r){return seen[r.key];});if(duplicates.length&&!payload.excludeDuplicates)throw new Error('سبق تسليم '+duplicates.length+' طلب للشركة. اختر تسليم الطلبات غير المسلّمة فقط.');var signature=JSON.stringify(data.rows.map(function(r){return [r.key,r.barcode,r.name,r.phone,r.governorate,r.due];}));if(String(payload.signature||'')!==signature)throw new Error('تغيرت بيانات الطلبات منذ فتح الكشف. أعد تحميل الدفعة وراجع مبالغها.');var rows=data.rows.filter(function(r){return !seen[r.key];});if(!rows.length)throw new Error('لا توجد طلبات غير مسلّمة في هذه الدفعة.');var now=new Date().toISOString();courierAppend_(COURIER_HANDOVER_SHEET,['الدفعة','معرف الطلب','رقم الطلب','الباركود','الاسم','الهاتف','المحافظة','التحصيل','أجرة التوصيل','مستحق الشركة','تاريخ التسليم للشركة','الموظف'],rows.map(function(r){return [batch,r.key,r.orderNumber,r.barcode,r.name,r.phone,r.governorate,r.due,2,r.companyDue,now,auth.email];}));return adminCourierBatch(batch);}finally{lock.releaseLock();}}
 function adminCourierSetStatus(payload){var auth=requireAdmin_();payload=payload||{};var batch=cleanId_(payload.batch,100),key=cleanId_(payload.key,150),status=cleanText_(payload.status,40),reason=cleanText_(payload.reason,500);if(COURIER_STATUSES.indexOf(status)<0)throw new Error('اختر حالة توصيل صحيحة.');if((status==='تعذّر التسليم'||status==='مرتجع')&&!reason)throw new Error('اكتب سبب تعذّر التسليم أو الإرجاع.');var lock=LockService.getScriptLock();lock.waitLock(20000);try{if(!courierSnapshots_().some(function(r){return r.batch===batch&&r.key===key;}))throw new Error('أكد تسليم الدفعة للشركة أولًا.');var current=courierTracking_()[key]||{};if(String(current.updatedAt||'')!==String(payload.updatedAt||''))throw new Error('تغيرت الحالة في جلسة أخرى. أعد تحميل الكشف.');courierAppend_(COURIER_STATUS_SHEET,['معرف الطلب','حالة التوصيل','السبب','وقت التعديل','الموظف','الدفعة'],[[key,status,reason,new Date().toISOString(),auth.email,batch]]);return adminCourierBatch(batch);}finally{lock.releaseLock();}}
 function adminCourierRecordPayment(payload){var auth=requireAdmin_();payload=payload||{};var batch=cleanId_(payload.batch,100),id=cleanId_(payload.id,100),amount=Number(payload.amount),date=String(payload.date||''),reference=cleanText_(payload.reference,200);if(!id||!Number.isFinite(amount)||amount<=0||Math.abs(amount*100-Math.round(amount*100))>0.00001)throw new Error('أدخل مبلغًا موجبًا بدقة قرشين.');if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||isNaN(Date.parse(date+'T12:00:00Z'))||new Date(date+'T12:00:00Z').toISOString().slice(0,10)!==date)throw new Error('اختر تاريخ تحويل صحيح.');var lock=LockService.getScriptLock();lock.waitLock(20000);try{var existing=courierRead_(COURIER_PAYMENT_SHEET,7).filter(function(r){return r[0]===id;})[0];if(existing){if(existing[1]!==batch||Number(existing[2])!==amount||existing[3]!==date||existing[4]!==ajyalCell_(reference))throw new Error('معرف التحويل مستخدم ببيانات مختلفة.');return adminCourierBatch(batch);}var data=adminCourierBatch(batch);if(!data.confirmed)throw new Error('أكد تسليم الدفعة للشركة أولًا.');if(Math.round(amount*100)>Math.round(data.remaining*100))throw new Error('المبلغ أكبر من المتبقي على الشركة.');courierAppend_(COURIER_PAYMENT_SHEET,['معرف التحويل','الدفعة','المبلغ','تاريخ التحويل','المرجع','وقت التسجيل','الموظف'],[[id,batch,amount,date,reference,new Date().toISOString(),auth.email]]);return adminCourierBatch(batch);}finally{lock.releaseLock();}}
+

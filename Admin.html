@@ -228,7 +228,7 @@
   $('searchBtn').onclick=()=>{todayMode=false;searchOrders()};$('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();todayMode=false;searchOrders()}});$('todayBtn').onclick=()=>{todayMode=true;searchOrders()};$('clearBtn').onclick=resetFilters;$('filterGovernorate').onchange=fillFilterDistricts;$('selectAll').onchange=e=>{if(e.target.checked)currentRows.forEach(r=>selected.add(r.requestId));else currentRows.forEach(r=>selected.delete(r.requestId));renderResults(currentRows)};$('bulkStatusBtn').onclick=bulkStatus;$('prepSelectedBtn').onclick=prepSelected;$('exportBtn').onclick=exportCsv;
   $('prepRangeBtn').onclick=()=>generatePrep({fromOrder:$('prepFrom').value,toOrder:$('prepTo').value});$('printPrepBtn').onclick=()=>window.print();$('refreshDeliveryBtn').onclick=loadDelivery;$('refreshTrashBtn').onclick=loadTrash;$('refreshAllBtn').onclick=refreshAll;
   $('newBtn').onclick=()=>{showView('ordersView');openEditor(null,'create')};$('closeEditor').onclick=closeEditor;$('cancelBtn').onclick=closeEditor;$('governorate').onchange=()=>fillDistricts('');$('productsTotal').oninput=calculateGrand;$('deliveryFee').oninput=calculateGrand;$('phone').onblur=duplicateCheck;$('orderForm').onsubmit=review;$('backEdit').onclick=()=>$('confirmBox').classList.remove('show');$('confirmSave').onclick=save;$('copyBtn').onclick=copyCurrent;$('whatsappBtn').onclick=()=>openWhatsApp(currentOriginal);$('deleteBtn').onclick=deleteCurrent;
-  load();
+  // Initialization runs after portal authentication.
 
 const STICKER_LOGO=[
 'data:image\x2fpng;base64,iVBORw0KGgoAAAANSUhEUgAAAJwAAACcCAIAAAAF2lUaAAAACXBIWXMAAAsSAAALEgHS3X78AAAWOUlEQVR42u1de3wNxx4fh6pP69Xqp7Q5NvEIiZbEmwhSCVraiISiiXgm3lSqty',
@@ -344,5 +344,7 @@ function courierExcel(data){const xml=value=>String(value??'').replace(/[\x00-\x
 $('downloadCourierExcel').onclick=()=>{if(!courierBatch||!courierBatch.rows.length)return;const blob=courierExcel(courierBatch),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='كشف_المندوب_'+courierBatch.rows[0].orderNumber+'_'+courierBatch.rows[courierBatch.rows.length-1].orderNumber+'.xlsx';a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);};
 
 </script>
+<?!= HtmlService.createHtmlOutputFromFile("AdminPortal").getContent(); ?>
 </body>
 </html>
+
