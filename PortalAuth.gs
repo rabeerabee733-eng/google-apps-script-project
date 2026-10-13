@@ -30,7 +30,7 @@ function portalIdentity_(token){
   var a=session&&portalAccounts_().filter(function(a){return a.id===session.id&&a.active&&a.version===session.version;})[0];if(!a)throw new Error('انتهت الجلسة أو تغيرت صلاحياتك. سجل الدخول مجددًا.');
   var result=portalPublic_(a);result.email='employee:'+a.username;return result;
 }
-function adminPortalSession(token){var a=portalIdentity_(token);return {native:!!a.native,user:a};}
+function adminPortalSession(token,employeeEntry){if(employeeEntry&&!token)throw new Error('سجل دخول الموظف أولًا.');var a=portalIdentity_(token);return {native:!!a.native,user:a};}
 function adminPortalLogout(token){if(token)CacheService.getScriptCache().remove('portal-session:'+portalDigest_(String(token)));return {ok:true};}
 function adminPortalAccounts(){requireAdmin_();return portalAccounts_().map(portalPublic_);}
 function adminPortalSaveAccount(payload){

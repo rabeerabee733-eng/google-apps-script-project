@@ -1678,12 +1678,12 @@ var ADMIN_STATUSES = ['جديد', 'قيد التجهيز', 'جاهز', 'خرج �
 var ADMIN_PAYMENT_STATUSES = ['غير مدفوع', 'مدفوع جزئيًا', 'مدفوع'];
 var ADMIN_PRIORITIES = ['عادي', 'مستعجل'];
 
-function serveAdmin_() {
+function serveAdmin_(employeeEntry) {
   var auth = adminAuth_();
 
-  return HtmlService
-    .createTemplateFromFile('Admin')
-    .evaluate()
+  var template = HtmlService.createTemplateFromFile('Admin');
+  template.employeeEntry = Boolean(employeeEntry);
+  return template.evaluate()
     .setTitle('إدارة طلبات التحضير الإلكتروني')
     .addMetaTag('viewport', 'width=device-width,initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
