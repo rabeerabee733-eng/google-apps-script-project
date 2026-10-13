@@ -2184,6 +2184,11 @@ function buildWizardReview(){
             '.qty-paper'
           );
 
+        if (Number(totalInput.value) === 0) {
+          if (folderInput) folderInput.value = '0';
+          if (paperInput) paperInput.value = '0';
+        }
+
         if (folderInput) {
           sanitizeQuantityInput(
             folderInput
@@ -2289,6 +2294,8 @@ function buildWizardReview(){
                 totalInput.value
               ) || 0
             : 0;
+
+        if (qty <= 0) continue;
 
         var price =
           Number(
@@ -2449,6 +2456,8 @@ function buildWizardReview(){
                 totalInput.value
               ) || 0
             : 0;
+
+        if (qty <= 0) continue;
 
         var item = {
           productId:
