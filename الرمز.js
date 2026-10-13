@@ -2,7 +2,7 @@ var SHEET_ID = '1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w';
 var SHEET_NAME = 'الطلبات';
 var WA_NUMBER = '0798382004';
 var APP_VERSION = '2026-10-12-BOOKING-STAFF-V4';
-var ADMIN_VERSION = '2026-10-13-TAB-PERMISSIONS-V3';
+var ADMIN_VERSION = '2026-10-13-ADMIN-REVIEW-V4';
 var ADMIN_EMAILS = ['rabeerabee733@gmail.com'];
 var ADMIN_LOG_SHEET_NAME = 'سجل الإدارة';
 var ADMIN_META_SHEET_NAME = 'بيانات الإدارة';
@@ -2835,12 +2835,14 @@ function adminRecordStickerExport(payload){
   if(!batch||!Array.isArray(ids)||!ids.length||ids.length>2000||!Number.isSafeInteger(from)||!Number.isSafeInteger(to)||from<1||to<from||to-from>1999)throw new Error('بيانات سجل التصدير غير صحيحة.');
   var lock=LockService.getScriptLock();lock.waitLock(20000);
   try{
-    var ledger=stickerExportLedger_();if(ledger.some(function(r){return r[4]===batch;}))return adminStickerExportSummary();
+    var ledger=stickerExportLedger_(),sameBatch=ledger.filter(function(r){return r[4]===batch;});
+    if(sameBatch.length&&(sameBatch.length!==ids.length||sameBatch.some(function(r){return ids.indexOf(r[0])<0;})))throw new Error('معرف الدفعة مستخدم لطلبات مختلفة. أعد تجهيز الملف.');
     var previewMeta=payload.revisions?portalStickerMeta_():{};var seen={},wanted={};ledger.forEach(function(r){seen[r[0]]=true;});ids.forEach(function(id){wanted[String(id)]=true;});
     var anchor=adminStickerSettings();if(!anchor||!stickerAnchorEqual_(payload.anchor,JSON.stringify(anchor)))throw new Error('تغيرت بداية الباركود. أعد تجهيز الملف.');
     var sheet=adminOrdersSheet_(),rows=sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues(),chosen=[];
-    rows.forEach(function(row,i){var key=stickerExportKey_(row),num=adminOrderNumber_(row[0]);if(wanted[key]){if(payload.revisions&&payload.revisions[key]!==portalDigest_(JSON.stringify([row,Number((previewMeta[String(row[16])]||{}).amountPaid)||0])))throw new Error('تغيرت بيانات طلب منذ المعاينة. أعد معاينة الستكرات.');if(num<from||num>to)throw new Error('طلب خارج نطاق التصدير.');if(seen[key]&&!payload.includeExported)throw new Error('صُدّرت ستكرات بعض الطلبات من جلسة أخرى. حدّث الصفحة وأعد التصدير.');chosen.push({key:key,num:num,row:i+2});}});
+    rows.forEach(function(row,i){var key=stickerExportKey_(row),num=adminOrderNumber_(row[0]);if(wanted[key]){if(payload.revisions&&payload.revisions[key]!==portalDigest_(JSON.stringify([row,Number((previewMeta[String(row[16])]||{}).amountPaid)||0])))throw new Error('تغيرت بيانات طلب منذ المعاينة. أعد معاينة الستكرات.');if(num<from||num>to)throw new Error('طلب خارج نطاق التصدير.');if(seen[key]&&!payload.includeExported&&!sameBatch.length)throw new Error('صُدّرت ستكرات بعض الطلبات من جلسة أخرى. حدّث الصفحة وأعد التصدير.');chosen.push({key:key,num:num,row:i+2});}});
     if(chosen.length!==ids.length)throw new Error('تغيرت قائمة الطلبات. أعد تجهيز الملف.');
+    if(sameBatch.length)return adminStickerExportSummary();
     chosen.sort(function(a,b){return a.num-b.num;});
     var ss=SpreadsheetApp.openById(SHEET_ID),log=ss.getSheetByName(STICKER_EXPORT_SHEET);if(!log){log=ss.insertSheet(STICKER_EXPORT_SHEET);log.getRange(1,1,1,7).setValues([['معرف الطلب','رقم الطلب','الباركود','وقت التصدير','معرف دفعة التصدير','عدد ستكرات الملف','الموظف']]);log.setFrozenRows(1);}
     var now=new Date().toISOString(),records=chosen.map(function(r){return[r.key,String(r.num),String(Number(anchor.barcode)+r.num-1).padStart(anchor.barcode.length,'0'),now,batch,String(payload.pages||''),auth.email||''];});

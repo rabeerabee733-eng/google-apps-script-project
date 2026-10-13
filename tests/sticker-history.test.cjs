@@ -6,3 +6,13 @@ let sheetOrder=c.adminStickerOrders({from:1,to:500,anchor:payload.anchor,include
 const valid=rows[0].slice();valid[14]='1) حقيبة الصف الأول — العدد: ٣ — مجلد: ٢ — ورقي: ١ — المجموع: 30 د';valid[8]=3;valid[9]=2;valid[10]=1;assert.equal(c.stickerVerifyPackaging_(valid).paperCount,1);valid[10]=2;assert.throws(()=>c.stickerVerifyPackaging_(valid),/لا تطابق/);valid[10]=1;valid[14]=valid[14].replace('ورقي: ١','ورقي: ٢');assert.throws(()=>c.stickerVerifyPackaging_(valid),/لا يساوي/);console.log('PASS: per-item and Sheet total packaging checks, Arabic numerals, and mismatch rejection.');
 
 rows[0][8]=5;rows[0][9]=5;rows[0][14]='1) حقيبة الصف الأول — العدد: 2 — مجلد: 2 — ورقي: 0 — المجموع: 20 د\n2) حقيبة الصف الثاني — العدد: 2 — مجلد: 2 — ورقي: 0 — المجموع: 20 د\n3) حقيبة الصف الثالث — العدد: 2 — مجلد: 2 — ورقي: 0 — المجموع: 20 د';const loose=c.adminStickerOrders({from:500,to:500,anchor:payload.anchor,includeExported:true});assert.equal(loose.rows[0].itemsText,rows[0][14]);c.adminRecordStickerExport({ids:['req500'],batch:'unrestricted_preview',from:500,to:500,anchor:payload.anchor,includeExported:true,revisions:{req500:loose.rows[0].stickerRevision}});console.log('PASS: mismatched summary totals do not block exporting exact Drive product details.');
+
+// A retry may reuse a recorded batch only when its current order snapshot is unchanged.
+const retryRows=c.adminStickerOrders({from:2,to:2,anchor:payload.anchor,includeExported:true}).rows;
+const retry={ids:['req2'],batch:'review_retry',from:2,to:2,anchor:payload.anchor,includeExported:true,revisions:{req2:retryRows[0].stickerRevision}};
+c.adminRecordStickerExport(retry);const countBefore=logs.length,colorBefore=colors.length;
+c.adminRecordStickerExport(retry);assert.equal(logs.length,countBefore);assert.equal(colors.length,colorBefore);
+rows[1][14]+=' محدث';assert.throws(()=>c.adminRecordStickerExport(retry),/تغيرت بيانات طلب/);assert.equal(logs.length,countBefore);
+assert.throws(()=>c.adminRecordStickerExport({...retry,ids:['req500'],from:1,to:500}),/طلبات مختلفة/);
+assert.throws(()=>c.adminRecordStickerExport({...retry,anchor:JSON.stringify({order:1,barcode:'2000000'})}),/تغيرت بداية الباركود/);
+console.log('PASS: repeated batch downloads validate current Drive data and barcode, cannot swap orders, and do not double-count or recolor.');
