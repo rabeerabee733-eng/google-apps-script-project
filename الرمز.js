@@ -219,6 +219,7 @@ function doGet(e) {
       50
     );
 
+  if (action === 'employee') { return serveAdmin_(true); }
   if (action === 'ajyalAdmin') { return serveAjyalAdmin_(); }
 
   if (action === 'admin') {
