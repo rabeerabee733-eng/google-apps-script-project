@@ -24,3 +24,5 @@ assert.throws(()=>c.adminPortalSaveAccount({...p,username:'barcodebad',permissio
 const barcodeUser=c.adminPortalSaveAccount({...p,username:'barcodereader',permissions:['barcodeRead']})[1];
 const barcodeLogin=c.adminPortalLogin({username:'barcodereader',password:p.password});c.adminBarcodeLookup=()=>({orderNumber:1});assert.equal(c.adminPortalRpc(barcodeLogin.token,'adminBarcodeLookup',[{}]).orderNumber,1);assert.throws(()=>c.adminPortalRpc(barcodeLogin.token,'adminBarcodeHandover',[{}]),/صلاحية/);assert.throws(()=>c.adminPortalRpc(barcodeLogin.token,'adminBarcodeSetup',[]),/صلاحية/);
 console.log('PASS: barcode inquiry/report permission is separate from handover; setup is manager-only.');
+assert.throws(()=>c.adminPortalRpc(barcodeLogin.token,'adminBarcodeScan',[{}]),/صلاحية/);assert.throws(()=>c.adminPortalRpc(session.token,'adminBarcodeScan',[{}]),/صلاحية/);
+console.log('PASS: direct scanning requires the handover action permission.');
