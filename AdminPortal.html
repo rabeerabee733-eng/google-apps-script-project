@@ -48,7 +48,7 @@ const nav=document.querySelector('.tabs');[['ajyal','أجيال'],['stickers','�
 // Existing section navigation hides the integrated portal.
 document.querySelectorAll('.tabs [data-view]').forEach(b=>b.addEventListener('click',()=>{$('portalPanel').hidden=true;}));
 const api={rpc,allowed,loadAjyal:null,labelParts,stickerHtml,adaptOrder};
-setTimeout(async()=>{try{applySession(await native('adminPortalSession',[token,Boolean(window.ADMIN_EMPLOYEE_ENTRY)]));}catch(e){reset();message('أدخل بيانات الحساب الذي خصصه المدير.');}},0);
+setTimeout(async()=>{if(window.ADMIN_EMPLOYEE_ENTRY&&!token){reset();message('أدخل بيانات الحساب الذي خصصه المدير.');return;}try{applySession(await native('adminPortalSession',[token,Boolean(window.ADMIN_EMPLOYEE_ENTRY)]));}catch(e){reset();message('أدخل بيانات الحساب الذي خصصه المدير.');}},0);
 return api;
 })();
 (()=>{function bridge(success,failure){return {ajyalAdminList:payload=>AdminPortal.rpc('ajyalAdminList',[payload]).then(success,failure),ajyalAdminUpdate:payload=>AdminPortal.rpc('ajyalAdminUpdate',[payload]).then(success,failure)};}
