@@ -1570,6 +1570,7 @@
       class="screen"
     >
       <div class="card success-card">
+        <section id="success-edit-section" style="background:#fbf6e8;padding:16px;border-radius:12px;margin-bottom:16px" hidden><h3>رابط تعديل طلبك</h3><p>يمكنك تعديل طلبك حتى أول تنزيل نهائي للستكرات من الإدارة. بعدها يتوقف التعديل تلقائيًا.</p><a id="success-edit-link" target="_blank" rel="noopener noreferrer">فتح تعديل الطلب</a><p><button type="button" class="btn" onclick="copyCustomerBookingLink()">نسخ رابط التعديل</button></p><small>احتفظ بالرابط لنفسك، فهو خاص بحجزك.</small></section>
         <p id="success-ajyal-confirmation" style="background:#fbf6e8;padding:16px;border-radius:12px;line-height:1.9"></p>
         <div class="check-icon">✓</div>
 
@@ -1715,7 +1716,7 @@
       '0798382004';
 
     var REQUIRED_SERVER_VERSION =
-      '2026-10-12-BOOKING-STAFF-V4';
+      '2026-10-14-CUSTOMER-EDIT-V5';
 
     var PRODUCTS = [
       {
@@ -2739,6 +2740,7 @@ function buildWizardReview(){
 
     function collectOrderData() {
       return {
+        customerEditToken: createCustomerEditToken(),
         ajyal: { enabled: document.getElementById('ajyal-enabled').checked,
           teachers: document.getElementById('ajyal-enabled').checked ? collectAjyalTeachers() : [] },
         requestId:
@@ -3130,6 +3132,7 @@ function buildWizardReview(){
         return;
       }
 
+      lastOrder.customerEditUrl=response.customerEditReady&&lastOrder.customerEditToken?'https://script.google.com/macros/s/AKfycbz-c1QyYl3h8wZf88vKChT7d3-91OMGJ5fq_931eMCVI11gJrLbyw_kPAUtdkVVCNTz2A/exec?action=editOrder#token='+lastOrder.customerEditToken:'';
       clearBookingDraft();
       fillSuccessScreen();
       formOpenedAt =
@@ -3141,6 +3144,8 @@ function buildWizardReview(){
     }
 
     function fillSuccessScreen() {
+      document.getElementById('success-edit-section').hidden=!lastOrder.customerEditUrl;
+      document.getElementById('success-edit-link').href=lastOrder.customerEditUrl||'#';
       setText('success-ajyal-confirmation','عدد المشتركين في أجيال: '+(lastOrder.ajyalCount||0)+' — قيمة الخدمة: '+(lastOrder.ajyalTotal||0)+' د.أ. الأولوية حسب رقم الحجز، وسنتواصل مع المعلمين عبر واتساب.');
       setText('success-ajyal-count',lastOrder.ajyalCount||0);
       setText('success-ajyal-total',(lastOrder.ajyalTotal||0)+' د.أ');
@@ -3781,6 +3786,12 @@ function buildWizardReview(){
         );
       }
     }
+
+    function createCustomerEditToken() {
+      if(!window.crypto||!crypto.getRandomValues)return '';
+      return Array.from(crypto.getRandomValues(new Uint8Array(32)),function(b){return b.toString(16).padStart(2,'0');}).join('');
+    }
+    function copyCustomerBookingLink(){if(!lastOrder?.customerEditUrl)return;navigator.clipboard.writeText(lastOrder.customerEditUrl).then(function(){showToast('تم نسخ رابط تعديل طلبك');}).catch(function(){fallbackCopy(lastOrder.customerEditUrl);});}
 
     function createRequestId() {
       return (

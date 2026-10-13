@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert'),crypto=require(
 const c=vm.createContext({console}),props={},cache={};const bytes=b=>Array.from(b,n=>n>127?n-256:n),buffer=a=>Buffer.from(a.map(n=>n&255));
 c.PropertiesService={getScriptProperties:()=>({getProperty:k=>props[k]||null,setProperty:(k,v)=>props[k]=v})};c.CacheService={getScriptCache:()=>({get:k=>cache[k]||null,put:(k,v)=>cache[k]=v,remove:k=>delete cache[k]})};c.LockService={getScriptLock:()=>({waitLock(){},releaseLock(){}})};
 c.Utilities={getUuid:()=>crypto.randomUUID(),newBlob:s=>({getBytes:()=>bytes(Buffer.from(s))}),DigestAlgorithm:{SHA_256:'sha256'},computeDigest:(alg,s)=>bytes(crypto.createHash(alg).update(s).digest()),computeHmacSha256Signature:(data,key)=>bytes(crypto.createHmac('sha256',buffer(key)).update(buffer(data)).digest()),base64EncodeWebSafe:a=>buffer(a).toString('base64url')};
-vm.runInContext(fs.readFileSync('الرمز.js','utf8')+'\n'+fs.readFileSync('PortalAuth.gs','utf8')+'\n'+fs.readFileSync('Operations.gs','utf8')+'\n'+fs.readFileSync('Barcode.gs','utf8'),c);let googleAdmin=true;c.adminAuth_=()=>({ok:googleAdmin,email:googleAdmin?'owner@test':''});
+vm.runInContext(fs.readFileSync('الرمز.js','utf8')+'\n'+fs.readFileSync('PortalAuth.gs','utf8')+'\n'+fs.readFileSync('Operations.gs','utf8')+'\n'+fs.readFileSync('Barcode.gs','utf8')+'\n'+fs.readFileSync('CustomerEdit.gs','utf8'),c);let googleAdmin=true;c.adminAuth_=()=>({ok:googleAdmin,email:googleAdmin?'owner@test':''});
 assert.throws(()=>c.adminPortalSession('',true),/الموظف/);assert(c.adminPortalSession('',false).native);
 assert.equal(c.portalPassword_('a test password','a salt'),crypto.pbkdf2Sync('a test password','a salt',20000,32,'sha256').toString('base64url'));
 const p={employee:'اسراء',username:'israa',password:'strong-password-123',permissions:['ajyalRead','ajyalEdit'],active:true};let a=c.adminPortalSaveAccount(p)[0];assert(!('hash' in a));assert(!JSON.stringify(props).includes(p.password));assert.throws(()=>c.adminPortalSaveAccount(p),/مستخدم/);assert.throws(()=>c.adminPortalSaveAccount({...p,username:'second',permissions:['stickerExport']}),/تتطلب/);
@@ -28,3 +28,5 @@ assert.throws(()=>c.adminPortalRpc(barcodeLogin.token,'adminBarcodeScan',[{}]),/
 console.log('PASS: direct scanning requires the handover action permission.');
 for(const method of ['adminWorkOverview','adminWorkOrders','adminUnifiedSearch','adminOrderTimeline','adminCompanies','adminCompanyDetail'])assert.throws(()=>c.adminPortalRpc(session.token,method,[]),/صلاحية/);
 console.log('PASS: organization endpoints remain inaccessible to Ajyal-only accounts.');
+
+assert.throws(()=>c.adminPortalRpc(session.token,'adminCustomerEditLink',['fake']),/صلاحية/);console.log('PASS: Ajyal-only staff cannot issue customer editing links.');

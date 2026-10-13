@@ -1,8 +1,8 @@
 var SHEET_ID = '1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w';
 var SHEET_NAME = 'الطلبات';
 var WA_NUMBER = '0798382004';
-var APP_VERSION = '2026-10-12-BOOKING-STAFF-V4';
-var ADMIN_VERSION = '2026-10-14-FOCUSED-ORDER-V10';
+var APP_VERSION = '2026-10-14-CUSTOMER-EDIT-V5';
+var ADMIN_VERSION = '2026-10-14-CUSTOMER-EDIT-V11';
 var ADMIN_EMAILS = ['rabeerabee733@gmail.com'];
 var ADMIN_LOG_SHEET_NAME = 'سجل الإدارة';
 var ADMIN_META_SHEET_NAME = 'بيانات الإدارة';
@@ -219,6 +219,7 @@ function doGet(e) {
       50
     );
 
+  if (action === 'editOrder') { return serveCustomerEdit_(); }
   if (action === 'track') { return serveCustomerTracking_(); }
   if (action === 'employee') { return serveAdmin_(true); }
   if (action === 'ajyalAdmin') { return serveAjyalAdmin_(); }
@@ -512,7 +513,7 @@ function saveOrder_(data) {
       );
 
     if (previousResult) {
-      saveAjyal_(data, previousResult.orderNumber, requestId);
+      // A retry must never recreate Ajyal entries after the customer edited the booking.
       return previousResult;
     }
 
@@ -818,6 +819,7 @@ function saveOrder_(data) {
 
     try {
       saveAjyal_(data, orderNumber, requestId);
+      customerEditRegister_(data);
       SpreadsheetApp.flush();
     } catch (serviceError) {
       sheet.deleteRow(row);
@@ -841,6 +843,7 @@ function saveOrder_(data) {
     var successResult = {
       result: 'success',
       code: 'ORDER_SAVED',
+      customerEditReady: Boolean(data.customerEditToken),
       ajyalCount:totals.ajyalCount,
       ajyalTotal:totals.ajyalTotal,
       orderId: orderNumber,
@@ -972,6 +975,7 @@ function findResultByRequestId_(
     ajyalTotal:ajyalTotal,
     result: 'success',
     code: 'ORDER_SAVED',
+    customerEditReady: typeof customerEditSheet_ === 'function' && Boolean(customerEditFind_(customerEditSheet_(false),1,requestId)),
     orderId:
       values[0],
     orderNumber:
@@ -1826,6 +1830,8 @@ function adminListOrders(filters) {
     }
   }
 
+  var customerChanges=typeof customerEditChanges_==='function'?customerEditChanges_():{};
+  results.forEach(function(o){o.customerEditedAt=customerChanges[o.requestId]||'';});
   return { rows: results, totalMatched: matched };
 }
 
@@ -1902,7 +1908,11 @@ function adminGetOrder(rowNumber, requestId) {
   var row = adminFindRowByRequestId_(sheet, requestId, rowNumber);
   var values = sheet.getRange(row, 1, 1, 17).getDisplayValues()[0];
   var meta = adminGetMeta_(values[16], values[0]);
-  return adminDecorateOrder_(adminRowToObject_(values, row), meta);
+  var order=adminDecorateOrder_(adminRowToObject_(values, row), meta);
+  order.customerEdit=customerEditState_(values);
+  order.customerEditedAt=customerEditChanges_()[String(values[16])]||'';
+  order.revision=customerEditRevision_(values,customerEditTeachers_(String(values[16])));
+  return order;
 }
 
 function adminUpdateOrder(payload) {
@@ -1917,6 +1927,7 @@ function adminUpdateOrder(payload) {
     var requestId = cleanId_(payload.requestId, 80);
     var row = adminFindRowByRequestId_(sheet, requestId, payload.rowNumber);
     var oldDisplay = sheet.getRange(row, 1, 1, 17).getDisplayValues()[0];
+    if(payload.revision && payload.revision!==customerEditRevision_(oldDisplay,customerEditTeachers_(requestId)))throw new Error('تغير الطلب منذ فتحه. أعد فتح الطلب وراجع التغييرات قبل الحفظ.');
     var normalized = adminValidateEditable_(payload);
     var newValues = oldDisplay.slice(0);
 
@@ -2674,7 +2685,7 @@ function adminHistoryDetails_(action, beforeJson, afterJson) {
   try { before = beforeJson ? JSON.parse(beforeJson) : []; } catch (ignore1) {}
   try { after = afterJson ? JSON.parse(afterJson) : []; } catch (ignore2) {}
 
-  if (action === 'تعديل طلب' && before.length && after.length) {
+  if ((action === 'تعديل طلب' || action === 'تعديل طلب بواسطة العميل') && before.length && after.length) {
     var labels = ['رقم الطلب','تاريخ الطلب','الاسم','الهاتف الأساسي','الهاتف البديل','المحافظة','اللواء','العنوان','إجمالي النسخ','المجلد','الورقي','مجموع المنتجات','رسوم التوصيل','الإجمالي','تفاصيل المنتجات','الملاحظات','معرّف الطلب'];
     var changes = [];
     for (var i = 0; i < Math.min(before.length, after.length); i++) {
