@@ -9,12 +9,51 @@ function barcodeObject_(row,packs,meta,snapshots,anchor){var o=opsOrder_(row,pac
 function adminBarcodeLookup(payload){requireAdmin_();payload=payload||{};var value=opsDigits_(payload.value).replace(/^\*|\*$/g,''),anchor=adminStickerSettings();if(!/^\d{1,12}$/.test(value))throw new Error('أدخل رقم باركود أو طلب صحيحًا.');if(payload.kind!=='order'&&!anchor)throw new Error('ثبّت بداية الباركود من تبويب التجهيز أولًا.');var n=payload.kind==='order'?Number(value):Number(value)-Number(anchor.barcode)+1,rows=opsRows_().filter(function(r){return adminOrderNumber_(r[0])===n;});if(n<1||rows.length!==1)throw new Error('لم يتم العثور على طلب واحد بهذا الرقم.');return barcodeObject_(rows[0],opsPacks_(),portalStickerMeta_(),courierSnapshots_(),anchor);}
 function barcodeRangeGroups_(numbers,column){var sorted=numbers.slice().sort(function(a,b){return a-b;}),out=[];if(!sorted.length)return out;var a=sorted[0],b=a;sorted.slice(1).forEach(function(n){if(n===b+1)b=n;else{out.push(column+a+':'+column+b);a=b=n;}});out.push(column+a+':'+column+b);return out;}
 function barcodeLetter_(n){var s='';while(n>0){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26);}return s;}
-function barcodeSync_(entries){var info=barcodeColumns_(true),sheet=info.sheet,rows=opsRows_(),locations={},groups={};rows.forEach(function(r,i){locations[stickerExportKey_(r)]=i+2;});entries.forEach(function(r){if(!locations[r.key])return;var groupKey=JSON.stringify([r.company,r.handedAt,r.handedBy,r.batch]);var g=groups[groupKey]||(groups[groupKey]={entry:r,rows:[]});g.rows.push(locations[r.key]);});Object.keys(groups).forEach(function(k){var g=groups[k],r=g.entry,values=['نعم',r.company||'غير مسجلة (تسليم سابق)',Utilities.formatDate(new Date(r.handedAt),'Asia/Amman','yyyy/MM/dd HH:mm:ss'),r.handedBy,r.batch];info.columns.forEach(function(col,i){sheet.getRangeList(barcodeRangeGroups_(g.rows,barcodeLetter_(col))).setValue(ajyalCell_(values[i]));});var ranges=barcodeRangeGroups_(g.rows,'A').map(function(a){return a.replace(/:A(\d+)$/,':'+barcodeLetter_(sheet.getLastColumn())+'$1');});sheet.getRangeList(ranges).setBackground(BARCODE_HANDOVER_COLOR_);});
- // Update managed metadata in one write, preserving payment values and advanced statuses.
- adminEnsureSupportSheets_();var ss=SpreadsheetApp.openById(SHEET_ID),metaSheet=ss.getSheetByName(ADMIN_META_SHEET_NAME),metaRows=metaSheet.getLastRow()>1?metaSheet.getRange(2,1,metaSheet.getLastRow()-1,10).getValues():[],metaIndex={};metaRows.forEach(function(r,i){metaIndex[String(r[0])]=i;});var byKey={};rows.forEach(function(r){byKey[stickerExportKey_(r)]=r;});entries.forEach(function(e){var raw=byKey[e.key];if(!raw)return;var id=String(raw[16]||'');if(!id)return;var i=metaIndex[id],m=i===undefined?[id,e.orderNumber,'جديد','غير مدفوع',0,'عادي','','','','']:metaRows[i];if(['جديد','قيد التجهيز','جاهز','خرج للتوصيل'].indexOf(m[2])!==-1){m[2]='خرج للتوصيل';if(!m[6])m[6]=new Date(e.handedAt);m[8]=new Date(e.handedAt);m[9]=e.handedBy;}if(i===undefined){metaIndex[id]=metaRows.length;metaRows.push(m);}});if(metaRows.length)metaSheet.getRange(2,1,metaRows.length,10).setValues(metaRows);
- var tracking=courierTracking_(),trackRows=entries.filter(function(e){return !tracking[e.key];}).map(function(e){return[e.key,'لدى الشركة','',e.handedAt,e.handedBy,e.batch];});if(trackRows.length)courierAppend_(COURIER_STATUS_SHEET,['معرف الطلب','حالة التوصيل','السبب','وقت التعديل','الموظف','الدفعة'],trackRows);
- var packs=opsRead_(PREP_ORDER_SHEET_,12),handed={};entries.forEach(function(e){handed[e.key]=e;});var changed=false;packs.forEach(function(p){var e=handed[p[0]];if(e&&!p[9]){p[3]='سُلّم للمندوب';p[8]=e.handedBy;p[9]=e.handedAt;p[10]=Utilities.getUuid();p[11]=e.handedBy;changed=true;}});if(changed)ss.getSheetByName(PREP_ORDER_SHEET_).getRange(2,1,packs.length,12).setNumberFormat('@').setValues(packs);SpreadsheetApp.flush();}
-function barcodeCommit_(batch,company,rows){var now=new Date().toISOString(),actor=opsActor_();courierAppend_(COURIER_HANDOVER_SHEET,['الدفعة','معرف الطلب','رقم الطلب','الباركود','الاسم','الهاتف','المحافظة','التحصيل','أجرة التوصيل','مستحق الشركة','تاريخ التسليم للشركة','الموظف','شركة التوصيل'],rows.map(function(r){return[batch,r.key,r.orderNumber,r.barcode,r.name,r.phone,r.governorate,r.due,2,r.companyDue,now,actor,company];}));var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(COURIER_HANDOVER_SHEET);sheet.getRange(1,13).setValue('شركة التوصيل');var keys=rows.map(function(r){return r.key;}),saved=courierSnapshots_().filter(function(r){return r.batch===batch&&keys.indexOf(r.key)!==-1;});barcodeSync_(saved);return saved;}
+// Read and write only the matching support record; never rewrite other orders.
+function barcodeRecord_(sheet,key,width){
+ var found=sheet&&sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,1).createTextFinder(String(key)).matchEntireCell(true).findNext():null;
+ return {sheet:sheet,row:found?found.getRow():0,values:found?sheet.getRange(found.getRow(),1,1,width).getValues()[0]:null};
+}
+function barcodeOrderRow_(number){
+ var sheet=adminOrdersSheet_(),matches=[];
+ if(sheet.getLastRow()>1)sheet.getRange(2,1,sheet.getLastRow()-1,1).getDisplayValues().forEach(function(r,i){if(adminOrderNumber_(r[0])===number)matches.push(i+2);});
+ if(number<1||matches.length!==1)throw new Error('لم يتم العثور على طلب واحد بهذا الرقم.');
+ return {row:matches[0],raw:sheet.getRange(matches[0],1,1,17).getDisplayValues()[0]};
+}
+function barcodeSync_(entries,context){
+ var info=barcodeColumns_(true),sheet=info.sheet,locations=context?context.locations:{},rawByKey=context?context.rawByKey:{},groups={};
+ if(!context)opsRows_().forEach(function(r,i){var key=stickerExportKey_(r);locations[key]=i+2;rawByKey[key]=r;});
+ entries.forEach(function(r){if(!locations[r.key])return;var groupKey=JSON.stringify([r.company,r.handedAt,r.handedBy,r.batch]);var g=groups[groupKey]||(groups[groupKey]={entry:r,rows:[]});g.rows.push(locations[r.key]);});
+ var adjacent=info.columns.every(function(col,i){return col===info.columns[0]+i;}),lastColumn=sheet.getLastColumn();
+ Object.keys(groups).forEach(function(k){
+   var g=groups[k],r=g.entry,name=r.company||'غير مسجلة (تسليم سابق)',values=['تم التسليم لشركة ('+name+')',name,Utilities.formatDate(new Date(r.handedAt),'Asia/Amman','yyyy/MM/dd HH:mm:ss'),r.handedBy,r.batch].map(ajyalCell_);
+   // The normal five adjacent columns need a single write per affected row.
+   if(adjacent)g.rows.forEach(function(row){sheet.getRange(row,info.columns[0],1,values.length).setValues([values]);});
+   else info.columns.forEach(function(col,i){sheet.getRangeList(barcodeRangeGroups_(g.rows,barcodeLetter_(col))).setValue(values[i]);});
+   sheet.getRangeList(barcodeRangeGroups_(g.rows,'A').map(function(a){return a.replace(/:A(\d+)$/,':'+barcodeLetter_(lastColumn)+'$1');})).setBackground(BARCODE_HANDOVER_COLOR_);
+ });
+ var ss=SpreadsheetApp.openById(SHEET_ID),metaSheet=ss.getSheetByName(ADMIN_META_SHEET_NAME);
+ if(!metaSheet){adminEnsureSupportSheets_();metaSheet=ss.getSheetByName(ADMIN_META_SHEET_NAME);}
+ var trackingSheet=ss.getSheetByName(COURIER_STATUS_SHEET),prepSheet=ss.getSheetByName(PREP_ORDER_SHEET_),trackRows=[];
+ entries.forEach(function(e){
+   var raw=rawByKey[e.key];if(!raw)return;var id=String(raw[16]||'');
+   if(id){
+     var record=context&&context.metaById&&context.metaById[id]||barcodeRecord_(metaSheet,id,10),m=record.values||[id,e.orderNumber,'جديد','غير مدفوع',0,'عادي','','','',''],changed=!record.row;
+     if(['جديد','قيد التجهيز','جاهز','خرج للتوصيل'].indexOf(m[2])!==-1){m[2]='خرج للتوصيل';if(!m[6])m[6]=new Date(e.handedAt);m[8]=new Date(e.handedAt);m[9]=e.handedBy;changed=true;}
+     if(changed)metaSheet.getRange(record.row||metaSheet.getLastRow()+1,1,1,10).setValues([m]);
+   }
+   if(!barcodeRecord_(trackingSheet,e.key,1).row)trackRows.push([e.key,'لدى الشركة','',e.handedAt,e.handedBy,e.batch]);
+   var pack=barcodeRecord_(prepSheet,e.key,12),p=pack.values;
+   if(p&&!p[9]){p[3]='سُلّم للمندوب';p[8]=e.handedBy;p[9]=e.handedAt;p[10]=Utilities.getUuid();p[11]=e.handedBy;prepSheet.getRange(pack.row,1,1,12).setValues([p]);}
+ });
+ if(trackRows.length)courierAppend_(COURIER_STATUS_SHEET,['معرف الطلب','حالة التوصيل','السبب','وقت التعديل','الموظف','الدفعة'],trackRows);
+ SpreadsheetApp.flush();
+}
+function barcodeCommit_(batch,company,rows,context){
+ var now=new Date().toISOString(),actor=opsActor_(),saved=rows.map(function(r){return {batch:batch,key:r.key,orderNumber:r.orderNumber,barcode:r.barcode,name:r.name,phone:r.phone,governorate:r.governorate,due:r.due,delivery:2,companyDue:r.companyDue,handedAt:now,handedBy:actor,company:company};});
+ courierAppend_(COURIER_HANDOVER_SHEET,['الدفعة','معرف الطلب','رقم الطلب','الباركود','الاسم','الهاتف','المحافظة','التحصيل','أجرة التوصيل','مستحق الشركة','تاريخ التسليم للشركة','الموظف','شركة التوصيل'],saved.map(function(r){return[r.batch,r.key,r.orderNumber,r.barcode,r.name,r.phone,r.governorate,r.due,r.delivery,r.companyDue,r.handedAt,r.handedBy,r.company];}));
+ barcodeSync_(saved,context);return saved;
+}
 function adminBarcodeHandover(payload){requireAdmin_();payload=payload||{};var id=cleanId_(payload.id,100),company=barcodeCompany_(payload.company),requested=payload.orders;if(!/^handover_[a-zA-Z0-9_-]+$/.test(id)||!Array.isArray(requested)||!requested.length||requested.length>200)throw new Error('أضف من 1 إلى 200 طلب للدفعة.');var keys=requested.map(function(o){return String(o.key);});if(new Set(keys).size!==keys.length)throw new Error('يوجد طلب مكرر في الدفعة.');var lock=LockService.getScriptLock();lock.waitLock(20000);try{var snapshots=courierSnapshots_(),saved=snapshots.filter(function(r){return r.batch===id;});if(saved.length){if(saved.length!==keys.length||saved.some(function(r){return keys.indexOf(r.key)<0||r.company!==company;}))throw new Error('معرف الدفعة مستخدم ببيانات مختلفة.');barcodeSync_(saved);return {batch:id,rows:saved,confirmed:true};}var previous={};snapshots.forEach(function(r){previous[r.key]=r;});var rowsByKey={},meta=portalStickerMeta_(),anchor=adminStickerSettings();opsRows_().forEach(function(r){rowsByKey[stickerExportKey_(r)]=r;});var rows=requested.map(function(input){var raw=rowsByKey[String(input.key)];if(!raw)throw new Error('حُذف طلب من الدفعة. أعد قراءته.');if(previous[String(input.key)])throw new Error('سبق تسليم الطلب '+raw[0]+' لشركة التوصيل.');var o=barcodeObject_(raw,{},meta,[],anchor);if(['ملغي','تم التسليم'].indexOf(o.status)!==-1)throw new Error('الطلب '+o.orderNumber+' حالته '+o.status+'.');if(o.revision!==input.revision||o.barcode!==input.barcode)throw new Error('تغيرت بيانات الطلب '+o.orderNumber+'. احذفه من القائمة وأعد قراءته.');return o;});return {batch:id,rows:barcodeCommit_(id,company,rows),confirmed:true};}finally{lock.releaseLock();}}
 // Each successful scan is committed immediately. The batch ID is stable across retries.
 function adminBarcodeScan(payload){
@@ -25,13 +64,22 @@ function adminBarcodeScan(payload){
     var snapshots=courierSnapshots_(),batch=snapshots.filter(function(r){return r.batch===id;});
     if(batch.some(function(r){return r.company!==company;}))return {ok:false,message:'هذه الدفعة مسجلة لشركة أخرى. ابدأ دفعة جديدة.'};
     var previous=snapshots.filter(function(r){return Number(kind==='order'?r.orderNumber:r.barcode)===Number(value);})[0],order;
-    if(!previous){try{order=adminBarcodeLookup({kind:kind,value:value});}catch(e){return {ok:false,message:e.message};}previous=snapshots.filter(function(r){return r.key===order.key;})[0];}
+    var context;
+    if(!previous){
+      try{
+        var anchor=adminStickerSettings();if(kind!=='order'&&!anchor)throw new Error('ثبّت بداية الباركود من تبويب التجهيز أولًا.');
+        var source=barcodeOrderRow_(kind==='order'?Number(value):Number(value)-Number(anchor.barcode)+1),raw=source.raw,key=stickerExportKey_(raw),requestId=String(raw[16]||''),record=barcodeRecord_(SpreadsheetApp.openById(SHEET_ID).getSheetByName(ADMIN_META_SHEET_NAME),requestId,10),meta={};
+        if(requestId&&record.values)meta[requestId]={status:record.values[2],amountPaid:record.values[4]};
+        order=barcodeObject_(raw,{},meta,[],anchor);context={locations:{},rawByKey:{},metaById:{}};context.locations[key]=source.row;context.rawByKey[key]=raw;if(requestId)context.metaById[requestId]=record;
+      }catch(e){return {ok:false,message:e.message};}
+      previous=snapshots.filter(function(r){return r.key===order.key;})[0];
+    }
     if(previous){
       if(previous.batch!==id)return {ok:false,duplicate:true,message:'سبق تسليم الطلب #'+previous.orderNumber+' إلى '+(previous.company||'شركة غير مسجلة')+' بتاريخ '+Utilities.formatDate(new Date(previous.handedAt),'Asia/Amman','yyyy/MM/dd HH:mm:ss')+'. لم يُسجّل مرة أخرى.'};
       barcodeSync_([previous]);return {ok:true,added:false,entry:previous,batch:id};
     }
     if(['ملغي','تم التسليم'].indexOf(order.status)!==-1)return {ok:false,message:'الطلب #'+order.orderNumber+' حالته '+order.status+'؛ لا يمكن تسليمه للشركة.'};
-    var saved=barcodeCommit_(id,company,[order]);return {ok:true,added:true,entry:saved[0],batch:id};
+    var saved=barcodeCommit_(id,company,[order],context);return {ok:true,added:true,entry:saved[0],batch:id};
   }finally{lock.releaseLock();}
 }
 function adminBarcodeReport(payload){

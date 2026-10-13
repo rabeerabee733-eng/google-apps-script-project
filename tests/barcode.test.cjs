@@ -22,7 +22,7 @@ assert.throws(()=>c.adminBarcodeHandover({...payload,orders:[item(o),item(o)]}),
 orders.data[1][13]=35;assert.throws(()=>c.adminBarcodeHandover(payload),/تغيرت/);assert.equal(c.courierSnapshots_().length,0);orders.data[1][13]=32;
 const sync=c.barcodeSync_;c.barcodeSync_=()=>{throw Error('projection failed');};assert.throws(()=>c.adminBarcodeHandover(payload),/projection failed/);assert.equal(c.courierSnapshots_().length,1);c.barcodeSync_=sync;
 const result=c.adminBarcodeHandover(payload);assert(result.confirmed);assert.equal(c.courierSnapshots_().length,1);assert.equal(result.rows[0].company,'شركة الاختبار');assert.equal(result.rows[0].due,32);assert.equal(result.rows[0].companyDue,30);assert.equal(result.rows[0].handedBy,'المدير');
-assert.equal(orders.data[1][17],'نعم');assert.equal(orders.data[1][18],'شركة الاختبار');assert.equal(orders.data[1][21],'handover_test');assert.equal(orders.colors['2:1'],'#dbeafe');assert.equal(c.portalStickerMeta_().r1.status,'خرج للتوصيل');assert.equal(JSON.stringify(orders.data.map(r=>r.slice(0,17))),first17);
+assert.equal(orders.data[1][17],'تم التسليم لشركة (شركة الاختبار)');assert.equal(orders.data[1][18],'شركة الاختبار');assert.equal(orders.data[1][21],'handover_test');assert.equal(orders.colors['2:1'],'#dbeafe');assert.equal(c.portalStickerMeta_().r1.status,'خرج للتوصيل');assert.equal(JSON.stringify(orders.data.map(r=>r.slice(0,17))),first17);
 assert.throws(()=>c.adminBarcodeHandover({...payload,id:'handover_other'}),/سبق تسليم/);assert.throws(()=>c.adminBarcodeHandover({...payload,company:'شركة أخرى'}),/مختلفة/);
 const updated=c.adminBarcodeLookup({kind:'order',value:1});assert.equal(updated.handover.company,'شركة الاختبار');assert.equal(updated.status,'خرج للتوصيل');
 orders.colors['2:1']='#dff4e4';c.barcodeSyncAfterExport_([{key:'r1',row:2}]);assert.equal(orders.colors['2:1'],'#dbeafe');
@@ -33,7 +33,7 @@ console.log('PASS: read-only Arabic barcode lookup, company required, duplicate 
 // Continuous scanning appends each order to one company batch, synchronizing only that order.
 for(let n=3;n<=6;n++){const raw=orders.data[1].slice(0,17);raw[0]=String(n);raw[2]='معلم '+n;raw[16]='r'+n;orders.data.push(raw);}
 const scan={id:'scan_session',company:'شركة المسح',kind:'barcode',value:'1000002'};
-let scanned=c.adminBarcodeScan(scan);assert(scanned.ok&&scanned.added);assert.equal(orders.data[3][17],'نعم');assert.equal(orders.data[3][18],'شركة المسح');assert.equal(c.courierSnapshots_().filter(r=>r.batch===scan.id).length,1);
+let scanned=c.adminBarcodeScan(scan);assert(scanned.ok&&scanned.added);assert.equal(orders.data[3][17],'تم التسليم لشركة (شركة المسح)');assert.equal(orders.data[3][18],'شركة المسح');assert.equal(c.courierSnapshots_().filter(r=>r.batch===scan.id).length,1);
 scanned=c.adminBarcodeScan({...scan,value:'1000003'});assert(scanned.ok&&scanned.added);assert.equal(c.courierSnapshots_().filter(r=>r.batch===scan.id).length,2);
 const duplicate=c.adminBarcodeScan(scan);assert(duplicate.ok&&!duplicate.added);assert.equal(c.courierSnapshots_().filter(r=>r.batch===scan.id).length,2);
 assert.equal(c.adminBarcodeScan({...scan,id:'scan_another'}).duplicate,true);assert.equal(c.adminBarcodeScan({...scan,company:'شركة خاطئة',value:'1000004'}).ok,false);assert.equal(c.adminBarcodeScan({...scan,value:'1000001'}).ok,false);assert.equal(c.adminBarcodeScan({...scan,company:''}).ok,false);assert.equal(c.adminBarcodeScan({...scan,value:'999999'}).ok,false);
@@ -41,3 +41,21 @@ const stableSync=c.barcodeSync_;let synced=[];c.barcodeSync_=rows=>{synced.push(
 c.barcodeSync_=()=>{throw Error('connection after commit');};assert.throws(()=>c.adminBarcodeScan({...scan,value:'1000005'}),/connection after commit/);c.barcodeSync_=stableSync;const repaired=c.adminBarcodeScan({...scan,value:'1000005'});assert(repaired.ok&&!repaired.added);assert.equal(c.courierSnapshots_().filter(r=>r.batch===scan.id).length,4);assert.equal(orders.data[6][18],'شركة المسح');
 const exactReport=c.adminBarcodeReport({batch:scan.id});assert.equal(exactReport.count,4);assert.equal(exactReport.company,'شركة المسح');assert(exactReport.rows.every(r=>r.batch===scan.id));assert.equal(exactReport.delivery,8);assert.equal(exactReport.companyDue,120);
 console.log('PASS: immediate per-scan Drive writes, incremental same-company batch, duplicate rejection across sessions, invalid/cancelled scans, one-order projections, ambiguous-write retry recovery, exact batch report.');
+// Regression: a scan must not rewrite thousands of unrelated order/support rows.
+const prepSheet=live.insertSheet(c.PREP_ORDER_SHEET_);prepSheet.data=[Array(12).fill('header')];
+for(let n=1000;n<2000;n++){metaSheet.data.push(['other'+n,n,'تم التسليم','مدفوع',15,'عادي','','','','']);prepSheet.data.push(['other'+n,n,'prep_other','تم التجهيز','rev','[]','اسراء','','','','','']);}
+const raw7=orders.data[1].slice(0,17);raw7[0]='7';raw7[16]='r7';orders.data.push(raw7);
+metaSheet.data.push(['r7','7','جاهز','جزئي',3,'عاجل','','','','']);prepSheet.data.push(['r7','7','prep_7','تم التجهيز','rev','[]','وليد','2026-10-13T10:00:00Z','','','','']);
+const untouchedMeta=JSON.stringify(metaSheet.data.slice(1,-1)),untouchedPacks=JSON.stringify(prepSheet.data.slice(1,-1)),writes=[],reads=[];
+const measuredRange=Sheet.prototype.getRange;Sheet.prototype.getRange=function(r,col=1,n=1,w=1){const range=measuredRange.call(this,r,col,n,w),name=this.name,set=range.setValues,get=range.getValues;range.setValues=function(rows){writes.push({name,r,col,n,w});return set.call(this,rows);};range.getValues=function(){reads.push({name,r,col,n,w});return get.call(this);};return range;};
+const quick=c.adminBarcodeScan({...scan,value:'1000006'});assert(quick.ok);assert.equal(quick.entry.due,29);assert.equal(quick.entry.companyDue,27);
+assert.equal(JSON.stringify(metaSheet.data.slice(1,-1)),untouchedMeta);assert.equal(JSON.stringify(prepSheet.data.slice(1,-1)),untouchedPacks);
+assert.equal(metaSheet.data.at(-1)[4],3);assert.equal(metaSheet.data.at(-1)[5],'عاجل');assert.equal(prepSheet.data.at(-1)[8],'المدير');
+assert(writes.filter(w=>[c.ADMIN_META_SHEET_NAME,c.PREP_ORDER_SHEET_].includes(w.name)).every(w=>w.n===1));
+assert.equal(writes.filter(w=>w.name===c.SHEET_NAME&&w.col===18&&w.w===5).length,1);
+assert(reads.filter(r=>r.name===c.SHEET_NAME&&r.w===17).every(r=>r.n===1));assert(reads.filter(r=>r.name===c.ADMIN_META_SHEET_NAME&&r.w===10).every(r=>r.n===1));
+assert.equal(orders.data.at(-1)[17],'تم التسليم لشركة (شركة المسح)');assert.match(orders.data.at(-1)[19],/^2026\/10\/\d{2} \d{2}:\d{2}:\d{2}$/);assert.equal(orders.colors[(orders.data.length)+':1'],'#dbeafe');
+// Column rearrangement remains safe and original A:Q values are preserved.
+orders.data.forEach(r=>{[r[17],r[19]]=[r[19],r[17]];});const raw8=raw7.slice();raw8[0]='8';raw8[16]='r8';orders.data.push(raw8);const before8=JSON.stringify(raw8.slice(0,17));
+const moved=c.adminBarcodeScan({...scan,value:'1000007'});assert(moved.ok);assert.equal(orders.data.at(-1)[19],'تم التسليم لشركة (شركة المسح)');assert.equal(orders.data.at(-1)[18],'شركة المسح');assert.equal(JSON.stringify(orders.data.at(-1).slice(0,17)),before8);
+console.log('PASS: 1000 unrelated metadata/packing records untouched; one-row reads/writes; one five-cell Drive write; paid amount and priority preserved; explicit company status, Amman timestamp, blue row; reordered columns supported.');

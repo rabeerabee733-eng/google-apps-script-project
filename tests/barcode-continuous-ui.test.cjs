@@ -11,15 +11,33 @@ vm.runInContext(fs.readFileSync('BarcodePanel.html','utf8').split('<script>')[1]
 (async()=>{
  await c.AdminBarcode.enter();nodes['barcode-mode-handover'].onclick();await nodes['barcode-camera'].onclick();assert.equal(opens,0);assert(nodes['barcode-notice'].textContent.includes('شركة'));
  nodes['barcode-company'].value='__new';nodes['barcode-company-new'].value='شركة اختبار';await nodes['barcode-camera'].onclick();assert.equal(opens,1);assert(nodes['barcode-company'].disabled);
- emit('1000000');await tick();assert.equal(pending.length,1);assert.equal(tones.length,0);assert.equal(stops,0);emit('1000001');assert.equal(pending.length,1);
- saved.push(entry(1));answer({ok:true,added:true,entry:entry(1)});await tick();assert.equal(tones.length,2);assert.equal(stops,0);assert(!nodes['barcode-camera-box'].hidden);assert(nodes['barcode-report-summary'].innerHTML.includes('عدد الطلبات: 1'));
- const calls=requests.length;emit('1000000');await tick();assert.equal(requests.length,calls);
- emit('1000001');await tick();const attempt=requests.at(-1).args[0];answer(null,Error('connection lost'));await tick();assert(!nodes['barcode-pending-box'].hidden);assert.equal(stops,0);emit('1000002');assert.equal(pending.length,0);
- const retry=nodes['barcode-retry'].onclick();await tick();assert.equal(JSON.stringify(requests.at(-1).args[0]),JSON.stringify(attempt));saved.push(entry(2));answer({ok:true,added:false,entry:entry(2)});await retry;assert(nodes['barcode-pending-box'].hidden);assert(nodes['barcode-report-summary'].innerHTML.includes('عدد الطلبات: 2'));assert.equal(opens,1);assert.equal(stops,0);
- emit('1000002');await tick();answer({ok:false,message:'الطلب ملغي'});await tick();assert(nodes['barcode-notice'].textContent.includes('ملغي'));assert(nodes['barcode-report-summary'].innerHTML.includes('عدد الطلبات: 2'));assert.equal(stops,0);
- const count=requests.length;emit('1000000');await tick();assert.equal(requests.length,count);assert(nodes['barcode-notice'].textContent.includes('لم يُكرّر'));
+ // Ten camera reads are accepted while only the first network request is outstanding.
+ for(let n=1;n<=10;n++)emit(String(999999+n));await tick();
+ assert.equal(pending.length,1);assert.equal(requests.filter(r=>r.method==='adminBarcodeScan').length,1);assert.equal(stops,0);
+ assert.equal(tones.filter(n=>n===600).length,10);assert.equal(tones.filter(n=>n===950).length,0);
+ assert(nodes['barcode-progress'].textContent.includes('بانتظار الحفظ: 10'));assert(nodes['barcode-confirm'].disabled);assert(nodes['barcode-report-csv'].disabled);
+ let stored=JSON.parse([...storage.values()][0]);assert.equal(stored.outbox.length,10);assert(stored.outbox.every(p=>p.id===stored.session.id&&p.company===stored.session.company));
+ emit('1000000');await tick();assert.equal(JSON.parse([...storage.values()][0]).outbox.length,10);
+ saved.push(entry(1));answer({ok:true,added:true,entry:entry(1)});await tick();
+ assert.equal(pending.length,1);assert.equal(requests.at(-1).args[0].value,'1000001');assert.equal(tones.filter(n=>n===950).length,1);assert.equal(stops,0);
+ // A failed reply retains the exact request and every queued barcode; no next write starts.
+ const attempt=JSON.stringify(requests.at(-1).args[0]);answer(null,Error('connection lost'));await tick();
+ assert(!nodes['barcode-pending-box'].hidden);assert.equal(pending.length,0);assert.equal(JSON.parse([...storage.values()][0]).outbox.length,9);
+ emit('1000010');await tick();assert.equal(JSON.parse([...storage.values()][0]).outbox.length,9);assert.equal(stops,0);
+ const retry=nodes['barcode-retry'].onclick();await tick();assert.equal(JSON.stringify(requests.at(-1).args[0]),attempt);
+ for(let n=2;n<=10;n++){assert.equal(pending.length,1);saved.push(entry(n));answer({ok:true,added:n!==2,entry:entry(n)});await tick();}
+ await retry;assert(nodes['barcode-pending-box'].hidden);assert.equal(opens,1);assert.equal(stops,0);assert.equal(pending.length,0);
+ assert(nodes['barcode-progress'].textContent.includes('محفوظ في Drive: 10 — بانتظار الحفظ: 0'));assert.equal(tones.filter(n=>n===950).length,10);assert(!nodes['barcode-confirm'].disabled);
+ const count=requests.length;emit('1000001');await tick();assert.equal(requests.length,count);assert(nodes['barcode-notice'].textContent.includes('لم يُكرّر'));
+ emit('1000010');await tick();answer({ok:false,message:'الطلب ملغي'});await tick();assert(nodes['barcode-rejected'].textContent.includes('الطلب ملغي'));assert.equal(saved.length,10);
  await nodes['barcode-confirm'].onclick();assert.equal(stops,1);assert.equal(requests.at(-1).method,'adminBarcodeReport');assert(requests.at(-1).args[0].batch.startsWith('scan_'));
- nodes['barcode-clear'].onclick();assert(!nodes['barcode-company'].disabled);assert.equal(saved.length,2);
+ // Reload/sign-out retains unsaved payloads, and an old reply cannot alter a new session.
+ nodes['barcode-value'].value='1000011';nodes['barcode-kind'].value='barcode';nodes['barcode-read'].onclick();await tick();assert.equal(pending.length,1);
+ c.AdminBarcode.reset();assert.equal(JSON.parse([...storage.values()][0]).outbox.length,1);answer({ok:true,entry:entry(12)});await tick();
+ await c.AdminBarcode.enter();assert(!nodes['barcode-pending-box'].hidden);assert(nodes['barcode-progress'].textContent.includes('بانتظار الحفظ: 1'));
+ const recovery=nodes['barcode-retry'].onclick();await tick();saved.push(entry(12));answer({ok:true,added:false,entry:entry(12)});await recovery;
+ assert(nodes['barcode-progress'].textContent.includes('محفوظ في Drive: 11 — بانتظار الحفظ: 0'));
+ nodes['barcode-clear'].onclick();assert(!nodes['barcode-company'].disabled);assert.equal(saved.length,11);assert.equal(storage.size,0);
  nodes['barcode-mode-inquiry'].onclick();await nodes['barcode-camera'].onclick();emit('1000001');await tick();assert.equal(requests.at(-1).method,'adminBarcodeLookup');answer({...entry(2),status:'خرج للتوصيل',itemsText:'منتج',handover:entry(2)});await tick();assert(!nodes['barcode-inquiry'].hidden);assert.equal(opens,2);assert.equal(stops,1);
- console.log('PASS: one camera stream across successive scans; company lock; sound only after persisted success; duplicate suppression; serialized requests; network pause and identical retry; live report; read-only inquiry.');
+ console.log('PASS: ten rapid camera reads before first ACK; serialized persisted queue; distinct capture/saved sounds; duplicate suppression; exact retry after network failure; no premature export; rejected scan list; reload recovery; stale-session isolation; read-only inquiry.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
