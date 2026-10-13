@@ -20,4 +20,4 @@ All 16 Node test files pass, including two focused suites covering token validat
 
 No real customer booking, sticker export, courier handover or payment was created to run tests. Live verification uses read-only pages and the no-token customer entry screen.
 
-New Apps Script files: `CustomerEdit.gs`, `CustomerEdit.html`. Deploy the same project version to the existing employee/public, manager and booking deployments; preserve their access and execution identities.
+New Apps Script files: `CustomerEdit.gs`, `CustomerEditPage.html` (use the repository `CustomerEdit.html` source). Apps Script requires distinct base names for script and HTML files. Deploy the same project version to the existing employee/public, manager and booking deployments; preserve their access and execution identities.

@@ -3,7 +3,7 @@
 var CUSTOMER_EDIT_SHEET_ = 'روابط تعديل الحجوزات';
 var CUSTOMER_EDIT_URL_ = 'https://script.google.com/macros/s/AKfycbz-c1QyYl3h8wZf88vKChT7d3-91OMGJ5fq_931eMCVI11gJrLbyw_kPAUtdkVVCNTz2A/exec?action=editOrder';
 function serveCustomerEdit_() {
-  return HtmlService.createHtmlOutputFromFile('CustomerEdit').setTitle('تعديل الحجز').addMetaTag('viewport','width=device-width,initial-scale=1');
+  return HtmlService.createHtmlOutputFromFile('CustomerEditPage').setTitle('تعديل الحجز').addMetaTag('viewport','width=device-width,initial-scale=1');
 }
 function customerEditSheet_(create) {
   var ss=SpreadsheetApp.openById(SHEET_ID),s=ss.getSheetByName(CUSTOMER_EDIT_SHEET_);
