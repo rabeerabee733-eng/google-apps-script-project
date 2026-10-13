@@ -26,3 +26,5 @@ const barcodeLogin=c.adminPortalLogin({username:'barcodereader',password:p.passw
 console.log('PASS: barcode inquiry/report permission is separate from handover; setup is manager-only.');
 assert.throws(()=>c.adminPortalRpc(barcodeLogin.token,'adminBarcodeScan',[{}]),/صلاحية/);assert.throws(()=>c.adminPortalRpc(session.token,'adminBarcodeScan',[{}]),/صلاحية/);
 console.log('PASS: direct scanning requires the handover action permission.');
+for(const method of ['adminWorkOverview','adminWorkOrders','adminUnifiedSearch','adminOrderTimeline','adminCompanies','adminCompanyDetail'])assert.throws(()=>c.adminPortalRpc(session.token,method,[]),/صلاحية/);
+console.log('PASS: organization endpoints remain inaccessible to Ajyal-only accounts.');

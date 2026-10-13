@@ -11,7 +11,7 @@
 <div class="barcode-actions"><button id="barcode-read" class="btn gold">عرض معلومات الطلب</button><button id="barcode-camera" class="btn dark">📷 قراءة بالكاميرا</button><label class="btn dark">قراءة صورة الباركود<input id="barcode-image" type="file" accept="image/*" capture="environment"></label></div>
 <div id="barcode-camera-box" hidden><video id="barcode-video" autoplay muted playsinline></video><p id="barcode-live-status" class="ops-status"></p><button id="barcode-stop" class="btn dark">إيقاف الكاميرا</button></div>
 <label class="ops-inline-check"><input id="barcode-sound" type="checkbox" checked> أصوات الالتقاط وتأكيد الحفظ</label>
-<div id="barcode-progress" class="barcode-summary" role="status" aria-live="polite">محفوظ في Drive: 0 — بانتظار الحفظ: 0</div><div id="barcode-waiting" class="tiny"></div><div id="barcode-rejected" class="barcode-info" hidden></div>
+<div id="barcode-progress" class="barcode-summary" role="status" aria-live="polite">محفوظ في Drive: 0 — بانتظار الحفظ: 0</div><p id="barcode-latest" aria-live="polite"></p><div id="barcode-waiting" class="tiny"></div><div id="barcode-rejected" class="barcode-info" hidden></div>
 <div id="barcode-pending-box" hidden><p>تعذر تأكيد الحفظ. القراءة متوقفة مؤقتًا؛ أعد المحاولة للتحقق من الطلب نفسه دون تكراره.</p><button id="barcode-retry" class="btn gold">إعادة محاولة الحفظ</button></div>
 <div id="barcode-inquiry" class="barcode-info" hidden></div>
 <section id="barcode-cart-box" hidden><h3>طلبات دفعة التسليم</h3><p>اقرأ الطرود تباعًا بعد نغمة الالتقاط القصيرة. الحفظ يجري تلقائيًا بالترتيب؛ نغمتان تعنيان تأكيد الحفظ في Drive. لا تغلق الصفحة قبل أن يصبح عدد المنتظر صفرًا. الجدول يعرض الطلبات المحفوظة فقط.</p><div id="barcode-cart" class="barcode-table"></div><div class="barcode-actions"><button id="barcode-confirm" class="btn gold" disabled>إيقاف المسح وعرض كشف الدفعة</button><button id="barcode-clear" class="btn dark">دفعة جديدة / شركة أخرى</button></div></section>
@@ -30,7 +30,10 @@ window.AdminBarcode=(()=>{
  function notice(text,error=false,id='barcode-notice'){$(id).textContent=text;$(id).dataset.error=String(error);if(id==='barcode-notice'){$('barcode-live-status').textContent=text;$('barcode-live-status').dataset.error=String(error);}}
  function persist(){try{if(session)sessionStorage.setItem(storageKey,JSON.stringify({session,outbox,rejected,owner:AdminPortal.userLabel()}));else sessionStorage.removeItem(storageKey);return true;}catch{return false;}}
  function restore(){if(session)return;try{const data=JSON.parse(sessionStorage.getItem(storageKey)||'null');if(data?.owner===AdminPortal.userLabel()&&/^scan_[a-zA-Z0-9_-]+$/.test(data.session?.id||'')&&typeof data.session.company==='string'){session=data.session;outbox=Array.isArray(data.outbox)?data.outbox:(data.pending?[data.pending]:[]);rejected=Array.isArray(data.rejected)?data.rejected:[];failed=!!outbox.length;}}catch{}}
+ function summary(){if(!session&&AdminPortal.allowed('barcodeHandover')){try{const saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');if(saved?.owner===AdminPortal.userLabel()){const pending=Array.isArray(saved.outbox)?saved.outbox:(saved.pending?[saved.pending]:[]);return {pending:pending.length,saved:0,latest:pending.at(-1)?.value||'',failed:!!pending.length};}}catch{}}return {pending:outbox.length,saved:queue.length,latest:outbox.at(-1)?.value||queue.at(-1)?.barcode||'',failed};}
  function progress(){
+  if($('barcode-latest'))$('barcode-latest').textContent='آخر باركود: '+(outbox.at(-1)?.value||queue.at(-1)?.barcode||'—')+(failed?' · يحتاج إعادة محاولة الحفظ':outbox.length?' · جارٍ الحفظ':' · لا توجد قراءات معلقة');
+  window.AdminOrganizer?.scanChanged();
   $('barcode-progress').textContent='محفوظ في Drive: '+queue.length+' — بانتظار الحفظ: '+outbox.length+' — مرفوض: '+rejected.length;
   $('barcode-waiting').textContent=outbox.length?'الباركودات قيد الحفظ: '+outbox.map(p=>p.value).join('، '):'اكتمل حفظ جميع القراءات المقبولة.';
   $('barcode-rejected').hidden=!rejected.length;$('barcode-rejected').textContent=rejected.length?'قراءات لم تُسجّل كتسليم:\n'+rejected.map(p=>p.value+' — '+p.message).join('\n'):'';
@@ -106,6 +109,6 @@ window.AdminBarcode=(()=>{
   await run(async()=>{if(AdminPortal.allowed('barcodeHandover'))restore();await refreshConfig();if(session){const data=await rpc('adminBarcodeReport',[{batch:session.id}]);queue=data.rows;renderQueue();if(queue.length)renderReport(data);}notice(failed?'توجد قراءات لم يُؤكد حفظها. اضغط «إعادة محاولة الحفظ».':mode==='handover'?'اختر الشركة وامسح الطلبات تباعًا.':'امسح الباركود للاستعلام عن الطلب.');});
   if(restoring&&session&&mode!=='handover'){mode='handover';$('barcode-mode-handover').setAttribute('aria-pressed','true');$('barcode-mode-inquiry').setAttribute('aria-pressed','false');$('barcode-company-box').hidden=false;$('barcode-cart-box').hidden=false;$('barcode-read').textContent='قراءة وتسجيل التسليم';}
   buttons();
- },leave:stopCamera,reset,sessionChanged:buttons};
+ },leave:stopCamera,reset,summary,sessionChanged:buttons};
 })();
 </script>
