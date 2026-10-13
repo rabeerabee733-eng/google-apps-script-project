@@ -2,7 +2,7 @@ var SHEET_ID = '1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w';
 var SHEET_NAME = 'الطلبات';
 var WA_NUMBER = '0798382004';
 var APP_VERSION = '2026-10-12-BOOKING-STAFF-V4';
-var ADMIN_VERSION = '2026-08-29-ADMIN-V2';
+var ADMIN_VERSION = '2026-10-13-TAB-PERMISSIONS-V3';
 var ADMIN_EMAILS = ['rabeerabee733@gmail.com'];
 var ADMIN_LOG_SHEET_NAME = 'سجل الإدارة';
 var ADMIN_META_SHEET_NAME = 'بيانات الإدارة';
@@ -2776,16 +2776,18 @@ function ajyalAdminList(filters) {
   return {employeeCounts:employeeCounts,total:rows.length,statuses:AJYAL_STATUSES,grades:AJYAL_GRADES,employees:AJYAL_EMPLOYEES,rows:rows.slice(offset,offset+100).map(function(r){return {requestId:r[0],orderNumber:r[1],teacherName:r[2],phone:r[4],status:r[5],notes:r[6],updatedAt:r[8],grade:r[9]||'',parentRequestId:r[10]||r[0],completedBy:r[5]==='مكتمل'?(r[11]||''):''};})};
 }
 function ajyalAdminUpdate(payload) {
-  requireAdmin_();payload=payload||{};
+  var actor=requireAdmin_();payload=payload||{};
   var id=cleanId_(payload.requestId,120),name=cleanText_(payload.teacherName,100),grade=cleanText_(payload.grade,30),phone=canonicalPhone_(payload.phone),status=cleanText_(payload.status,30);
   if(!id||!name||AJYAL_GRADES.indexOf(grade)===-1||!phone||AJYAL_STATUSES.indexOf(status)===-1)throw new Error('بيانات غير صحيحة.');
   var completedBy=status==='مكتمل'?cleanText_(payload.completedBy,100):'';
+  if(actor.username&&status==='مكتمل')completedBy=actor.employee;
   if(status==='مكتمل'&&AJYAL_EMPLOYEES.indexOf(completedBy)===-1)throw new Error('اختر الموظف الذي أنجز الطلب قبل تحديد الحالة مكتمل.');
   var lock=LockService.getScriptLock();if(!lock.tryLock(20000))throw new Error('النظام مشغول، حاول مجددًا.');
   try {
     var sheet=ajyalSheet_(),row=ajyalFind_(sheet,id);if(!row)throw new Error('لم يتم العثور على العميل.');
     var old=sheet.getRange(row,1,1,12).getDisplayValues()[0];
     if(old[8]!==String(payload.updatedAt||''))throw new Error('تم تعديل السجل، حدّث القائمة أولًا.');
+    if(actor.username&&old[5]==='مكتمل'&&status==='مكتمل'&&old[11])completedBy=old[11];
     old[2]=ajyalCell_(name);old[4]=displayPhone_(phone);old[5]=status;old[6]=ajyalCell_(cleanText_(payload.notes,1000));old[8]=new Date().toISOString();old[9]=grade;old[11]=completedBy;
     sheet.getRange(row,1,1,12).setNumberFormat('@').setValues([old]);return {ok:true};
   } finally {lock.releaseLock();}
@@ -2806,9 +2808,10 @@ function adminStickerOrders(selector){
   var anchor=adminStickerSettings();if(!anchor)throw new Error('ثبّت رقم بداية الباركود أولًا.');if(!stickerAnchorEqual_(selector.anchor,JSON.stringify(anchor)))throw new Error('تغيرت إعدادات الباركود. أعد تحميلها قبل التصدير.');
   var sheet=adminOrdersSheet_(),rows=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues():[];
   var exported={};stickerExportLedger_().forEach(function(r){exported[r[0]]=true;});
-  var selected=rows.filter(function(r){var n=adminOrderNumber_(r[0]);return n>=from&&n<=to&&(selector.includeExported||!exported[stickerExportKey_(r)]);}).sort(function(a,b){return adminOrderNumber_(a[0])-adminOrderNumber_(b[0]);});
+  var selected=rows.filter(function(r){var n=adminOrderNumber_(r[0]);return n>=from&&n<=to&&(selector.includeExported||!exported[stickerExportKey_(r)]);});
+  if(selector.order!=='sheet')selected.sort(function(a,b){return adminOrderNumber_(a[0])-adminOrderNumber_(b[0]);});
   var portalMeta=portalStickerMeta_();
-  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.amountPaid=Number((portalMeta[order.requestId]||{}).amountPaid)||0;order.stickerKey=stickerExportKey_(r);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
+  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.amountPaid=Number((portalMeta[order.requestId]||{}).amountPaid)||0;order.labelDue=adminRound2_(Math.max(0,numberFromDisplay_(order.grandTotal)-order.amountPaid));order.stickerRevision=portalDigest_(JSON.stringify([r,order.amountPaid]));order.stickerKey=stickerExportKey_(r);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
 }
 
 function stickerAnchorEqual_(left,right){try{var a=left?JSON.parse(String(left)):null,b=right?JSON.parse(String(right)):null;return !a&&!b||!!a&&!!b&&Number(a.order)===Number(b.order)&&String(a.barcode)===String(b.barcode);}catch(e){return false;}}
@@ -2823,10 +2826,10 @@ function adminRecordStickerExport(payload){
   var lock=LockService.getScriptLock();lock.waitLock(20000);
   try{
     var ledger=stickerExportLedger_();if(ledger.some(function(r){return r[4]===batch;}))return adminStickerExportSummary();
-    var seen={},wanted={};ledger.forEach(function(r){seen[r[0]]=true;});ids.forEach(function(id){wanted[String(id)]=true;});
+    var previewMeta=payload.revisions?portalStickerMeta_():{};var seen={},wanted={};ledger.forEach(function(r){seen[r[0]]=true;});ids.forEach(function(id){wanted[String(id)]=true;});
     var anchor=adminStickerSettings();if(!anchor||!stickerAnchorEqual_(payload.anchor,JSON.stringify(anchor)))throw new Error('تغيرت بداية الباركود. أعد تجهيز الملف.');
     var sheet=adminOrdersSheet_(),rows=sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues(),chosen=[];
-    rows.forEach(function(row,i){var key=stickerExportKey_(row),num=adminOrderNumber_(row[0]);if(wanted[key]){if(num<from||num>to)throw new Error('طلب خارج نطاق التصدير.');if(seen[key]&&!payload.includeExported)throw new Error('صُدّرت ستكرات بعض الطلبات من جلسة أخرى. حدّث الصفحة وأعد التصدير.');chosen.push({key:key,num:num,row:i+2});}});
+    rows.forEach(function(row,i){var key=stickerExportKey_(row),num=adminOrderNumber_(row[0]);if(wanted[key]){if(payload.revisions&&payload.revisions[key]!==portalDigest_(JSON.stringify([row,Number((previewMeta[String(row[16])]||{}).amountPaid)||0])))throw new Error('تغيرت بيانات طلب منذ المعاينة. أعد معاينة الستكرات.');if(num<from||num>to)throw new Error('طلب خارج نطاق التصدير.');if(seen[key]&&!payload.includeExported)throw new Error('صُدّرت ستكرات بعض الطلبات من جلسة أخرى. حدّث الصفحة وأعد التصدير.');chosen.push({key:key,num:num,row:i+2});}});
     if(chosen.length!==ids.length)throw new Error('تغيرت قائمة الطلبات. أعد تجهيز الملف.');
     chosen.sort(function(a,b){return a.num-b.num;});
     var ss=SpreadsheetApp.openById(SHEET_ID),log=ss.getSheetByName(STICKER_EXPORT_SHEET);if(!log){log=ss.insertSheet(STICKER_EXPORT_SHEET);log.getRange(1,1,1,7).setValues([['معرف الطلب','رقم الطلب','الباركود','وقت التصدير','معرف دفعة التصدير','عدد ستكرات الملف','الموظف']]);log.setFrozenRows(1);}
