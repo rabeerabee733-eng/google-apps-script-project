@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert'),crypto=require(
 const c=vm.createContext({console}),props={},cache={};const bytes=b=>Array.from(b,n=>n>127?n-256:n),buffer=a=>Buffer.from(a.map(n=>n&255));
 c.PropertiesService={getScriptProperties:()=>({getProperty:k=>props[k]||null,setProperty:(k,v)=>props[k]=v})};c.CacheService={getScriptCache:()=>({get:k=>cache[k]||null,put:(k,v)=>cache[k]=v,remove:k=>delete cache[k]})};c.LockService={getScriptLock:()=>({waitLock(){},releaseLock(){}})};
 c.Utilities={getUuid:()=>crypto.randomUUID(),newBlob:s=>({getBytes:()=>bytes(Buffer.from(s))}),DigestAlgorithm:{SHA_256:'sha256'},computeDigest:(alg,s)=>bytes(crypto.createHash(alg).update(s).digest()),computeHmacSha256Signature:(data,key)=>bytes(crypto.createHmac('sha256',buffer(key)).update(buffer(data)).digest()),base64EncodeWebSafe:a=>buffer(a).toString('base64url')};
-vm.runInContext(fs.readFileSync('الرمز.js','utf8')+'\n'+fs.readFileSync('PortalAuth.gs','utf8')+'\n'+fs.readFileSync('Operations.gs','utf8'),c);let googleAdmin=true;c.adminAuth_=()=>({ok:googleAdmin,email:googleAdmin?'owner@test':''});
+vm.runInContext(fs.readFileSync('الرمز.js','utf8')+'\n'+fs.readFileSync('PortalAuth.gs','utf8')+'\n'+fs.readFileSync('Operations.gs','utf8')+'\n'+fs.readFileSync('Barcode.gs','utf8'),c);let googleAdmin=true;c.adminAuth_=()=>({ok:googleAdmin,email:googleAdmin?'owner@test':''});
 assert.throws(()=>c.adminPortalSession('',true),/الموظف/);assert(c.adminPortalSession('',false).native);
 assert.equal(c.portalPassword_('a test password','a salt'),crypto.pbkdf2Sync('a test password','a salt',20000,32,'sha256').toString('base64url'));
 const p={employee:'اسراء',username:'israa',password:'strong-password-123',permissions:['ajyalRead','ajyalEdit'],active:true};let a=c.adminPortalSaveAccount(p)[0];assert(!('hash' in a));assert(!JSON.stringify(props).includes(p.password));assert.throws(()=>c.adminPortalSaveAccount(p),/مستخدم/);assert.throws(()=>c.adminPortalSaveAccount({...p,username:'second',permissions:['stickerExport']}),/تتطلب/);
@@ -18,3 +18,9 @@ const session=c.adminPortalLogin({username:'israa',password:p.password});for(con
 for(const method of ['adminPrepPlan','adminPrepCreate','adminPrepChecklist','adminPrepHandover','adminBackupList','adminBackupRestore'])assert.throws(()=>c.adminPortalRpc(session.token,method,[]),/صلاحية/);
 assert.throws(()=>c.adminPortalSaveAccount({...p,username:'prepbad',permissions:['prepEdit']}),/تتطلب/);
 console.log('PASS: packing permissions require the preparation tab; Ajyal-only users cannot access packing, tracking administration or backups.');
+
+for(const method of ['adminBarcodeConfig','adminBarcodeLookup','adminBarcodeReport','adminBarcodeHandover','adminBarcodeSetup'])assert.throws(()=>c.adminPortalRpc(session.token,method,[]),/صلاحية/);
+assert.throws(()=>c.adminPortalSaveAccount({...p,username:'barcodebad',permissions:['barcodeHandover']}),/تتطلب/);
+const barcodeUser=c.adminPortalSaveAccount({...p,username:'barcodereader',permissions:['barcodeRead']})[1];
+const barcodeLogin=c.adminPortalLogin({username:'barcodereader',password:p.password});c.adminBarcodeLookup=()=>({orderNumber:1});assert.equal(c.adminPortalRpc(barcodeLogin.token,'adminBarcodeLookup',[{}]).orderNumber,1);assert.throws(()=>c.adminPortalRpc(barcodeLogin.token,'adminBarcodeHandover',[{}]),/صلاحية/);assert.throws(()=>c.adminPortalRpc(barcodeLogin.token,'adminBarcodeSetup',[]),/صلاحية/);
+console.log('PASS: barcode inquiry/report permission is separate from handover; setup is manager-only.');
