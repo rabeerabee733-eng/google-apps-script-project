@@ -2,7 +2,7 @@ var SHEET_ID = '1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w';
 var SHEET_NAME = 'الطلبات';
 var WA_NUMBER = '0798382004';
 var APP_VERSION = '2026-10-14-CUSTOMER-EDIT-V5';
-var ADMIN_VERSION = '2026-10-14-CUSTOMER-EDIT-V11';
+var ADMIN_VERSION = '2026-10-14-WORKFLOW-V12';
 var ADMIN_EMAILS = ['rabeerabee733@gmail.com'];
 var ADMIN_LOG_SHEET_NAME = 'سجل الإدارة';
 var ADMIN_META_SHEET_NAME = 'بيانات الإدارة';
@@ -2834,7 +2834,7 @@ function adminStickerOrders(selector){
   var selected=rows.filter(function(r){var n=adminOrderNumber_(r[0]);return n>=from&&n<=to&&(selector.includeExported||!exported[stickerExportKey_(r)]);});
   if(selector.order!=='sheet')selected.sort(function(a,b){return adminOrderNumber_(a[0])-adminOrderNumber_(b[0]);});
   var portalMeta=portalStickerMeta_();
-  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.amountPaid=Number((portalMeta[order.requestId]||{}).amountPaid)||0;order.labelDue=adminRound2_(Math.max(0,numberFromDisplay_(order.grandTotal)-order.amountPaid));order.stickerRevision=portalDigest_(JSON.stringify([r,order.amountPaid]));order.stickerKey=stickerExportKey_(r);order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
+  return {total:selected.length,rows:selected.slice(offset,offset+100).map(function(r){var order=adminRowToObject_(r,0),number=Number(anchor.barcode)+adminOrderNumber_(r[0])-1;if(!Number.isSafeInteger(number)||number<0||String(number).length>12)throw new Error('الباركود الناتج خارج النطاق للطلب '+r[0]);order.amountPaid=Number((portalMeta[order.requestId]||{}).amountPaid)||0;order.labelDue=adminRound2_(Math.max(0,numberFromDisplay_(order.grandTotal)-order.amountPaid));order.stickerRevision=portalDigest_(JSON.stringify([r,order.amountPaid]));order.stickerKey=stickerExportKey_(r);order.previouslyExported=!!exported[order.stickerKey];order.barcode=String(number).padStart(anchor.barcode.length,'0');return order;})};
 }
 
 function stickerAnchorEqual_(left,right){try{var a=left?JSON.parse(String(left)):null,b=right?JSON.parse(String(right)):null;return !a&&!b||!!a&&!!b&&Number(a.order)===Number(b.order)&&String(a.barcode)===String(b.barcode);}catch(e){return false;}}
@@ -2855,13 +2855,15 @@ function adminRecordStickerExport(payload){
     var sheet=adminOrdersSheet_(),rows=sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues(),chosen=[];
     rows.forEach(function(row,i){var key=stickerExportKey_(row),num=adminOrderNumber_(row[0]);if(wanted[key]){if(payload.revisions&&payload.revisions[key]!==portalDigest_(JSON.stringify([row,Number((previewMeta[String(row[16])]||{}).amountPaid)||0])))throw new Error('تغيرت بيانات طلب منذ المعاينة. أعد معاينة الستكرات.');if(num<from||num>to)throw new Error('طلب خارج نطاق التصدير.');if(seen[key]&&!payload.includeExported&&!sameBatch.length)throw new Error('صُدّرت ستكرات بعض الطلبات من جلسة أخرى. حدّث الصفحة وأعد التصدير.');chosen.push({key:key,num:num,row:i+2});}});
     if(chosen.length!==ids.length)throw new Error('تغيرت قائمة الطلبات. أعد تجهيز الملف.');
-    if(sameBatch.length)return adminStickerExportSummary();
+    var downloadCheck=workflowExportCheck_(payload,chosen,seen,sameBatch);
+    if(sameBatch.length){workflowRecordDownload_(payload,chosen,downloadCheck);return adminStickerExportSummary();}
     chosen.sort(function(a,b){return a.num-b.num;});
     var ss=SpreadsheetApp.openById(SHEET_ID),log=ss.getSheetByName(STICKER_EXPORT_SHEET);if(!log){log=ss.insertSheet(STICKER_EXPORT_SHEET);log.getRange(1,1,1,7).setValues([['معرف الطلب','رقم الطلب','الباركود','وقت التصدير','معرف دفعة التصدير','عدد ستكرات الملف','الموظف']]);log.setFrozenRows(1);}
     var now=new Date().toISOString(),records=chosen.map(function(r){return[r.key,String(r.num),String(Number(anchor.barcode)+r.num-1).padStart(anchor.barcode.length,'0'),now,batch,String(payload.pages||''),auth.email||''];});
     var sortedRows=chosen.slice().sort(function(a,b){return a.row-b.row;}),ranges=[],start=sortedRows[0].row,end=start;sortedRows.slice(1).forEach(function(r){if(r.row===end+1)end=r.row;else{ranges.push('A'+start+':Q'+end);start=end=r.row;}});ranges.push('A'+start+':Q'+end);
     sheet.getRangeList(ranges).setBackground('#dff4e4');
     log.getRange(log.getLastRow()+1,1,records.length,7).setNumberFormat('@').setValues(records);
+    workflowRecordDownload_(payload,chosen,downloadCheck);
     barcodeSyncAfterExport_(chosen);
     return adminStickerExportSummary();
   }finally{lock.releaseLock();}

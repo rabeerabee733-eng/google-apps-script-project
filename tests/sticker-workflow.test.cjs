@@ -7,7 +7,7 @@ const c=vm.createContext({console,config:{},identity:{native:true},preview:[],pr
  $:node,allowed:()=>true,clearStatus(){},statusMsg(){},createStickerArticles:async()=>['<article/>'],
  rpc:async(name,args)=>{rpcCalls.push({name,args});if(name==='adminStickerSettings')return new Promise(r=>resolveSettings=r);if(name==='adminStickerOrders')return{total:1,rows:[{stickerKey:'k803',stickerRevision:'rev803'}]};return{};},
  buildPreviewPdf:job=>new Promise(r=>resolvePdf=r),refreshStickerPanel:async()=>{},loadDashboard(){},
- URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},document:{body:{append(){}},createElement:()=>({click(){downloads.push(this.download);},remove(){}})},setTimeout(){}
+ URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},document:{getElementById:node,body:{append(){}},createElement:()=>({click(){downloads.push(this.download);},remove(){}})},setTimeout(){}
 });
 for(const name of ['stickerNotice','updateStickerControls','previewStickers','downloadStickerPdf']){
  const start=script.indexOf((['previewStickers','downloadStickerPdf'].includes(name)?'async ':'')+'function '+name+'(');

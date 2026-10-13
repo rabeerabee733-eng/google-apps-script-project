@@ -75,14 +75,15 @@ function customerEditParse_(row,teachers) {
 }
 function customerEditView_(access) {
   var row=access.values,state=customerEditState_(row),result={orderNumber:row[0],locked:state.locked,lockedAt:state.lockedAt,message:state.reason};
-  if(state.locked)return result;
   var teachers=customerEditTeachers_(String(row[16])),parsed=customerEditParse_(row,teachers);
-  result.revision=customerEditRevision_(row,teachers);
+  result.tracking=workflowPublicTracking_(row,teachers);
+  result.revision=state.locked?'':customerEditRevision_(row,teachers);
   result.order={name:row[2],phone:row[3],altPhone:row[4],governorate:row[5],district:row[6],address:row[7]};
-  result.productsEditable=parsed.editable;result.items=parsed.items;result.totals=parsed.totals;result.itemsText=row[14];
+  result.productsEditable=!state.locked&&parsed.editable;result.items=parsed.items;result.totals=parsed.totals;result.itemsText=row[14];
   result.teachers=teachers.filter(function(t){return t.values[5]!=='ملغي';}).map(function(t){var a=t.values;return {id:a[0],teacherName:a[2],phone:a[4],grade:a[9],editable:a[5]==='جديد'};});
   result.catalog=Object.keys(PRODUCTS).map(function(k){var p=PRODUCTS[k];return {id:k,name:p.name,price:p.price,splitAllowed:!!p.splitAllowed,paperOnly:!!p.paperOnly,soldOut:!!p.soldOut};});
   result.districts=DISTRICTS;result.grades=AJYAL_GRADES;
+  if(state.locked)return result;
   result.message=parsed.editable?'يمكنك التعديل حتى أول تنزيل نهائي للستكرات.':'يمكنك تعديل بيانات الاتصال والعنوان. تفاصيل هذا الطلب تتطلب مراجعة الإدارة لتعديل المنتجات أو أجيال.';
   return result;
 }
@@ -125,16 +126,20 @@ function customerEditSave(payload) {
     var meta=portalStickerMeta_()[String(old[16])]||{};
     if(normalized.grandTotal<Number(meta.amountPaid||0))throw new Error('المبلغ الجديد أقل من المبلغ المدفوع. تواصل معنا لتسوية الفرق.');
     var values=[ajyalCell_(normalized.name),displayPhone_(normalized.mainPhone),normalized.altPhone?displayPhone_(normalized.altPhone):'',normalized.governorate,normalized.district,ajyalCell_(normalized.address),normalized.itemsCount,normalized.folderCount,normalized.paperCount,normalized.productsTotal,normalized.deliveryFee,normalized.grandTotal,ajyalCell_(text)];
-    var range=access.sheet.getRange(access.row,3,1,13),backup=range.getValues(),ajyal=plan.changes.length?ajyalSheet_():null,applied=[];
+    var range=access.sheet.getRange(access.row,3,1,13),backup=range.getValues(),ajyal=plan.changes.length?ajyalSheet_():null,applied=[],review=null,previousEdited=access.tokenSheet.getRange(access.tokenRow,4).getDisplayValue();
     try {
       range.setValues([values]);
       plan.changes.forEach(function(c){c.actualRow=c.row||ajyal.getLastRow()+1;applied.push(c);ajyal.getRange(c.actualRow,1,1,12).setNumberFormat('@').setValues([c.after]);});
       SpreadsheetApp.flush();
       var after=access.sheet.getRange(access.row,1,1,17).getDisplayValues()[0];
+      var editedAt=new Date().toISOString();
+      review=workflowAddReview_(old,after,teachers,customerEditTeachers_(String(old[16])),editedAt);
       adminLog_('العميل','تعديل طلب بواسطة العميل',old[0],old[16],access.row,old,after);
       if(plan.changes.length)adminLog_('العميل','تعديل اشتراكات أجيال بواسطة العميل',old[0],old[16],access.row,[],['تم تحديث '+plan.changes.length+' سجل اشتراك']);
-      access.tokenSheet.getRange(access.tokenRow,4).setValue(new Date().toISOString());
+      access.tokenSheet.getRange(access.tokenRow,4).setValue(editedAt);
     } catch(error) {
+      if(review)review.sheet.deleteRow(review.row);
+      access.tokenSheet.getRange(access.tokenRow,4).setValue(previousEdited);
       range.setValues(backup);applied.reverse().forEach(function(c){if(c.before)ajyal.getRange(c.actualRow,1,1,12).setValues([c.before]);else ajyal.deleteRow(c.actualRow);});SpreadsheetApp.flush();throw new Error('تعذر حفظ التعديل. أعد فتح الرابط للتحقق من الطلب ثم حاول مجددًا.');
     }
     access.values=after;
@@ -145,7 +150,6 @@ function adminCustomerEditLink(requestId) {
   requireAdmin_();var lock=LockService.getScriptLock();lock.waitLock(20000);
   try {
     var s=adminOrdersSheet_(),r=adminFindRowByRequestId_(s,cleanId_(requestId,80),null),row=s.getRange(r,1,1,17).getDisplayValues()[0],state=customerEditState_(row);
-    if(state.locked)throw new Error(state.reason);
     var token=Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'');customerEditStoreToken_(String(row[16]),token);
     return {url:CUSTOMER_EDIT_URL_+'#token='+token,orderNumber:row[0],phone:canonicalPhone_(row[3])};
   } finally {lock.releaseLock();}
