@@ -1,8 +1,8 @@
 'use strict';
 const CACHE_PREFIX = 'tahdir-mobile-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v2';
+const CACHE_NAME = CACHE_PREFIX + 'v3';
 const ROOT = new URL('./', self.location.href);
-const SHELL = ['index.html', 'app.css', 'app.js', 'manifest.webmanifest', 'brand-logo-v2.jpg', 'icon-brand-v2-180.png', 'icon-brand-v2-192.png', 'icon-brand-v2-512.png', 'icon-brand-v2-maskable.png'].map(path => new URL(path, ROOT).href);
+const SHELL = ['index.html', 'install-iphone.html', 'app.css?v=3', 'app.js?v=3', 'manifest.webmanifest?v=3', 'apple-touch-icon-v3.png', 'brand-logo-v2.jpg', 'icon-brand-v2-180.png', 'icon-brand-v2-192.png', 'icon-brand-v2-512.png', 'icon-brand-v2-maskable.png'].map(path => new URL(path, ROOT).href);
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)));
 });
@@ -20,7 +20,23 @@ self.addEventListener('fetch', event => {
   const isHome = url.pathname === ROOT.pathname || url.pathname === ROOT.pathname + 'index.html';
   const cacheUrl = isHome ? new URL('index.html', ROOT).href : url.href;
   if (!isHome && !SHELL.includes(cacheUrl)) return;
+  const freshMetadata = isHome || url.pathname === ROOT.pathname + 'install-iphone.html' || url.pathname === ROOT.pathname + 'manifest.webmanifest';
   event.respondWith(caches.open(CACHE_NAME).then(async cache => {
+    // Read current installation metadata online; preserve the public offline launcher.
+    if (freshMetadata) {
+      try {
+        const response = await fetch(request, {cache: 'no-store'});
+        if (response.ok && !response.redirected) {
+          await cache.put(cacheUrl, response.clone()).catch(() => {});
+          return response;
+        }
+        return (await cache.match(cacheUrl)) || response;
+      } catch (error) {
+        const fallback = await cache.match(cacheUrl);
+        if (fallback) return fallback;
+        throw error;
+      }
+    }
     const cached = await cache.match(cacheUrl);
     return cached || fetch(request);
   }));

@@ -3,8 +3,9 @@ const $ = id => document.getElementById(id);
 const installDialog = $('installDialog');
 let installPrompt = null;
 let waitingWorker = null;
-const appUrl = new URL('./', location.href).href;
 const isIphone = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const iphoneInstallPage = document.body.dataset.install === 'iphone';
+const appUrl = new URL(isIphone || iphoneInstallPage ? './install-iphone.html' : './', location.href).href;
 const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
 function showPlatform(platform) {
@@ -15,12 +16,13 @@ function showPlatform(platform) {
   $('androidButton').setAttribute('aria-pressed', String(!iphone));
 }
 function showHelp() {
-  showPlatform(isIphone ? 'iphone' : 'android');
+  showPlatform(isIphone || iphoneInstallPage ? 'iphone' : 'android');
   $('dialogStatus').textContent = '';
   $('copyFallback').hidden = true;
   if (!installDialog.open) installDialog.showModal();
 }
 function updateInstalled() {
+  if ($('iphoneSetup')) $('iphoneSetup').hidden = standalone() || !(isIphone || iphoneInstallPage);
   if (standalone()) {
     $('installLabel').textContent = 'التطبيق على هاتفك';
     $('installNote').textContent = 'اختر بوابة الدخول لبدء العمل';

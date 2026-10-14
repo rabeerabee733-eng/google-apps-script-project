@@ -12,11 +12,11 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <title>إدارة التحضير — تطبيق الهاتف</title>
-  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="manifest" href="./manifest.webmanifest?v=3">
   <link rel="icon" type="image/png" href="./icon-brand-v2-192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="./icon-brand-v2-180.png">
-  <link rel="stylesheet" href="./app.css">
-  <script src="./app.js" defer></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="https://rabeerabee733-eng.github.io/google-apps-script-project/mobile/apple-touch-icon-v3.png">
+  <link rel="stylesheet" href="./app.css?v=3">
+  <script src="./app.js?v=3" defer></script>
 </head>
 <body>
   <main class="app">
@@ -26,6 +26,11 @@
       <p class="eyebrow">كل يوم، بداية أسهل</p>
       <h1>إدارة التحضير</h1>
       <p class="intro">طلباتك ومهام فريقك،<br>من مكان واحد على هاتفك.</p>
+      <section class="iphone-steps" id="iphoneSetup" aria-label="تثبيت التطبيق على آيفون" hidden>
+        <strong>أضف هذه الصفحة إلى شاشة الآيفون</strong>
+        <p>من Safari: مشاركة ← إضافة إلى الشاشة الرئيسية ← إضافة.</p>
+        <p>أكمل الإضافة هنا أولًا، ثم افتح التطبيق واختر دخول الموظفين أو الإدارة.</p>
+      </section>
       <button class="install primary" id="installButton" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></svg><span id="installLabel">تثبيت على الهاتف</span></button>
       <p class="install-note" id="installNote">على أندرويد وآيفون · دون اشتراك مطوّر</p>
     </header>
@@ -60,7 +65,7 @@
     <p class="dialog-intro">بعد التثبيت، افتح «إدارة التحضير» من الشاشة الرئيسية، ثم اختر بوابة الدخول.</p>
     <div class="platforms" role="group" aria-label="نوع الهاتف"><button id="androidButton" type="button" aria-pressed="true">أندرويد</button><button id="iphoneButton" type="button" aria-pressed="false">آيفون</button></div>
     <div id="androidGuide"><ol><li>افتح رابط التطبيق في <strong>Chrome</strong>.</li><li>اضغط القائمة <strong>⋮</strong>، ثم «إضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق».</li><li>اختر «تثبيت» أو «إضافة» لإكمال الخطوات التي يعرضها هاتفك.</li></ol></div>
-    <div id="iphoneGuide" hidden><ol><li>افتح رابط التطبيق في <strong>Safari</strong>.</li><li>اضغط «مشاركة»، ثم <strong>«إضافة إلى الشاشة الرئيسية»</strong>.</li><li>فعّل «فتح كتطبيق ويب» إذا ظهر، ثم اضغط «إضافة».</li></ol></div>
+    <div id="iphoneGuide" hidden><ol><li>افتح <a href="./install-iphone.html">صفحة التثبيت الخاصة بآيفون</a> في <strong>Safari</strong> وانتظر ظهور الشعار.</li><li>من صفحة التثبيت نفسها، اضغط «مشاركة»، ثم <strong>«إضافة إلى الشاشة الرئيسية»</strong>.</li><li>فعّل «فتح كتطبيق ويب» إذا ظهر، ثم اضغط «إضافة».</li></ol><p class="small-note">أكمل التثبيت قبل فتح بوابة الموظفين أو الإدارة. إذا سبق أن أضفت اختصارًا بأيقونة مختلفة، احذف الاختصار القديم ثم أضف الصفحة الجديدة.</p></div>
     <p class="small-note">إذا فتحت الرابط داخل واتساب، افتحه أولًا في متصفح الهاتف. لا يحتاج التطبيق إلى اشتراك Apple Developer.</p>
     <button class="secondary" id="copyDialogButton" type="button">نسخ رابط التطبيق</button>
     <input id="copyFallback" aria-label="رابط التطبيق للنسخ اليدوي" readonly hidden>
