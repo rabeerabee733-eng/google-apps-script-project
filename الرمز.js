@@ -1691,6 +1691,9 @@ function serveAdmin_(employeeEntry) {
   template.employeeEntry = Boolean(employeeEntry);
   return template.evaluate()
     .setTitle('إدارة طلبات التحضير الإلكتروني')
+    .addMetaTag('apple-mobile-web-app-capable', 'yes')
+    .addMetaTag('mobile-web-app-capable', 'yes')
+    .setFaviconUrl('https://rabeerabee733-eng.github.io/google-apps-script-project/mobile/icon-brand-v2-192.png')
     .addMetaTag('viewport', 'width=device-width,initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
 }

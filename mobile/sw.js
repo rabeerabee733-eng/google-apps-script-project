@@ -1,8 +1,8 @@
 'use strict';
 const CACHE_PREFIX = 'tahdir-mobile-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v4';
+const CACHE_NAME = CACHE_PREFIX + 'v5';
 const ROOT = new URL('./', self.location.href);
-const SHELL = ['index.html', 'install-iphone.html', 'app.css?v=4', 'preferences.js?v=4', 'app.js?v=4', 'manifest.webmanifest?v=4', 'apple-touch-icon-v3.png', 'icon-brand-v2-192.png', 'icon-brand-v2-512.png', 'icon-brand-v2-maskable.png'].map(path => new URL(path, ROOT).href);
+const SHELL = ['index.html', 'install-iphone.html', 'app.css?v=5', 'preferences.js?v=5', 'app.js?v=5', 'manifest.webmanifest?v=5', 'apple-touch-icon-v3.png', 'icon-brand-v2-192.png', 'icon-brand-v2-512.png', 'icon-brand-v2-maskable.png'].map(path => new URL(path, ROOT).href);
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)));
 });
