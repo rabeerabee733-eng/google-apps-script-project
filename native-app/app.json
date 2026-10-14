@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "التحضير الإلكتروني",
+    "slug": "altahdir-management",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/brand.png",
+    "userInterfaceStyle": "light",
+    "scheme": "altahdir-management",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.altahdir.management",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.altahdir.management",
+      "versionCode": 1,
+      "allowBackup": false,
+      "permissions": [
+        "CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/brand.png",
+        "backgroundColor": "#F6F4EF"
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "السماح للتطبيق بمسح باركود طلبات التجهيز.",
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-router"
+    ],
+    "extra": {
+      "supportsRTL": true
+    }
+  }
+}

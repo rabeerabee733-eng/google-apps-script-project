@@ -1,0 +1,6 @@
+native-app/**
+tests/**
+mobile/**
+outputs/**
+node_modules/**
+.git/**

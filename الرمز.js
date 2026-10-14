@@ -219,6 +219,8 @@ function doGet(e) {
       50
     );
 
+  if (action === 'mobilePair') { return mobilePairPage_(params.pair); }
+
   if (action === 'editOrder') { return serveCustomerEdit_(); }
   if (action === 'track') { return serveCustomerTracking_(); }
   if (action === 'employee') { return serveAdmin_(true); }
@@ -290,6 +292,7 @@ function doGet(e) {
  * استقبال POST مرة واحدة من صفحة GitHub.
  */
 function doPost(e) {
+  if (e && e.parameter && e.parameter.mobile === '1') return mobilePost_(e);
   var result;
   var requestId = '';
 
@@ -1699,6 +1702,9 @@ function serveAdmin_(employeeEntry) {
 }
 
 function adminAuth_() {
+  if (typeof portalContext_ !== 'undefined' && portalContext_ && portalContext_.mobileManager === true && portalContext_.native === true && ADMIN_EMAILS.indexOf(portalContext_.email) !== -1) {
+    return { ok: true, email: portalContext_.email };
+  }
   var email = String(Session.getActiveUser().getEmail() || '')
     .trim()
     .toLowerCase();
