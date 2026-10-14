@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#142b36">
-  <meta name="description" content="تطبيق الدخول إلى إدارة التحضير الإلكتروني للمدير والموظفين.">
+  <meta name="theme-color" content="#f7f6f2">
+  <meta name="description" content="إدارة التحضير الإلكتروني — مساحة عمل المدير والموظفين.">
   <meta name="robots" content="noindex,nofollow">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,64 +12,71 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <title>إدارة التحضير — تطبيق الهاتف</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=3">
+  <link rel="manifest" href="./manifest.webmanifest?v=4">
   <link rel="icon" type="image/png" href="./icon-brand-v2-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="https://rabeerabee733-eng.github.io/google-apps-script-project/mobile/apple-touch-icon-v3.png">
-  <link rel="stylesheet" href="./app.css?v=3">
-  <script src="./app.js?v=3" defer></script>
+  <link rel="stylesheet" href="./app.css?v=4">
+  <script src="./preferences.js?v=4"></script>
+  <script src="./app.js?v=4" defer></script>
 </head>
 <body data-install="iphone">
-  <main class="app">
-    <header class="hero">
-      <div class="topline"><span class="brand">التحضير الإلكتروني</span><span class="badge">مساحة الفريق</span></div>
-      <img class="app-icon" src="./brand-logo-v2.jpg" width="96" height="96" alt="شعار التحضير الإلكتروني">
-      <p class="eyebrow">كل يوم، بداية أسهل</p>
-      <h1>إدارة التحضير</h1>
-      <p class="intro">طلباتك ومهام فريقك،<br>من مكان واحد على هاتفك.</p>
-      <section class="iphone-steps" id="iphoneSetup" aria-label="تثبيت التطبيق على آيفون">
-        <strong>أضف هذه الصفحة إلى شاشة الآيفون</strong>
-        <p>من Safari: مشاركة ← إضافة إلى الشاشة الرئيسية ← إضافة.</p>
-        <p>أكمل الإضافة هنا أولًا، ثم افتح التطبيق واختر دخول الموظفين أو الإدارة.</p>
-      </section>
-      <button class="install primary" id="installButton" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></svg><span id="installLabel">تثبيت على الهاتف</span></button>
-      <p class="install-note" id="installNote">على أندرويد وآيفون · دون اشتراك مطوّر</p>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m1-16a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 4v2"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6v15M3 3h5a4 4 0 0 1 4 3 4 4 0 0 1 4-3h5v16h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3Z"/></symbol><symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M20 12H4m6-6-6 6 6 6"/></symbol><symbol id="i-external" viewBox="0 0 24 24"><path d="M14 3h7v7m0-7L10 14m0-10H4a1 1 0 0 0-1 1v15a1 1 0 0 0 1 1h15a1 1 0 0 0 1-1v-6"/></symbol><symbol id="i-chevron" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4m-3 14h2"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13A9 9 0 0 1 11 3a9 9 0 1 0 10 10Z"/></symbol><symbol id="i-screen" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M12 16v5m-4 0h8"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></symbol></svg>
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="#home" aria-label="التحضير الإلكتروني — الرئيسية"><img class="app-icon" src="./icon-brand-v2-192.png" width="46" height="46" alt="شعار التحضير الإلكتروني"><span><strong>التحضير الإلكتروني</strong><small>مساحة الفريق</small></span></a>
+      <span class="connection" id="connectionBadge"><i aria-hidden="true"></i><span id="connectionText">متصل</span></span>
     </header>
+    <main id="mainContent">
+      <p class="offline" id="offlineNotice" role="status" hidden>الجهاز غير متصل. يمكنك تصفّح الواجهة والدليل؛ تحتاج بوابات العمل إلى الإنترنت.</p>
+      <section class="view" id="home" data-view aria-labelledby="homeTitle">
+        <div class="welcome"><div><p class="eyebrow" id="todayLabel">مساحتك اليومية</p><h1 id="homeTitle" tabindex="-1">أهلًا بك <span class="gold-dot">.</span></h1></div><span class="mini-label">لنبدأ العمل</span></div>
+        <section class="hero" aria-label="مساحة العمل">
+          <div class="hero-mark"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-shield"/></svg></div><p class="hero-kicker">إدارة التحضير</p>
+          <h2>كل يوم،<br><span>بداية منظّمة.</span></h2>
+          <p>بوابتك لمتابعة العمل مع فريقك.</p>
+          <a class="quick-entry" id="quickEntry" href="https://script.google.com/macros/s/AKfycbz-c1QyYl3h8wZf88vKChT7d3-91OMGJ5fq_931eMCVI11gJrLbyw_kPAUtdkVVCNTz2A/exec?action=employee" target="_blank" rel="noopener noreferrer" hidden><span id="quickEntryLabel">فتح بوابتي المفضلة</span><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
+        </section>
+        <div class="section-heading"><h2>مساحة العمل</h2><span>اختر بوابة الدخول</span></div>
+        <div class="entry-list">
+          <a class="entry" id="employeeLink" href="https://script.google.com/macros/s/AKfycbz-c1QyYl3h8wZf88vKChT7d3-91OMGJ5fq_931eMCVI11gJrLbyw_kPAUtdkVVCNTz2A/exec?action=employee" target="_blank" rel="noopener noreferrer"><span class="entry-icon"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-users"/></svg></span><span class="entry-copy"><strong>دخول الموظفين <small class="favorite" id="employeeFavorite" hidden>المفضلة</small></strong><span>اسم المستخدم وكلمة المرور</span></span><svg class="icon entry-arrow" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
+          <a class="entry manager-entry" id="managerLink" href="https://script.google.com/macros/s/AKfycbwI48f5C3GujAjVoRd_dNXOHIj5GAeMptz6Cg0oDG0hUAkIIXXwLklUgJjhHSP95AqEEQ/exec?action=admin" target="_blank" rel="noopener noreferrer"><span class="entry-icon"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-shield"/></svg></span><span class="entry-copy"><strong>دخول الإدارة <small class="favorite" id="managerFavorite" hidden>المفضلة</small></strong><span>حساب Google المخوّل للإدارة</span></span><svg class="icon entry-arrow" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
+        </div>
+        <p class="entry-note"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-external"/></svg><span>تفتح بوابة العمل في المتصفح. ارجع إلى التطبيق للتنقّل بين أقسامه.</span></p>
+        <button class="install-card" id="installButton" type="button"><span class="install-icon"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-phone"/></svg></span><span><strong id="installLabel">تطبيقك، بلمسة واحدة</strong><small id="installNote">أضفه إلى شاشة هاتفك الرئيسية</small></span><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-download"/></svg></button>
+        <section class="iphone-steps" id="iphoneSetup" aria-label="تثبيت التطبيق على آيفون"><strong>ثبّت من هذه الصفحة في Safari</strong><p>مشاركة ← إضافة إلى الشاشة الرئيسية ← إضافة. أكمل التثبيت قبل فتح بوابة العمل.</p></section>
+      </section>
 
-    <section class="workspace" aria-labelledby="workspaceTitle">
-      <div class="section-title"><h2 id="workspaceTitle">ابدأ العمل</h2><span>اختر بوابة الدخول</span></div>
-      <p class="offline" id="offlineNotice" role="status" hidden>أنت غير متصل بالإنترنت. اتصل بالشبكة لفتح الموقع ومتابعة العمل.</p>
-      <a class="entry" id="employeeLink" href="https://script.google.com/macros/s/AKfycbz-c1QyYl3h8wZf88vKChT7d3-91OMGJ5fq_931eMCVI11gJrLbyw_kPAUtdkVVCNTz2A/exec?action=employee" target="_blank" rel="noopener noreferrer">
-        <span class="entry-icon"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m1-16a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 4v2"/></svg></span>
-        <span class="entry-copy"><strong>دخول الموظفين</strong><span>باسم المستخدم وكلمة المرور</span></span><span class="arrow" aria-hidden="true">←</span>
-      </a>
-      <a class="entry" id="managerLink" href="https://script.google.com/macros/s/AKfycbwI48f5C3GujAjVoRd_dNXOHIj5GAeMptz6Cg0oDG0hUAkIIXXwLklUgJjhHSP95AqEEQ/exec?action=admin" target="_blank" rel="noopener noreferrer">
-        <span class="entry-icon manager"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg></span>
-        <span class="entry-copy"><strong>دخول الإدارة</strong><span>بحساب Google المخوّل للإدارة</span></span><span class="arrow" aria-hidden="true">←</span>
-      </a>
-      <p class="entry-note">تفتح بوابات العمل في المتصفح باستخدام بيانات الموقع نفسها وصلاحيات حسابك.</p>
-    </section>
+      <section class="view" id="guide" data-view aria-labelledby="guideTitle" hidden>
+        <div class="page-heading"><p class="eyebrow">كل ما تحتاجه للبدء</p><h1 id="guideTitle" tabindex="-1">دليل الاستخدام</h1><p>خطوات بسيطة، وعملك أقرب إليك.</p></div>
+        <section class="panel guide-card"><span class="round-icon"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-phone"/></svg></span><h2>أضفه إلى هاتفك</h2><p>افتح إدارة التحضير من شاشتك الرئيسية، مع الشعار المعتمد.</p><button class="primary" id="helpButton" type="button">عرض خطوات التثبيت <svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></button></section>
+        <div class="section-heading"><h2>كيف تستخدم التطبيق؟</h2></div>
+        <ol class="steps"><li><span>١</span><div><strong>اختر بوابتك</strong><p>الموظفون باسم المستخدم وكلمة المرور، والإدارة بحساب Google المخوّل.</p></div></li><li><span>٢</span><div><strong>تابع عملك</strong><p>تفتح صفحة العمل في المتصفح، وتستخدم بياناتك وصلاحياتك الحالية.</p></div></li><li><span>٣</span><div><strong>ارجع بسهولة</strong><p>افتح التطبيق من شاشتك الرئيسية للعودة إلى واجهة الدخول.</p></div></li></ol>
+        <div class="section-heading"><h2>أسئلة شائعة</h2></div>
+        <div class="faq"><details><summary>هل يعمل دون إنترنت؟ <svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></summary><p>تبقى هذه الواجهة ودليل الاستخدام متاحَين بعد أول تحميل. عرض الطلبات وحفظ التغييرات داخل بوابة العمل يحتاجان إلى الإنترنت.</p></details><details><summary>لماذا تفتح بوابة العمل في المتصفح؟ <svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></summary><p>التطبيق يجمع روابط الدخول إلى موقع العمل الحالي. تسجيل الدخول والطلبات تتم داخل الموقع بنفس حسابك وصلاحياتك.</p></details><details><summary>الأيقونة لا تظهر على الآيفون <svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></summary><p>افتح <a href="./install-iphone.html">رابط تثبيت آيفون</a> في Safari وانتظر ظهور الشعار، ثم أضف الصفحة إلى الشاشة الرئيسية قبل فتح بوابة العمل. احذف الاختصار القديم إذا كان يحمل أيقونة مختلفة.</p></details></div>
+        <button class="secondary" id="copyButton" type="button"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-copy"/></svg> نسخ رابط التثبيت</button>
+      </section>
 
-    <section class="help" aria-label="التثبيت والمشاركة">
-      <button class="text-button" id="helpButton" type="button">طريقة التثبيت <span aria-hidden="true">↗</span></button>
-      <span class="divider" aria-hidden="true"></span>
-      <button class="text-button" id="copyButton" type="button">نسخ رابط التثبيت <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg></button>
-    </section>
-    <p class="status" id="status" role="status" aria-live="polite"></p>
-    <section class="update" id="updateNotice" hidden><p>يتوفر تحديث لواجهة التطبيق.</p><button id="updateButton" type="button">تحديث الآن</button></section>
-    <footer><span class="dot" aria-hidden="true"></span><span id="connectionText">يلزم الإنترنت لعرض الطلبات وحفظ التغييرات</span></footer>
-    <noscript><p class="offline">فعّل JavaScript لاستخدام زر التثبيت والمساعدة. روابط الدخول تعمل مباشرة.</p></noscript>
-  </main>
-
+      <section class="view" id="settings" data-view aria-labelledby="settingsTitle" hidden>
+        <div class="page-heading"><p class="eyebrow">على طريقتك</p><h1 id="settingsTitle" tabindex="-1">الإعدادات</h1><p>اجعل الوصول إلى عملك أكثر راحة.</p></div>
+        <section class="panel settings-panel"><fieldset><legend>مظهر التطبيق</legend><p class="field-note">اختر الألوان المريحة لعينيك.</p><div class="appearance-options"><label><input type="radio" name="theme" value="light"><span><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-sun"/></svg>فاتح</span></label><label><input type="radio" name="theme" value="dark"><span><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-moon"/></svg>داكن</span></label><label><input type="radio" name="theme" value="system" checked><span><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-screen"/></svg>تلقائي</span></label></div></fieldset></section>
+        <section class="panel settings-panel"><fieldset><legend>بوابتك المفضلة</legend><p class="field-note">يظهر اختصارها في الرئيسية للوصول إليها بسرعة.</p><div class="role-options"><label><input type="radio" name="preferredRole" value="none" checked><span>اختيار البوابة كل مرة</span></label><label><input type="radio" name="preferredRole" value="employee"><span><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-users"/></svg>بوابة الموظفين</span></label><label><input type="radio" name="preferredRole" value="manager"><span><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-shield"/></svg>بوابة الإدارة</span></label></div></fieldset></section>
+        <div class="panel text-setting"><label for="largeText"><strong>نص أكبر</strong><small>قراءة أوضح داخل واجهة التطبيق</small></label><input class="switch" id="largeText" type="checkbox" role="switch"></div>
+        <p class="settings-note"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-lock"/></svg><span>تُحفظ اختيارات المظهر والبوابة على هذا الجهاز. اختيار بوابة الإدارة لا يغيّر صلاحيات حسابك.</span></p>
+        <div class="about"><img src="./icon-brand-v2-192.png" alt="" width="36" height="36"><div><strong>التحضير الإلكتروني</strong><span>واجهة الهاتف · الإصدار ٤</span></div></div>
+      </section>
+      <section class="update" id="updateNotice" hidden><div><strong>تحديث جديد جاهز</strong><p>احصل على أحدث واجهة للتطبيق.</p></div><button id="updateButton" type="button">تحديث الآن</button></section>
+      <noscript><p class="offline">فعّل JavaScript لاستخدام التنقّل والإعدادات. روابط دخول الموظفين والإدارة تعمل مباشرة.</p></noscript>
+    </main>
+    <nav class="bottom-nav" aria-label="التنقّل الرئيسي"><a href="#home" data-nav="home" aria-current="page"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-home"/></svg><span>الرئيسية</span></a><a href="#guide" data-nav="guide" ><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-book"/></svg><span>الدليل</span></a><a href="#settings" data-nav="settings" ><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-settings"/></svg><span>الإعدادات</span></a></nav>
+  </div>
+  <p class="toast" id="status" role="status" aria-live="polite" hidden></p>
   <dialog id="installDialog" aria-labelledby="installTitle">
-    <div class="dialog-heading"><div><p class="eyebrow">خطوة واحدة أقرب</p><h2 id="installTitle">أضفه إلى هاتفك</h2></div><button class="close" id="closeDialog" aria-label="إغلاق" type="button">×</button></div>
-    <p class="dialog-intro">بعد التثبيت، افتح «إدارة التحضير» من الشاشة الرئيسية، ثم اختر بوابة الدخول.</p>
+    <div class="sheet-handle" aria-hidden="true"></div><div class="dialog-heading"><div><p class="eyebrow">دائمًا على شاشتك</p><h2 id="installTitle">أضف التطبيق لهاتفك</h2></div><button class="icon-button" id="closeDialog" aria-label="إغلاق" type="button"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-close"/></svg></button></div>
+    <p class="dialog-intro">ثبّت من هذه الصفحة أولًا، ثم افتح التطبيق واختر بوابة الدخول.</p>
     <div class="platforms" role="group" aria-label="نوع الهاتف"><button id="androidButton" type="button" aria-pressed="true">أندرويد</button><button id="iphoneButton" type="button" aria-pressed="false">آيفون</button></div>
-    <div id="androidGuide"><ol><li>افتح رابط التطبيق في <strong>Chrome</strong>.</li><li>اضغط القائمة <strong>⋮</strong>، ثم «إضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق».</li><li>اختر «تثبيت» أو «إضافة» لإكمال الخطوات التي يعرضها هاتفك.</li></ol></div>
-    <div id="iphoneGuide" hidden><ol><li>افتح <a href="./install-iphone.html">صفحة التثبيت الخاصة بآيفون</a> في <strong>Safari</strong> وانتظر ظهور الشعار.</li><li>من صفحة التثبيت نفسها، اضغط «مشاركة»، ثم <strong>«إضافة إلى الشاشة الرئيسية»</strong>.</li><li>فعّل «فتح كتطبيق ويب» إذا ظهر، ثم اضغط «إضافة».</li></ol><p class="small-note">أكمل التثبيت قبل فتح بوابة الموظفين أو الإدارة. إذا سبق أن أضفت اختصارًا بأيقونة مختلفة، احذف الاختصار القديم ثم أضف الصفحة الجديدة.</p></div>
-    <p class="small-note">إذا فتحت الرابط داخل واتساب، افتحه أولًا في متصفح الهاتف. لا يحتاج التطبيق إلى اشتراك Apple Developer.</p>
-    <button class="secondary" id="copyDialogButton" type="button">نسخ رابط التطبيق</button>
-    <input id="copyFallback" aria-label="رابط التطبيق للنسخ اليدوي" readonly hidden>
-    <p id="dialogStatus" class="status" role="status" aria-live="polite"></p>
+    <div id="androidGuide"><ol><li>افتح رابط التطبيق في <strong>Chrome</strong>.</li><li>اضغط القائمة <strong>⋮</strong> ثم «إضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق».</li><li>أكمل الخطوات التي يعرضها هاتفك.</li></ol></div>
+    <div id="iphoneGuide" hidden><ol><li>افتح <a href="./install-iphone.html">صفحة تثبيت آيفون</a> في <strong>Safari</strong> وانتظر ظهور الشعار.</li><li>اضغط «مشاركة»، ثم <strong>«إضافة إلى الشاشة الرئيسية»</strong>.</li><li>فعّل «فتح كتطبيق ويب» إذا ظهر، ثم اضغط «إضافة».</li></ol><p class="small-note">إذا كان الاختصار القديم يعرض أيقونة مختلفة، احذفه ثم أضف هذه الصفحة من جديد.</p></div>
+    <button class="secondary" id="copyDialogButton" type="button"><svg class="icon " aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#i-copy"/></svg>نسخ رابط التثبيت</button><input id="copyFallback" aria-label="رابط التطبيق للنسخ اليدوي" readonly hidden><p id="dialogStatus" class="dialog-status" role="status" aria-live="polite"></p>
   </dialog>
 </body>
 </html>

@@ -1,12 +1,65 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const installDialog = $('installDialog');
-let installPrompt = null;
-let waitingWorker = null;
+const preferences = window.TahdirPreferences;
+const views = ['home','guide','settings'];
 const isIphone = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const iphoneInstallPage = document.body.dataset.install === 'iphone';
 const appUrl = new URL(isIphone || iphoneInstallPage ? './install-iphone.html' : './', location.href).href;
 const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+let installPrompt = null;
+let waitingWorker = null;
+let statusTimer;
+
+function notify(message) {
+  clearTimeout(statusTimer);
+  $('status').textContent = message;
+  $('status').hidden = false;
+  statusTimer = setTimeout(() => { $('status').hidden = true; }, 4500);
+}
+function renderView(focus = false) {
+  const requested = location.hash.slice(1);
+  const view = views.includes(requested) ? requested : 'home';
+  document.querySelectorAll('[data-view]').forEach(panel => { panel.hidden = panel.id !== view; });
+  document.querySelectorAll('[data-nav]').forEach(link => {
+    if (link.dataset.nav === view) link.setAttribute('aria-current','page');
+    else link.removeAttribute('aria-current');
+  });
+  if (focus) {
+    window.scrollTo(0, 0);
+    $(view + 'Title').focus({preventScroll:true});
+  }
+}
+window.addEventListener('hashchange', () => renderView(true));
+renderView();
+
+function renderPreferences() {
+  const settings = preferences.get();
+  document.querySelectorAll('input[name="theme"]').forEach(input => { input.checked = input.value === settings.theme; });
+  document.querySelectorAll('input[name="preferredRole"]').forEach(input => { input.checked = input.value === settings.role; });
+  $('largeText').checked = settings.largeText;
+  $('quickEntry').hidden = settings.role === 'none';
+  $('employeeFavorite').hidden = settings.role !== 'employee';
+  $('managerFavorite').hidden = settings.role !== 'manager';
+  if (settings.role !== 'none') {
+    $('quickEntry').href = $(settings.role + 'Link').href;
+    $('quickEntryLabel').textContent = settings.role === 'employee' ? 'متابعة إلى بوابة الموظفين' : 'متابعة إلى بوابة الإدارة';
+  }
+}
+function savePreferences(changes) {
+  const persisted = preferences.set(changes);
+  renderPreferences();
+  notify(persisted ? 'تم حفظ اختيارك على هذا الجهاز.' : 'تم تطبيق الاختيار. المتصفح لا يسمح بحفظه بعد الإغلاق.');
+}
+document.querySelectorAll('input[name="theme"]').forEach(input => input.addEventListener('change', () => savePreferences({theme:input.value})));
+document.querySelectorAll('input[name="preferredRole"]').forEach(input => input.addEventListener('change', () => savePreferences({role:input.value})));
+$('largeText').addEventListener('change', () => savePreferences({largeText:$('largeText').checked}));
+renderPreferences();
+function updateDate() {
+  $('todayLabel').textContent = new Intl.DateTimeFormat('ar-JO', {weekday:'long', day:'numeric', month:'long', timeZone:'Asia/Amman'}).format(new Date());
+}
+updateDate();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) updateDate(); });
 
 function showPlatform(platform) {
   const iphone = platform === 'iphone';
@@ -22,22 +75,20 @@ function showHelp() {
   if (!installDialog.open) installDialog.showModal();
 }
 function updateInstalled() {
-  if ($('iphoneSetup')) $('iphoneSetup').hidden = standalone() || !(isIphone || iphoneInstallPage);
-  if (standalone()) {
-    $('installLabel').textContent = 'التطبيق على هاتفك';
-    $('installNote').textContent = 'اختر بوابة الدخول لبدء العمل';
-    $('installButton').hidden = true;
-  }
+  $('iphoneSetup').hidden = standalone() || !iphoneInstallPage;
+  $('installButton').hidden = standalone();
 }
 function updateNetwork() {
   $('offlineNotice').hidden = navigator.onLine;
-  $('connectionText').textContent = navigator.onLine ? 'يلزم الإنترنت لعرض الطلبات وحفظ التغييرات' : 'بوابات العمل متاحة عند عودة الاتصال';
+  $('connectionText').textContent = navigator.onLine ? 'متصل' : 'غير متصل';
+  $('connectionBadge').classList.toggle('is-offline', !navigator.onLine);
+  $('connectionBadge').setAttribute('aria-label', navigator.onLine ? 'الجهاز متصل بالإنترنت' : 'الجهاز غير متصل بالإنترنت');
 }
 async function copyAppLink() {
   try {
     await navigator.clipboard.writeText(appUrl);
-    $('status').textContent = 'تم نسخ الرابط. يمكنك مشاركته مع الموظفين.';
-    $('dialogStatus').textContent = 'تم نسخ رابط التطبيق.';
+    notify('تم نسخ رابط التثبيت.');
+    $('dialogStatus').textContent = 'تم نسخ رابط التثبيت.';
   } catch (_) {
     if (!installDialog.open) showHelp();
     $('copyFallback').value = appUrl;
@@ -47,15 +98,12 @@ async function copyAppLink() {
     $('dialogStatus').textContent = 'اضغط مطولًا على الرابط واختر نسخ.';
   }
 }
-window.addEventListener('beforeinstallprompt', event => {
-  event.preventDefault();
-  installPrompt = event;
-});
+window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); installPrompt = event; });
 window.addEventListener('appinstalled', () => {
   installPrompt = null;
-  $('installLabel').textContent = 'تم تثبيت التطبيق';
-  $('installNote').textContent = 'افتح «إدارة التحضير» من الشاشة الرئيسية';
-  $('status').textContent = 'تم التثبيت بنجاح.';
+  $('installButton').hidden = true;
+  $('iphoneSetup').hidden = true;
+  notify('تم تثبيت التطبيق. افتحه من الشاشة الرئيسية.');
   if (installDialog.open) installDialog.close();
 });
 $('installButton').addEventListener('click', async () => {
@@ -65,7 +113,7 @@ $('installButton').addEventListener('click', async () => {
   try {
     await prompt.prompt();
     const choice = await prompt.userChoice;
-    $('status').textContent = choice.outcome === 'accepted' ? 'أكمل التثبيت حسب التعليمات على هاتفك.' : 'يمكنك التثبيت لاحقًا من قائمة المتصفح.';
+    notify(choice.outcome === 'accepted' ? 'أكمل التثبيت حسب تعليمات هاتفك.' : 'يمكنك التثبيت لاحقًا من الدليل.');
   } catch (_) { showHelp(); }
 });
 $('helpButton').addEventListener('click', showHelp);
@@ -74,12 +122,12 @@ $('androidButton').addEventListener('click', () => showPlatform('android'));
 $('iphoneButton').addEventListener('click', () => showPlatform('iphone'));
 $('copyButton').addEventListener('click', copyAppLink);
 $('copyDialogButton').addEventListener('click', copyAppLink);
-for (const id of ['employeeLink', 'managerLink']) {
+for (const id of ['employeeLink','managerLink','quickEntry']) {
   $(id).addEventListener('click', event => {
     if (!navigator.onLine) {
       event.preventDefault();
-      $('offlineNotice').hidden = false;
-      $('offlineNotice').scrollIntoView({block: 'center'});
+      notify('اتصل بالإنترنت لفتح بوابة العمل.');
+      $('offlineNotice').scrollIntoView({block:'center'});
     }
   });
 }
@@ -92,11 +140,11 @@ updateInstalled();
 if ('serviceWorker' in navigator) {
   let reloading = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloading) return;
+    if (reloading || !waitingWorker) return;
     reloading = true;
-    if (waitingWorker) location.reload();
+    location.reload();
   });
-  navigator.serviceWorker.register('./sw.js', {scope: './', updateViaCache: 'none'}).then(registration => {
+  navigator.serviceWorker.register('./sw.js', {scope:'./', updateViaCache:'none'}).then(registration => {
     const offerUpdate = () => {
       if (registration.waiting && navigator.serviceWorker.controller) {
         waitingWorker = registration.waiting;
@@ -108,10 +156,8 @@ if ('serviceWorker' in navigator) {
       const worker = registration.installing;
       if (worker) worker.addEventListener('statechange', offerUpdate);
     });
-    $('updateButton').addEventListener('click', () => {
-      if (waitingWorker) waitingWorker.postMessage({type: 'ACTIVATE_UPDATE'});
-    });
+    $('updateButton').addEventListener('click', () => { if (waitingWorker) waitingWorker.postMessage({type:'ACTIVATE_UPDATE'}); });
   }).catch(() => {
-    $('installNote').textContent = 'يمكنك فتح بوابات الدخول أو إضافة الصفحة للشاشة الرئيسية';
+    $('installNote').textContent = 'أضف الصفحة من قائمة المتصفح';
   });
 }
