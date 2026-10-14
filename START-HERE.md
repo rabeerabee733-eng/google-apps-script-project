@@ -2,7 +2,7 @@
 
 ابدأ بقراءة `native-app/README.md` للتشغيل والربط و`native-app/VERIFICATION.md` لنتائج الاختبار والقيود.
 
-**لا يوجد حاليًا ملف APK أو IPA جاهز للتثبيت.** بناء Android توقف بسبب قيود شبكة أدوات البناء، وiPhone يحتاج بيئة وتوقيع Apple.
+**أُنتج APK تجريبي لـ Android بنجاح.** إصدار 1.0.0، لأجهزة ARM64 بنظام Android 7 فأحدث، موقع بمفتاح Android Debug للاختبار الداخلي. لم يُختبر على جهاز فعلي. لا يوجد IPA؛ iPhone يحتاج بيئة وتوقيع Apple.
 
 هذا المصدر لتطبيق أصلي Android وiPhone مع تحديثات خادم Google Apps Script الحالي. ليس متجر PDF السابق، وليس واجهة WebView.
 
