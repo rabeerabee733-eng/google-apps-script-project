@@ -1,8 +1,8 @@
 'use strict';
 const CACHE_PREFIX = 'tahdir-mobile-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v1';
+const CACHE_NAME = CACHE_PREFIX + 'v2';
 const ROOT = new URL('./', self.location.href);
-const SHELL = ['index.html', 'app.css', 'app.js', 'manifest.webmanifest', 'icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png'].map(path => new URL(path, ROOT).href);
+const SHELL = ['index.html', 'app.css', 'app.js', 'manifest.webmanifest', 'brand-logo-v2.jpg', 'icon-brand-v2-180.png', 'icon-brand-v2-192.png', 'icon-brand-v2-512.png', 'icon-brand-v2-maskable.png'].map(path => new URL(path, ROOT).href);
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)));
 });
