@@ -26,7 +26,7 @@ app=$(find "$output/DerivedData/Build/Products/Release-iphoneos" -maxdepth 1 -na
 test -n "$app"
 test -f "$app/main.jsbundle"
 executable=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Info.plist")
-lipo -verify_arch arm64 "$app/$executable"
+lipo "$app/$executable" -verify_arch arm64
 python3 - "$app/Info.plist" <<'PY'
 import plistlib, sys
 with open(sys.argv[1], 'rb') as f:
