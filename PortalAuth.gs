@@ -25,6 +25,7 @@ function adminPortalLogin(payload){
   }finally{lock.releaseLock();}
 }
 function portalIdentity_(token){
+  if(token && String(token).indexOf('mob_')===0)return mobileManagerIdentity_(token);
   if(!token){var native=adminAuth_();if(native.ok)return {native:true,email:native.email,employee:'المدير',permissions:PORTAL_PERMISSIONS_.slice()};throw new Error('سجل الدخول أولًا.');}
   var session=JSON.parse(CacheService.getScriptCache().get('portal-session:'+portalDigest_(String(token)))||'null');
   var a=session&&portalAccounts_().filter(function(a){return a.id===session.id&&a.active&&a.version===session.version;})[0];if(!a)throw new Error('انتهت الجلسة أو تغيرت صلاحياتك. سجل الدخول مجددًا.');

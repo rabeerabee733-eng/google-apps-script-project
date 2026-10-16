@@ -1,0 +1,9 @@
+<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>ربط التطبيق</title>
+<style>body{font:18px system-ui;background:#f5f3ee;color:#222;max-width:480px;margin:60px auto;padding:24px}main{background:white;border:1px solid #ded5bf;border-radius:20px;padding:28px}button{padding:16px;border:0;border-radius:12px;background:#b68b36;color:#111;font:inherit;width:100%;margin:8px 0}code{display:block;font-size:32px;letter-spacing:5px;text-align:center;padding:20px}p{line-height:1.9}</style>
+<main><h1>ربط تطبيق الإدارة</h1><p>الحساب: <?= email ?></p><p>وافق فقط إذا بدأت طلب الربط بنفسك، وكان الرمز التالي مطابقًا للرمز الظاهر على هاتفك.</p><code><?= code ?></code><button id="approve">السماح لهذا التطبيق لمدة 6 ساعات</button><p id="status" role="status"></p><button id="revoke">إلغاء جميع جلسات تطبيق المدير</button></main>
+<input type="hidden" id="pair" value="<?= pairId ?>">
+<script>
+const message=document.getElementById('status');
+document.getElementById('approve').onclick=function(){const button=this;button.disabled=true;google.script.run.withSuccessHandler(()=>{message.textContent='تم السماح. عُد إلى التطبيق واضغط إكمال الربط.';}).withFailureHandler(e=>{message.textContent=e.message;button.disabled=false;}).mobilePairApprove(document.getElementById('pair').value);};
+document.getElementById('revoke').onclick=function(){if(!confirm('إلغاء جميع جلسات المدير على الهواتف؟'))return;google.script.run.withSuccessHandler(()=>{message.textContent='تم إلغاء الجلسات.';}).withFailureHandler(e=>{message.textContent=e.message;}).mobileRevokeAllSessions();};
+</script></html>

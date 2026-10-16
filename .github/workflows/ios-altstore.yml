@@ -1,0 +1,51 @@
+name: iPhone IPA for AltStore
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'native-app/**'
+      - '.github/workflows/ios-altstore.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ios-altstore-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    if: github.event.repository.private == false
+    runs-on: macos-26
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: native-app
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check TypeScript
+        run: npm run typecheck
+      - name: Check lint
+        run: npm run lint
+      - name: Client tests
+        run: npm run test:client
+      - name: Build unsigned iPhone app
+        run: bash scripts/build-ios-altstore.sh
+      - name: Upload personal-install package
+        uses: actions/upload-artifact@v4
+        with:
+          name: altahdir-iphone-altstore
+          path: |
+            native-app/build-altstore/altahdir-management-altstore-unsigned.ipa
+            native-app/build-altstore/SHA256.txt
+            native-app/INSTALL-ALTSTORE.md
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
