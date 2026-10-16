@@ -32,3 +32,9 @@ console.log('PASS: organization endpoints remain inaccessible to Ajyal-only acco
 assert.throws(()=>c.adminPortalRpc(session.token,'adminCustomerEditLink',['fake']),/صلاحية/);console.log('PASS: Ajyal-only staff cannot issue customer editing links.');
 
 for(const method of ['adminWorkflowReviews','adminWorkflowResolve','adminPrepManifest','adminWorkflowSettings'])assert.throws(()=>c.adminPortalRpc(session.token,method,[]),/صلاحية/);c.adminWorkflowAlerts=()=>({rows:[{type:'ajyal'}]});assert.equal(c.adminPortalRpc(session.token,'adminWorkflowAlerts',[{}]).rows[0].type,'ajyal');console.log('PASS: new review/settings/manifest routes denied to Ajyal-only staff; scoped alerts allowed.');
+
+const gradAccount=c.adminPortalSaveAccount({...p,username:'graduation-only',permissions:['graduationRead']}).find(a=>a.username==='graduation-only');
+assert.deepEqual(Array.from(gradAccount.permissions),['graduationRead']);
+const gradSession=c.adminPortalLogin({username:'graduation-only',password:p.password});
+for(const method of ['adminListOrders','ajyalAdminList','adminStickerOrders','adminFinanceList'])assert.throws(()=>c.adminPortalRpc(gradSession.token,method,[]),/صلاحية/);
+console.log('PASS: graduation tab permission is saved independently and grants no order, Ajyal, sticker, or finance RPC access.');

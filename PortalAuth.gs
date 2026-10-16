@@ -1,6 +1,6 @@
 // Accounts apply only to the integrated Ajyal/sticker portal. Existing order RPCs
 // continue to require an allowlisted Google administrator.
-var PORTAL_PERMISSIONS_=['barcodeRead','barcodeHandover','dashboardRead','ordersRead','ordersEdit','ordersDelete','stickerRead','stickerExport','prepEdit','deliveryRead','deliveryEdit','payments','trashRead','trashRestore','ajyalRead','ajyalEdit'];
+var PORTAL_PERMISSIONS_=['barcodeRead','barcodeHandover','dashboardRead','ordersRead','ordersEdit','ordersDelete','stickerRead','stickerExport','prepEdit','deliveryRead','deliveryEdit','payments','trashRead','trashRestore','ajyalRead','ajyalEdit','graduationRead'];
 var portalContext_=null;
 function portalAccounts_(){return JSON.parse(PropertiesService.getScriptProperties().getProperty('ADMIN_PORTAL_ACCOUNTS_V1')||'[]');}
 function portalPublic_(a){return {id:a.id,username:a.username,employee:a.employee,active:a.active,permissions:a.permissions,version:a.version};}
