@@ -130,3 +130,21 @@ $('edit-form').onsubmit=function(e){e.preventDefault();if(busy)return;setBusy(tr
 @page{size:100mm 100mm;margin:0}body:has(#portalStickerDialog[open]){margin:0!important;padding:0!important}body:has(#portalStickerDialog[open])>main,body:has(#portalStickerDialog[open])>#portalPanel{display:none!important}#portalStickerDialog[open]{position:static!important;inset:auto!important;width:100mm!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;overflow:visible!important}.portal-print-hide{display:none!important}#portalStickerPages{display:block!important;padding:0!important;background:#fff!important}.lab-sticker{width:100mm!important;height:100mm!important;margin:0!important;border:0!important;break-after:page;break-inside:avoid;box-shadow:none!important}.lab-sticker:last-child{break-after:auto}dialog:not(#portalStickerDialog){display:none!important}
 #portal-graduation .graduation-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}#portal-graduation .graduation-actions a{display:inline-flex;align-items:center;text-decoration:none;min-height:44px}#portalGraduationFrame iframe{display:block;box-sizing:border-box;width:100%;height:76vh;min-height:480px;border:1px solid #555;border-radius:12px;background:#fff}#portal-graduation .graduation-note{line-height:1.9;color:inherit}@media(max-width:700px){#portalGraduationFrame iframe{height:72vh;min-height:360px}#portal-graduation .graduation-actions>*{flex:1 1 100%;justify-content:center}}
 </style>
+
+<!-- WhatsApp manager shortcut: no shared credentials or customer data. -->
+<style>#waManagerView[hidden]{display:none!important}#waManagerView .wa-actions{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}#waManagerView a{display:inline-flex;align-items:center;text-decoration:none;min-height:44px}#waManagerView p{line-height:1.9}</style>
+<script>
+setTimeout(()=>{
+  if(document.getElementById('waManagerTab')||!window.AdminPortal)return;
+  const nav=document.querySelector('.tabs'),main=document.querySelector('main.wrap');
+  if(!nav||!main)return;
+  const button=document.createElement('button');button.id='waManagerTab';button.type='button';button.className='btn tabBtn';button.hidden=true;
+  button.innerHTML='<svg class="wf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11a9 9 0 0 1-9 9H5l-4 2 2-6a9 9 0 1 1 18-5z"/></svg><span>محادثات واتساب</span>';
+  const panel=document.createElement('section');panel.id='waManagerView';panel.className='view noPrint';panel.hidden=true;
+  panel.innerHTML='<div class="card"><div class="sectionTitle"><h2>محادثات واتساب</h2></div><p>عرض الرسائل الواردة، والبحث في المحادثات، وإسناد المتابعة للموظفين، وتسجيل الملاحظات الداخلية.</p><div class="wa-actions"><a class="btn gold" href="https://altahdir-ai-agent.onrender.com/dashboard" target="_blank" rel="noopener noreferrer">فتح لوحة المحادثات ↗</a></div><p class="tiny">تسجيل الدخول مستقل بمفتاح لوحة المحادثات. إسناد موظف للمتابعة لا ينشئ له حساب دخول. حالات المتابعة لا تثبت تسجيل طلب أو عملية بيع؛ راجع حالة تشغيل الوكيل داخل لوحة المحادثات.</p></div>';
+  main.append(panel);(nav.querySelector('[data-org-group="services"] .org-group-buttons')||nav).append(button);
+  function sync(){const show=window.AdminPortal.isNative();if(button.hidden===show)button.hidden=!show;if(!show){panel.hidden=true;panel.classList.remove('active');button.classList.remove('active');}}
+  button.onclick=()=>{if(!window.AdminPortal.isNative())return;window.AdminWorkflow?.navigation();window.closeEditor?.();window.AdminBarcode?.leave();document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('portalPanel').hidden=true;document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));panel.hidden=false;panel.classList.add('active');button.classList.add('active');};
+  new MutationObserver(sync).observe(nav,{subtree:true,attributes:true,attributeFilter:['hidden']});sync();
+},0);
+</script>
