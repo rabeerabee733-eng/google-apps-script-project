@@ -290,6 +290,7 @@ function doGet(e) {
  * استقبال POST مرة واحدة من صفحة GitHub.
  */
 function doPost(e) {
+  if (e && e.parameter && e.parameter.waBridge === '1') return waBridge_(e);
   var result;
   var requestId = '';
 
