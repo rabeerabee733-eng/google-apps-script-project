@@ -37,10 +37,10 @@ function customerEditAccess_(token) {
 }
 function customerEditState_(row) {
   var key=stickerExportKey_(row),exported=stickerExportLedger_().filter(function(x){return x[0]===key||String(x[1])===String(row[0]);})[0];
-  if(exported)return {locked:true,lockedAt:exported[3],reason:'توقف تعديل هذا الطلب بعد تنزيل الستكرات. تواصل معنا إذا احتجت إلى مساعدة.'};
-  var meta=portalStickerMeta_()[String(row[16])]||{};
-  if(['ملغي','خرج للتوصيل','تم التسليم'].indexOf(meta.status)!==-1||courierSnapshots_().some(function(x){return x.key===key;}))return {locked:true,lockedAt:'',reason:'هذا الطلب مغلق للتعديل. تواصل معنا للمساعدة.'};
-  return {locked:false,lockedAt:'',reason:''};
+  var meta=portalStickerMeta_()[String(row[16])]||{},sent=!!exported||['خرج للتوصيل','تم التسليم'].indexOf(meta.status)!==-1||courierSnapshots_().some(function(x){return x.key===key;});
+  if(sent)return {locked:true,printed:!!exported,canCreateNew:true,status:meta.status==='تم التسليم'?'تم التسليم':'خرج للتوصيل',lockedAt:exported?exported[3]:'',reason:'تم طباعة الستكرات أو خروج الطلب للتوصيل؛ لا يمكن تعديله. يمكنك إضافة طلب جديد.'};
+  if(meta.status==='ملغي')return {locked:true,printed:false,canCreateNew:false,status:'ملغي',lockedAt:'',reason:'هذا الطلب ملغي ومغلق للتعديل. تواصل معنا للمساعدة.'};
+  return {locked:false,printed:false,canCreateNew:false,status:meta.status||'جديد',lockedAt:'',reason:''};
 }
 function customerEditTeachers_(id) {
   var s=SpreadsheetApp.openById(SHEET_ID).getSheetByName(AJYAL_SHEET);
@@ -105,8 +105,11 @@ function customerEditAjyalPlan_(existing,input,items,order) {
 }
 function customerEditSave(payload) {
   payload=payload||{};var lock=LockService.getScriptLock();lock.waitLock(20000);
-  try {
-    var access=customerEditAccess_(payload.token),old=access.values,state=customerEditState_(old);
+  try {return customerEditApply_(payload,customerEditAccess_(payload.token));} finally {lock.releaseLock();}
+}
+// Caller holds the shared script lock and has already verified access.
+function customerEditApply_(payload,access) {
+    var old=access.values,state=customerEditState_(old);
     if(state.locked)throw new Error(state.reason);
     var teachers=customerEditTeachers_(String(old[16]));
     if(!payload.revision||payload.revision!==customerEditRevision_(old,teachers))throw new Error('تغير الطلب منذ فتح الصفحة. حدّث الصفحة وراجع البيانات قبل الحفظ.');
@@ -126,7 +129,8 @@ function customerEditSave(payload) {
     var meta=portalStickerMeta_()[String(old[16])]||{};
     if(normalized.grandTotal<Number(meta.amountPaid||0))throw new Error('المبلغ الجديد أقل من المبلغ المدفوع. تواصل معنا لتسوية الفرق.');
     var values=[ajyalCell_(normalized.name),displayPhone_(normalized.mainPhone),normalized.altPhone?displayPhone_(normalized.altPhone):'',normalized.governorate,normalized.district,ajyalCell_(normalized.address),normalized.itemsCount,normalized.folderCount,normalized.paperCount,normalized.productsTotal,normalized.deliveryFee,normalized.grandTotal,ajyalCell_(text)];
-    var range=access.sheet.getRange(access.row,3,1,13),backup=range.getValues(),ajyal=plan.changes.length?ajyalSheet_():null,applied=[],review=null,previousEdited=access.tokenSheet.getRange(access.tokenRow,4).getDisplayValue();
+    if(payload.whatsappNote)values.push(ajyalCell_((String(old[15]||'')+'\n[تعديل واتساب] '+cleanText_(payload.whatsappNote,1000)).slice(0,5000)));
+    var range=access.sheet.getRange(access.row,3,1,values.length),backup=range.getValues(),ajyal=plan.changes.length?ajyalSheet_():null,applied=[],review=null,previousEdited=access.tokenSheet.getRange(access.tokenRow,4).getDisplayValue();
     try {
       range.setValues([values]);
       plan.changes.forEach(function(c){c.actualRow=c.row||ajyal.getLastRow()+1;applied.push(c);ajyal.getRange(c.actualRow,1,1,12).setNumberFormat('@').setValues([c.after]);});
@@ -144,7 +148,6 @@ function customerEditSave(payload) {
     }
     access.values=after;
     var result=customerEditView_(access);result.saved=true;return result;
-  } finally {lock.releaseLock();}
 }
 function adminCustomerEditLink(requestId) {
   requireAdmin_();var lock=LockService.getScriptLock();lock.waitLock(20000);
@@ -158,3 +161,4 @@ function adminCustomerEditLink(requestId) {
 function customerEditCheck(token) { return customerEditState_(customerEditAccess_(token).values); }
 
 function customerEditChanges_(){var s=customerEditSheet_(false),map={};if(s&&s.getLastRow()>1)s.getRange(2,1,s.getLastRow()-1,4).getDisplayValues().forEach(function(r){if(r[3])map[r[0]]=r[3];});return map;}
+

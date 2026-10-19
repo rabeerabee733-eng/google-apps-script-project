@@ -1345,47 +1345,14 @@ function displayPhone_(
     : '';
 }
 
-function phoneExists_(
-  sheet,
-  phone
-) {
-  if (
-    !phone ||
-    sheet.getLastRow() <
-      2
-  ) {
-    return false;
-  }
-
-  var values =
-    sheet
-      .getRange(
-        2,
-        4,
-        sheet.getLastRow() -
-          1,
-        2
-      )
-      .getDisplayValues();
-
-  for (
-    var i = 0;
-    i < values.length;
-    i++
-  ) {
-    if (
-      canonicalPhone_(
-        values[i][0]
-      ) === phone ||
-      canonicalPhone_(
-        values[i][1]
-      ) === phone
-    ) {
-      return true;
-    }
-  }
-
-  return false;
+function phoneExists_(sheet,phone) {
+  if(!phone||sheet.getLastRow()<2)return false;
+  var rows=sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues();
+  return rows.some(function(row){
+    if(canonicalPhone_(row[3])!==phone&&canonicalPhone_(row[4])!==phone)return false;
+    // Unknown state fails closed. Only a dispatched/printed previous order permits another.
+    return typeof customerEditState_!=='function'||customerEditState_(row).canCreateNew!==true;
+  });
 }
 
 function nextOrderNumber_(
@@ -1786,6 +1753,7 @@ function adminListOrders(filters) {
   var maxOrder = adminOptionalNumber_(filters.maxOrder);
   var limit = Math.max(1, Math.min(Number(filters.limit) || 300, 1000));
 
+  var offset = Math.max(0, Math.floor(Number(filters.offset) || 0));
   var results = [];
   var matched = 0;
 
@@ -1829,7 +1797,7 @@ function adminListOrders(filters) {
     if (prepType === 'مختلط' && !(folderCount > 0 && paperCount > 0)) continue;
 
     matched++;
-    if (results.length < limit) {
+    if (matched > offset && results.length < limit) {
       results.push(adminDecorateOrder_(adminRowToObject_(row, i + 2), meta));
     }
   }
@@ -2857,16 +2825,17 @@ function adminRecordStickerExport(payload){
     var previewMeta=payload.revisions?portalStickerMeta_():{};var seen={},wanted={};ledger.forEach(function(r){seen[r[0]]=true;});ids.forEach(function(id){wanted[String(id)]=true;});
     var anchor=adminStickerSettings();if(!anchor||!stickerAnchorEqual_(payload.anchor,JSON.stringify(anchor)))throw new Error('تغيرت بداية الباركود. أعد تجهيز الملف.');
     var sheet=adminOrdersSheet_(),rows=sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues(),chosen=[];
-    rows.forEach(function(row,i){var key=stickerExportKey_(row),num=adminOrderNumber_(row[0]);if(wanted[key]){if(payload.revisions&&payload.revisions[key]!==portalDigest_(JSON.stringify([row,Number((previewMeta[String(row[16])]||{}).amountPaid)||0])))throw new Error('تغيرت بيانات طلب منذ المعاينة. أعد معاينة الستكرات.');if(num<from||num>to)throw new Error('طلب خارج نطاق التصدير.');if(seen[key]&&!payload.includeExported&&!sameBatch.length)throw new Error('صُدّرت ستكرات بعض الطلبات من جلسة أخرى. حدّث الصفحة وأعد التصدير.');chosen.push({key:key,num:num,row:i+2});}});
+    rows.forEach(function(row,i){var key=stickerExportKey_(row),num=adminOrderNumber_(row[0]);if(wanted[key]){if(payload.revisions&&payload.revisions[key]!==portalDigest_(JSON.stringify([row,Number((previewMeta[String(row[16])]||{}).amountPaid)||0])))throw new Error('تغيرت بيانات طلب منذ المعاينة. أعد معاينة الستكرات.');if(num<from||num>to)throw new Error('طلب خارج نطاق التصدير.');if(seen[key]&&!payload.includeExported&&!sameBatch.length)throw new Error('صُدّرت ستكرات بعض الطلبات من جلسة أخرى. حدّث الصفحة وأعد التصدير.');chosen.push({key:key,num:num,row:i+2,requestId:String(row[16])});}});
     if(chosen.length!==ids.length)throw new Error('تغيرت قائمة الطلبات. أعد تجهيز الملف.');
     var downloadCheck=workflowExportCheck_(payload,chosen,seen,sameBatch);
-    if(sameBatch.length){workflowRecordDownload_(payload,chosen,downloadCheck);return adminStickerExportSummary();}
+    if(sameBatch.length){stickerMarkDispatched_(chosen,auth.email);workflowRecordDownload_(payload,chosen,downloadCheck);return adminStickerExportSummary();}
     chosen.sort(function(a,b){return a.num-b.num;});
     var ss=SpreadsheetApp.openById(SHEET_ID),log=ss.getSheetByName(STICKER_EXPORT_SHEET);if(!log){log=ss.insertSheet(STICKER_EXPORT_SHEET);log.getRange(1,1,1,7).setValues([['معرف الطلب','رقم الطلب','الباركود','وقت التصدير','معرف دفعة التصدير','عدد ستكرات الملف','الموظف']]);log.setFrozenRows(1);}
     var now=new Date().toISOString(),records=chosen.map(function(r){return[r.key,String(r.num),String(Number(anchor.barcode)+r.num-1).padStart(anchor.barcode.length,'0'),now,batch,String(payload.pages||''),auth.email||''];});
     var sortedRows=chosen.slice().sort(function(a,b){return a.row-b.row;}),ranges=[],start=sortedRows[0].row,end=start;sortedRows.slice(1).forEach(function(r){if(r.row===end+1)end=r.row;else{ranges.push('A'+start+':Q'+end);start=end=r.row;}});ranges.push('A'+start+':Q'+end);
     sheet.getRangeList(ranges).setBackground('#dff4e4');
     log.getRange(log.getLastRow()+1,1,records.length,7).setNumberFormat('@').setValues(records);
+    stickerMarkDispatched_(chosen,auth.email);
     workflowRecordDownload_(payload,chosen,downloadCheck);
     barcodeSyncAfterExport_(chosen);
     return adminStickerExportSummary();
@@ -2905,4 +2874,15 @@ function adminCourierBatches(){requireAdmin_();var groups={},snapshots=courierSn
 function adminCourierHandover(payload){var auth=requireAdmin_();payload=payload||{};var batch=cleanId_(payload.batch,100),lock=LockService.getScriptLock();lock.waitLock(20000);try{var snapshots=courierSnapshots_();var saved=snapshots.filter(function(r){return r.batch===batch;});if(saved.length){barcodeSync_(saved);return adminCourierBatch(batch);}var company=barcodeCompany_(payload.company);var data=courierCurrentBatch_(batch),seen={};snapshots.forEach(function(r){seen[r.key]=true;});var duplicates=data.rows.filter(function(r){return seen[r.key];});if(duplicates.length&&!payload.excludeDuplicates)throw new Error('سبق تسليم '+duplicates.length+' طلب للشركة. اختر تسليم الطلبات غير المسلّمة فقط.');var signature=JSON.stringify(data.rows.map(function(r){return [r.key,r.barcode,r.name,r.phone,r.governorate,r.due];}));if(String(payload.signature||'')!==signature)throw new Error('تغيرت بيانات الطلبات منذ فتح الكشف. أعد تحميل الدفعة وراجع مبالغها.');var rows=data.rows.filter(function(r){return !seen[r.key];});if(!rows.length)throw new Error('لا توجد طلبات غير مسلّمة في هذه الدفعة.');barcodeCommit_(batch,company,rows);return adminCourierBatch(batch);}finally{lock.releaseLock();}}
 function adminCourierSetStatus(payload){var auth=requireAdmin_();payload=payload||{};var batch=cleanId_(payload.batch,100),key=cleanId_(payload.key,150),status=cleanText_(payload.status,40),reason=cleanText_(payload.reason,500);if(COURIER_STATUSES.indexOf(status)<0)throw new Error('اختر حالة توصيل صحيحة.');if((status==='تعذّر التسليم'||status==='مرتجع')&&!reason)throw new Error('اكتب سبب تعذّر التسليم أو الإرجاع.');var lock=LockService.getScriptLock();lock.waitLock(20000);try{if(!courierSnapshots_().some(function(r){return r.batch===batch&&r.key===key;}))throw new Error('أكد تسليم الدفعة للشركة أولًا.');var current=courierTracking_()[key]||{};if(String(current.updatedAt||'')!==String(payload.updatedAt||''))throw new Error('تغيرت الحالة في جلسة أخرى. أعد تحميل الكشف.');courierAppend_(COURIER_STATUS_SHEET,['معرف الطلب','حالة التوصيل','السبب','وقت التعديل','الموظف','الدفعة'],[[key,status,reason,new Date().toISOString(),auth.email,batch]]);return adminCourierBatch(batch);}finally{lock.releaseLock();}}
 function adminCourierRecordPayment(payload){var auth=requireAdmin_();payload=payload||{};var batch=cleanId_(payload.batch,100),id=cleanId_(payload.id,100),amount=Number(payload.amount),date=String(payload.date||''),reference=cleanText_(payload.reference,200);if(!id||!Number.isFinite(amount)||amount<=0||Math.abs(amount*100-Math.round(amount*100))>0.00001)throw new Error('أدخل مبلغًا موجبًا بدقة قرشين.');if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||isNaN(Date.parse(date+'T12:00:00Z'))||new Date(date+'T12:00:00Z').toISOString().slice(0,10)!==date)throw new Error('اختر تاريخ تحويل صحيح.');var lock=LockService.getScriptLock();lock.waitLock(20000);try{var existing=courierRead_(COURIER_PAYMENT_SHEET,7).filter(function(r){return r[0]===id;})[0];if(existing){if(existing[1]!==batch||Number(existing[2])!==amount||existing[3]!==date||existing[4]!==ajyalCell_(reference))throw new Error('معرف التحويل مستخدم ببيانات مختلفة.');return adminCourierBatch(batch);}var data=adminCourierBatch(batch);if(!data.confirmed)throw new Error('أكد تسليم الدفعة للشركة أولًا.');if(Math.round(amount*100)>Math.round(data.remaining*100))throw new Error('المبلغ أكبر من المتبقي على الشركة.');courierAppend_(COURIER_PAYMENT_SHEET,['معرف التحويل','الدفعة','المبلغ','تاريخ التحويل','المرجع','وقت التسجيل','الموظف'],[[id,batch,amount,date,reference,new Date().toISOString(),auth.email]]);return adminCourierBatch(batch);}finally{lock.releaseLock();}}
-
+// The immutable export ledger is authoritative, even if a later metadata write is retried.
+function stickerMarkDispatched_(chosen,email){
+  adminEnsureSupportSheets_();var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(ADMIN_META_SHEET_NAME);
+  var values=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,10).getValues():[],map={},changed=false,now=new Date();
+  values.forEach(function(r,i){if(map[String(r[0])]===undefined)map[String(r[0])]=i;});
+  chosen.forEach(function(r){if(!r.requestId)return;var index=map[r.requestId],row=index===undefined?[r.requestId,String(r.num),'جديد','غير مدفوع',0,'عادي','','','','']:values[index].slice();
+    if(['خرج للتوصيل','تم التسليم','ملغي'].indexOf(row[2])!==-1)return;
+    row[2]='خرج للتوصيل';row[6]=row[6]||now;row[8]=now;row[9]=email||'الستكرات';
+    if(index===undefined){map[r.requestId]=values.length;values.push(row);}else values[index]=row;changed=true;
+  });
+  if(changed)sheet.getRange(2,1,values.length,10).setValues(values);
+}
