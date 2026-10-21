@@ -42,6 +42,7 @@ function waBridge_(e){
       return waJSON_(waCancelOrder_(d));
     }
     if(['edit_notifications','edit_notifications_ack'].indexOf(request.op)!==-1)return waJSON_(customerEditNotices_(request.op,d));
+    if(['booking_notifications','booking_notifications_ack','booking_notification_details','booking_notifications_status'].indexOf(request.op)!==-1)return waJSON_(bookingNotifications_(request.op,d));
     if(request.op==='catalog')return waJSON_({ok:true,products:PRODUCTS,districts:DISTRICTS,delivery:{amman:2,other:3}});
     if(request.op==='customer_order')return waJSON_(waEditableOrder_(d));
     if(request.op==='customer_orders')return waJSON_(waLookupOrders_(d));
@@ -236,3 +237,4 @@ function waCancelOrder_(d){
 }
 
 function waWasCancelled_(id){var s=SpreadsheetApp.openById(SHEET_ID).getSheetByName('إلغاءات واتساب');return !!(s&&s.getLastRow()>1&&s.getRange(2,3,s.getLastRow()-1,1).getDisplayValues().some(function(r){return r[0]===id;}));}
+

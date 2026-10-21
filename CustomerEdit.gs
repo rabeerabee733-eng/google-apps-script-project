@@ -23,6 +23,7 @@ function customerEditStoreToken_(requestId,token) {
 }
 function customerEditRegister_(data) {
   if(data.customerEditToken)customerEditStoreToken_(data.requestId,String(data.customerEditToken));
+  try{bookingNoticeQueue_(data);}catch(ignore){/* Polling recovers the notification without failing the booking. */}
 }
 function customerEditAccess_(token) {
   var error='رابط التعديل غير صالح أو تم استبداله. اطلب رابطًا جديدًا من الإدارة.';
@@ -194,3 +195,4 @@ function customerEditNotices_(op,d){
   return {ok:true,events:rows.filter(function(r){return r[6]==='pending';}).slice(0,50).map(function(r){return {id:r[0],sender:r[1],targetRequestId:r[2],orderNumber:r[3],text:r[4],createdAt:r[5]};})};
  }finally{lock.releaseLock();}
 }
+
