@@ -41,6 +41,7 @@ function waBridge_(e){
       if(SHEET_ID==='1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w'&&p.getProperty('WA_BRIDGE_ALLOW_PRODUCTION')!=='true')return waJSON_(waFail_('PRODUCTION_LOCKED'));
       return waJSON_(waCancelOrder_(d));
     }
+    if(['edit_notifications','edit_notifications_ack'].indexOf(request.op)!==-1)return waJSON_(customerEditNotices_(request.op,d));
     if(request.op==='catalog')return waJSON_({ok:true,products:PRODUCTS,districts:DISTRICTS,delivery:{amman:2,other:3}});
     if(request.op==='customer_order')return waJSON_(waEditableOrder_(d));
     if(request.op==='customer_orders')return waJSON_(waLookupOrders_(d));
@@ -211,6 +212,7 @@ function waCancelOrder_(d){
       if(!state||typeof state.printed!=='boolean'||typeof state.locked!=='boolean')return waFail_('CANCEL_UNCERTAIN');
       if(state.printed||state.canCreateNew===true||['خرج للتوصيل','تم التسليم'].indexOf(state.status)!==-1)return waFail_('ORDER_LOCKED');
       if(state.locked&&state.status!=='ملغي')return waFail_('ORDER_LOCKED');
+      if(d.baseRevision&&d.baseRevision!==customerEditRevision_(a.values,customerEditTeachers_(d.targetRequestId)))return waFail_('STALE_ORDER');
     }else if(!record)return waFail_('NOT_FOUND');
     adminEnsureSupportSheets_();
     var trash=ss.getSheetByName(ADMIN_TRASH_SHEET_NAME),archived=trash.getLastRow()>1?trash.getRange(2,1,trash.getLastRow()-1,20).getDisplayValues().some(function(r){return r[16]===d.targetRequestId&&canonicalPhone_(r[3])===phone;}):false;

@@ -105,10 +105,10 @@ function customerEditAjyalPlan_(existing,input,items,order) {
 }
 function customerEditSave(payload) {
   payload=payload||{};var lock=LockService.getScriptLock();lock.waitLock(20000);
-  try {return customerEditApply_(payload,customerEditAccess_(payload.token));} finally {lock.releaseLock();}
+  try {return customerEditApply_(payload,customerEditAccess_(payload.token),true);} finally {lock.releaseLock();}
 }
 // Caller holds the shared script lock and has already verified access.
-function customerEditApply_(payload,access) {
+function customerEditApply_(payload,access,notifyWhatsApp) {
     var old=access.values,state=customerEditState_(old);
     if(state.locked)throw new Error(state.reason);
     var teachers=customerEditTeachers_(String(old[16]));
@@ -130,7 +130,7 @@ function customerEditApply_(payload,access) {
     if(normalized.grandTotal<Number(meta.amountPaid||0))throw new Error('المبلغ الجديد أقل من المبلغ المدفوع. تواصل معنا لتسوية الفرق.');
     var values=[ajyalCell_(normalized.name),displayPhone_(normalized.mainPhone),normalized.altPhone?displayPhone_(normalized.altPhone):'',normalized.governorate,normalized.district,ajyalCell_(normalized.address),normalized.itemsCount,normalized.folderCount,normalized.paperCount,normalized.productsTotal,normalized.deliveryFee,normalized.grandTotal,ajyalCell_(text)];
     if(payload.whatsappNote)values.push(ajyalCell_((String(old[15]||'')+'\n[تعديل واتساب] '+cleanText_(payload.whatsappNote,1000)).slice(0,5000)));
-    var range=access.sheet.getRange(access.row,3,1,values.length),backup=range.getValues(),ajyal=plan.changes.length?ajyalSheet_():null,applied=[],review=null,previousEdited=access.tokenSheet.getRange(access.tokenRow,4).getDisplayValue();
+    var range=access.sheet.getRange(access.row,3,1,values.length),backup=range.getValues(),ajyal=plan.changes.length?ajyalSheet_():null,applied=[],review=null,notification=null,previousEdited=access.tokenSheet.getRange(access.tokenRow,4).getDisplayValue();
     try {
       range.setValues([values]);
       plan.changes.forEach(function(c){c.actualRow=c.row||ajyal.getLastRow()+1;applied.push(c);ajyal.getRange(c.actualRow,1,1,12).setNumberFormat('@').setValues([c.after]);});
@@ -141,7 +141,9 @@ function customerEditApply_(payload,access) {
       adminLog_('العميل','تعديل طلب بواسطة العميل',old[0],old[16],access.row,old,after);
       if(plan.changes.length)adminLog_('العميل','تعديل اشتراكات أجيال بواسطة العميل',old[0],old[16],access.row,[],['تم تحديث '+plan.changes.length+' سجل اشتراك']);
       access.tokenSheet.getRange(access.tokenRow,4).setValue(editedAt);
+      if(notifyWhatsApp){notification={};customerEditQueueNotice_(old,after,editedAt,notification);}
     } catch(error) {
+      if(notification&&notification.sheet&&notification.row<=notification.sheet.getLastRow())notification.sheet.deleteRow(notification.row);
       if(review)review.sheet.deleteRow(review.row);
       access.tokenSheet.getRange(access.tokenRow,4).setValue(previousEdited);
       range.setValues(backup);applied.reverse().forEach(function(c){if(c.before)ajyal.getRange(c.actualRow,1,1,12).setValues([c.before]);else ajyal.deleteRow(c.actualRow);});SpreadsheetApp.flush();throw new Error('تعذر حفظ التعديل. أعد فتح الرابط للتحقق من الطلب ثم حاول مجددًا.');
@@ -162,3 +164,33 @@ function customerEditCheck(token) { return customerEditState_(customerEditAccess
 
 function customerEditChanges_(){var s=customerEditSheet_(false),map={};if(s&&s.getLastRow()>1)s.getRange(2,1,s.getLastRow()-1,4).getDisplayValues().forEach(function(r){if(r[3])map[r[0]]=r[3];});return map;}
 
+
+
+// Queue in the same locked save transaction; notification failures cannot cause a
+// duplicate save. Only the signed bridge can collect and acknowledge these rows.
+function customerEditNoticeSheet_(create){
+ var ss=SpreadsheetApp.openById(SHEET_ID),s=ss.getSheetByName('إشعارات تعديل الطلبات');
+ if(!s&&create){s=ss.insertSheet('إشعارات تعديل الطلبات');s.getRange(1,1,1,7).setValues([['معرف الإشعار','واتساب العميل','معرف الطلب','رقم الطلب','الملخص','وقت التعديل','حالة الإشعار']]);s.setFrozenRows(1);}
+ return s;
+}
+function customerEditQueueNotice_(before,after,at,receipt){
+ var phone=canonicalPhone_(before[3]),sender='962'+String(phone).replace(/^0/,'');
+ if(!/^9627\d{8}$/.test(sender))return null;
+ var text='تم تعديل طلبك بنجاح ✅\nرقم الطلب: '+after[0]+'\n'+after[14]+'\n\nالمنتجات والخدمات: '+after[11]+' د.أ\nالتوصيل: '+after[12]+' د.أ\nالإجمالي: '+after[13]+' د.أ\nالعنوان: '+[after[5],after[6],after[7]].filter(Boolean).join('، ');
+ var s=customerEditNoticeSheet_(true),r=s.getLastRow()+1;
+ if(receipt){receipt.sheet=s;receipt.row=r;}
+ s.getRange(r,1,1,7).setNumberFormat('@').setValues([['edit_'+Utilities.getUuid().replace(/-/g,''),sender,String(after[16]),String(after[0]),text,at,'pending']]);
+ return {sheet:s,row:r};
+}
+function customerEditNotices_(op,d){
+ var lock=LockService.getScriptLock();lock.waitLock(20000);
+ try{
+  var s=customerEditNoticeSheet_(false),rows=s&&s.getLastRow()>1?s.getRange(2,1,s.getLastRow()-1,7).getDisplayValues():[];
+  if(op==='edit_notifications_ack'){
+   var ids=Array.isArray(d.ids)?d.ids.slice(0,50):[];
+   rows.forEach(function(r,i){if(r[6]==='pending'&&ids.indexOf(r[0])!==-1)s.getRange(i+2,7).setValue('queued');});
+   return {ok:true};
+  }
+  return {ok:true,events:rows.filter(function(r){return r[6]==='pending';}).slice(0,50).map(function(r){return {id:r[0],sender:r[1],targetRequestId:r[2],orderNumber:r[3],text:r[4],createdAt:r[5]};})};
+ }finally{lock.releaseLock();}
+}
