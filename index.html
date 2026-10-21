@@ -2019,6 +2019,18 @@ function buildWizardReview(){
       return null;
     }
 
+    var catalogRefreshing=false;
+    async function refreshCanonicalCatalog(){
+      if(catalogRefreshing)throw new Error('CATALOG_BUSY');catalogRefreshing=true;
+      try{
+        const response=await fetch(WEB_APP_URL+'?action=catalog',{signal:AbortSignal.timeout(15000)});
+        const data=await response.json();if(!data.ok||!data.canonical||!data.products)throw new Error('CATALOG_UNAVAILABLE');
+        const next=PRODUCTS.map(p=>{const live=data.products[p.id];if(!live||!Number.isFinite(live.price)||live.price<=0||typeof live.description!=='string')throw new Error('INVALID_CATALOG');return {...p,...live};});
+        const changed=JSON.stringify(PRODUCTS.map(p=>[p.id,p.price,!!p.soldOut]))!==JSON.stringify(next.map(p=>[p.id,p.price,!!p.soldOut]));PRODUCTS=next;
+        for(const p of PRODUCTS){const card=document.querySelector('[data-product-id="'+p.id+'"]');if(!card)continue;card.dataset.price=p.price;card.querySelector('.product-price').textContent=p.price+' دنانير';card.querySelector('.product-name').textContent=p.name;const desc=card.querySelector('.product-details p');if(desc)desc.textContent=p.description;card.querySelectorAll('.qty-input,.qty-button').forEach(el=>el.disabled=!!p.soldOut);if(p.soldOut){card.querySelectorAll('.qty-input').forEach(el=>el.value=0);card.querySelector('.product-price').textContent+=' — غير متاح حاليًا';}}
+        calculateTotals();return changed;
+      }finally{catalogRefreshing=false;}
+    }
     function renderProducts() {
       /*
        * المنتجات مكتوبة داخل HTML أصلًا.
@@ -2801,7 +2813,11 @@ function buildWizardReview(){
       };
     }
 
-    function submitOrder() {
+    async function submitOrder() {
+      if(catalogRefreshing)return;
+      try{const changed=await refreshCanonicalCatalog();if(changed){showToast('تحدّثت معلومات المنتجات. راجع الملخص ثم أكّد الحجز.');return;}}
+      catch{showError('تعذر التحقق من الأسعار الحالية. حاول مجددًا بعد قليل.');return;}
+
       if (
         submitting ||
         !validateForm()
@@ -3843,6 +3859,7 @@ function buildWizardReview(){
         calculateTotals();
         updateNetworkStatus();
         initializeDraftSaving();
+        refreshCanonicalCatalog().catch(()=>showToast("تعذر تحديث المنتجات؛ سنعيد التحقق قبل تأكيد الحجز."));
       }
     );
   </script>

@@ -108,6 +108,8 @@ var PRODUCTS = {
     soldOut: false
   }
 };
+if(typeof catalogApply_==='function')PRODUCTS=catalogApply_(PRODUCTS);
+
 
 var DISTRICTS = {
   'عمان': [
@@ -219,6 +221,7 @@ function doGet(e) {
       50
     );
 
+  if(action==='catalog')return ContentService.createTextOutput(JSON.stringify(catalogView_())).setMimeType(ContentService.MimeType.JSON);
   if (action === 'editOrder') { return serveCustomerEdit_(); }
   if (action === 'track') { return serveCustomerTracking_(); }
   if (action === 'employee') { return serveAdmin_(true); }

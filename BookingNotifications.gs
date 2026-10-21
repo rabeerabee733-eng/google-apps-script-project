@@ -37,8 +37,9 @@ function bookingNotifications_(op,d){
   var matches=notices.map(function(r,i){return {values:r,row:i+2};}).filter(function(x){return x.values[0]===d.id;});
   if(matches.length!==1)return waFail_('NOT_FOUND');var notice=matches[0],n=notice.values;
   if(op==='booking_notifications_status'){
-   if(['sent','sent_by_agent','send_uncertain','failed','obsolete','waiting_template','queued'].indexOf(d.status)===-1)return waFail_('INVALID_STATUS');
-   if(['sent','sent_by_agent','obsolete'].indexOf(n[5])!==-1)return {ok:true};
+   if(['sent','sent_by_agent','send_uncertain','failed','obsolete','waiting_template','queued','delivered','read'].indexOf(d.status)===-1)return waFail_('INVALID_STATUS');
+   if(n[5]==='obsolete'||n[5]==='read'||n[5]==='delivered'&&d.status!=='read')return {ok:true};
+   if(['sent','sent_by_agent'].indexOf(n[5])!==-1&&['delivered','read','failed'].indexOf(d.status)===-1)return {ok:true};
    s.getRange(notice.row,6).setValue(d.status);s.getRange(notice.row,8,1,2).setValues([[new Date().toISOString(),String(d.outboundId||'').slice(0,300)]]);return {ok:true};
   }
   if(op!=='booking_notification_details')return waFail_('UNKNOWN_OPERATION');
@@ -47,8 +48,7 @@ function bookingNotifications_(op,d){
   if(found.length!==1||'962'+canonicalPhone_(found[0][3]).slice(1)!==d.sender)return waFail_('NOT_FOUND');
   var order=found[0],state=customerEditState_(order);if(state.status==='ملغي')return waFail_('NOT_FOUND');
   var previous=JSON.parse(n[4]),url=previous.editUrl||'',token=url.split('#token=')[1]||'';
-  if(state.locked)url='التعديل غير متاح بعد طباعة الستكر أو خروج الطلب للتوصيل.';
-  else {
+  {
    var links=customerEditSheet_(false),linkRow=customerEditFind_(links,1,n[2]);
    if(!/^[a-f0-9]{64}$/.test(token)||!linkRow||links.getRange(linkRow,2).getDisplayValue()!==portalDigest_(token)){
     token=Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'');customerEditStoreToken_(n[2],token);url=CUSTOMER_EDIT_URL_+'#token='+token;

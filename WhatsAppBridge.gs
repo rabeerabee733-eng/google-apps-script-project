@@ -43,7 +43,9 @@ function waBridge_(e){
     }
     if(['edit_notifications','edit_notifications_ack'].indexOf(request.op)!==-1)return waJSON_(customerEditNotices_(request.op,d));
     if(['booking_notifications','booking_notifications_ack','booking_notification_details','booking_notifications_status'].indexOf(request.op)!==-1)return waJSON_(bookingNotifications_(request.op,d));
-    if(request.op==='catalog')return waJSON_({ok:true,products:PRODUCTS,districts:DISTRICTS,delivery:{amman:2,other:3}});
+    if(['lifecycle_poll','lifecycle_ack','lifecycle_details'].indexOf(request.op)!==-1)return waJSON_(lifecycleNotifications_(request.op,d));
+    if(request.op==='catalog')return waJSON_(catalogView_());
+    if(request.op==='catalog_update')return waJSON_(catalogUpdate_(d));
     if(request.op==='customer_order')return waJSON_(waEditableOrder_(d));
     if(request.op==='customer_orders')return waJSON_(waLookupOrders_(d));
     if(['customer_status','customer_edit_link','customer_orders','agent_report'].indexOf(request.op)!==-1)return waJSON_(waCustomerService_(request.op,d,p));

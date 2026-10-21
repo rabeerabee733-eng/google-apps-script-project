@@ -8,7 +8,7 @@ function fixture(){
   PropertiesService:{getScriptProperties:()=>({getProperty:k=>props[k]})},
   ContentService:{MimeType:{JSON:'json'},createTextOutput:t=>({setMimeType:()=>JSON.parse(t)})},
   Utilities:{Charset:{UTF_8:'utf8'},computeHmacSha256Signature:(s,k)=>[...createHmac('sha256',k).update(s).digest()]},
-  SpreadsheetApp:{openById:()=>({getSheetByName:()=>({})})},
+  SpreadsheetApp:{openById:()=>({getSheetByName:n=>n==='الطلبات'?{}:null})},
   canonicalPhone_:s=>/^07\d{8}$/.test(s)?s:'',findResultByRequestId_:()=>null,
   sanitizeItems_:items=>({ok:true,items:items.map(i=>({...i,...ctx.PRODUCTS[i.productId]}))}),
   calculateTotals_:items=>{const productsTotal=items.reduce((n,i)=>n+i.price*i.qty,0);return {productsTotal,deliveryFee:2,grandTotal:productsTotal+2};},

@@ -42,15 +42,16 @@ function adminWorkflowResolve(payload){
     return {ok:true};
   }finally{lock.releaseLock();}
 }
-function workflowPublicTracking_(row,teachers){
-  var key=stickerExportKey_(row),meta=portalStickerMeta_()[String(row[16])]||{},p=opsPacks_()[key],tracking=courierTracking_()[key]||{},h=courierSnapshots_().filter(function(x){return x.key===key;}).pop(),status=meta.status||'جديد';
+function workflowPublicTracking_(row,teachers,context){
+  context=context||{meta:portalStickerMeta_(),packs:opsPacks_(),tracking:courierTracking_(),snapshots:courierSnapshots_()};
+  var key=stickerExportKey_(row),meta=context.meta[String(row[16])]||{},p=context.packs[key],tracking=context.tracking[key]||{},h=context.lastSnapshot?context.lastSnapshot[key]:context.snapshots.filter(function(x){return x.key===key;}).pop(),status=meta.status||'جديد';
   if(status!=='ملغي'){
     if(tracking.status)status=tracking.status==='لدى الشركة'?'خرج للتوصيل':tracking.status;
     else if(status!=='تم التسليم'&&(h||p&&p.handedAt))status='خرج للتوصيل';
     else if(p&&['جديد','قيد التجهيز','جاهز'].indexOf(status)!==-1)status=p.packedAt&&p.itemsRevision===opsItemRevision_(row)?'جاهز':'قيد التجهيز';
   }
   var active=(teachers||[]).filter(function(t){return t.values[5]!=='ملغي';});
-  return {status:status,company:h&&h.company||'',ajyalTotal:active.length,ajyalCompleted:active.filter(function(t){return t.values[5]==='مكتمل';}).length,corrections:workflowCorrections_().filter(function(r){return r.key===String(row[16]);}).slice(-5).reverse().map(function(r){return {at:r.at,text:r.text,status:r.status,response:r.response,resolvedAt:r.resolvedAt};})};
+  return {status:status,company:h&&h.company||'',ajyalTotal:active.length,ajyalCompleted:active.filter(function(t){return t.values[5]==='مكتمل';}).length,corrections:(context.corrections||workflowCorrections_()).filter(function(r){return r.key===String(row[16]);}).slice(-5).reverse().map(function(r){return {at:r.at,text:r.text,status:r.status,response:r.response,resolvedAt:r.resolvedAt};})};
 }
 function customerCorrectionSubmit(payload){
   payload=payload||{};var text=String(payload.text||'').trim(),id=String(payload.id||'');
@@ -97,3 +98,4 @@ function adminWorkflowAlerts(payload){
   return {settings:settings,version:portalDigest_(JSON.stringify(settings)),counts:counts,total:filtered.length,rows:filtered.slice(offset,offset+50),offset:offset,unknown:unknown,updatedAt:new Date().toISOString()};
 }
 function adminPrepManifest(id){orgRequire_(['stickerRead']);var d=adminPrepBatch(id);return {batch:d.batch,summary:d.summary,createdAt:new Date().toISOString(),orders:d.orders.sort(function(a,b){return Number(a.orderNumber)-Number(b.orderNumber);}).map(function(o){return {number:o.orderNumber,name:o.name,items:o.items.map(function(i){return {text:i.text,product:i.product,folder:i.folder,paper:i.paper};}),stale:o.stale};})};}
+
