@@ -6,8 +6,8 @@ function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve
 
 test('verified save shows a visible confirmation beside the mobile save button and updates the revision',async()=>{
  const u=await ready();await u.nodes.form.onsubmit(submit);
- assert.match(u.nodes['save-message'].textContent,/تم حفظ التعديلات بنجاح.*51/);
- assert.equal(u.nodes['save-message'].hidden,false);assert.equal(u.nodes['save-message'].focused,true);assert.equal(u.nodes['save-message'].scrolled,true);
+ assert.match(u.nodes['save-message'].textContent,/تم تعديل طلبك بنجاح.*51/);
+ assert.equal(u.nodes['save-message'].hidden,false);assert.equal(u.nodes['saved-summary'].focused,true);assert.equal(u.nodes['saved-summary'].scrolled,true);assert.equal(u.nodes['saved-summary'].hidden,false);assert.match(u.nodes['saved-summary-details'].textContent,/عميل تجريبي/);assert.match(u.nodes['saved-summary-items'].textContent,/حقيبة الصف الأول × 2/);assert.match(u.nodes['saved-summary-totals'].textContent,/الإجمالي: 25.00 د/);
  assert.equal(u.nodes.save.textContent,'تم حفظ التعديلات ✓');assert.equal(u.nodes.form.hidden,false);assert.equal(u.nodes.fields.disabled,false);
  await u.nodes.form.onsubmit(submit);assert.equal(u.calls.filter(c=>c.name==='customerEditSave')[1].arg.revision,'v2');
 });
@@ -21,7 +21,7 @@ test('temporary polling failures retain the form, typed edits and previous succe
 test('late polling failure cannot hide a successfully saved order',async()=>{
  const u=await ready(),check=deferred();u.setCheck(check.promise);u.timers[0]();await tick();
  await u.nodes.form.onsubmit(submit);check.reject(new Error('رابط التعديل غير صالح أو تم استبداله.'));await tick();
- assert.equal(u.nodes.form.hidden,false);assert.match(u.nodes['save-message'].textContent,/تم حفظ التعديلات بنجاح/);
+ assert.equal(u.nodes.form.hidden,false);assert.match(u.nodes['save-message'].textContent,/تم تعديل طلبك بنجاح/);
 });
 test('focus and timer checks do not run during a save and double submission sends one write',async()=>{
  const u=await ready(),save=deferred();u.setSave(save.promise);const pending=u.nodes.form.onsubmit(submit);await tick();
@@ -48,6 +48,6 @@ test('explicitly revoked links still hide protected form content',async()=>{
 });
 test('new edits clear the old success caption and null check responses do not erase the form',async()=>{
  const u=await ready();await u.nodes.form.onsubmit(submit);u.nodes.form.oninput();
- assert.equal(u.nodes.save.textContent,'حفظ التعديلات');assert.equal(u.nodes['save-message'].hidden,true);
+ assert.equal(u.nodes.save.textContent,'حفظ التعديلات');assert.equal(u.nodes['save-message'].hidden,true);assert.equal(u.nodes['saved-summary'].hidden,true);
  u.setCheck(null);u.timers[0]();await tick();assert.equal(u.nodes.form.hidden,false);assert.match(u.nodes['connection-message'].textContent,/مؤقتًا/);
 });

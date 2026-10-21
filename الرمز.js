@@ -755,10 +755,7 @@ function saveOrder_(data) {
         ajyal.length
       );
 
-    var row =
-      sheet.getLastRow() +
-      1;
-
+    var row = nextOrderNumber_(sheet);
     var orderNumber = row;
 
     var values = [[
@@ -1352,66 +1349,14 @@ function phoneExists_(sheet,phone) {
   });
 }
 
-function nextOrderNumber_(
-  sheet
-) {
-  var maximum = 0;
-
-  if (
-    sheet.getLastRow() >=
-      2
-  ) {
-    var values =
-      sheet
-        .getRange(
-          2,
-          1,
-          sheet.getLastRow() -
-            1,
-          1
-        )
-        .getDisplayValues();
-
-    for (
-      var i = 0;
-      i < values.length;
-      i++
-    ) {
-      var current =
-        Number(
-          String(
-            values[i][0]
-          ).replace(
-            /[^\d]/g,
-            ''
-          )
-        );
-
-      if (
-        isFinite(current) &&
-        current > maximum
-      ) {
-        maximum =
-          current;
-      }
-    }
-  }
-
-  var savedFloor = Number(
-    PropertiesService
-      .getScriptProperties()
-      .getProperty('ADMIN_ORDER_NUMBER_FLOOR') ||
-      0
-  );
-
-  if (
-    isFinite(savedFloor) &&
-    savedFloor > maximum
-  ) {
-    maximum = savedFloor;
-  }
-
-  return maximum + 1;
+function nextOrderNumber_(sheet) {
+  // New order numbers match their physical row. Never renumber existing orders.
+  // Physical deletion must not cause an issued/cancelled number to be reused.
+  var next=Math.max(2,sheet.getLastRow()+1);
+  if(sheet.getLastRow()>1)sheet.getRange(2,1,sheet.getLastRow()-1,1).getDisplayValues().forEach(function(r){var n=Number(r[0]);if(Number.isSafeInteger(n)&&n>0)next=Math.max(next,n+1);});
+  var log=SpreadsheetApp.openById(SHEET_ID).getSheetByName('إلغاءات واتساب');
+  if(log&&log.getLastRow()>1)log.getRange(2,4,log.getLastRow()-1,1).getDisplayValues().forEach(function(r){var n=Number(r[0]);if(Number.isSafeInteger(n)&&n>0)next=Math.max(next,n+1);});
+  return next;
 }
 
 function rememberOrderNumberFloor_(
@@ -1947,7 +1892,7 @@ function adminCreateOrder(payload) {
     ensureHeaders_(sheet);
     var normalized = adminValidateEditable_(payload);
     var requestId = 'ADMIN-' + Utilities.getUuid();
-    var rowNumber = sheet.getLastRow() + 1;
+    var rowNumber = nextOrderNumber_(sheet);
     var orderNumber = rowNumber;
     rememberOrderNumberFloor_(orderNumber);
     var values = [[

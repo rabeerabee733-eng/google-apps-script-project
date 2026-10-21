@@ -1,0 +1,9 @@
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+test('new admin orders use a unique number after rows were removed, matching their new row',()=>{
+ const c=vm.createContext({console});vm.runInContext(fs.readFileSync('الرمز.js','utf8'),c);
+ let nextRow,stored,floor='52';const sheet={getLastRow:()=>2,getRange(r,col,n=1,w=1){return{getDisplayValues(){if(col===1&&w===1)return[['52']];return[stored];},setNumberFormats(){return this;},setValues(v){nextRow=r;stored=v[0];return this;}};}};
+ c.PropertiesService={getScriptProperties:()=>({getProperty:()=>floor,setProperty:(k,v)=>floor=v})};c.Utilities={getUuid:()=> 'test-id'};c.requireAdmin_=()=>({email:'test@example.test'});c.LockService={getScriptLock:()=>({tryLock:()=>true,releaseLock(){}})};c.adminOrdersSheet_=()=>sheet;c.ensureHeaders_=()=>{};c.adminValidateEditable_=()=>({name:'Test',mainPhone:'0790000000',altPhone:'',governorate:'عمان',district:'قصبة عمان',address:'Test',itemsCount:1,folderCount:1,paperCount:0,productsTotal:10,deliveryFee:2,grandTotal:12,itemsText:'bag',notes:''});c.adminUpsertMeta_=()=>({});c.adminMetaPatchFromPayload_=()=>({});c.adminLog_=()=>{};c.SpreadsheetApp={flush(){},openById:()=>({getSheetByName:()=>null})};
+ const r=c.adminCreateOrder({});assert.equal(nextRow,53);assert.equal(r.order.orderNumber,53);assert.equal(floor,'53');
+});
+
+test('fresh registers start at row 2 and deleted last-order numbers remain reserved',()=>{const c=vm.createContext({console});vm.runInContext(fs.readFileSync('الرمز.js','utf8'),c);const sheet={getLastRow:()=>1};let log=null;c.SpreadsheetApp={openById:()=>({getSheetByName:()=>log})};assert.equal(c.nextOrderNumber_(sheet),2);log={getLastRow:()=>2,getRange:()=>({getDisplayValues:()=>[['51']]})};assert.equal(c.nextOrderNumber_(sheet),52);});

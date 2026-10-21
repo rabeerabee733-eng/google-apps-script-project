@@ -36,6 +36,11 @@ function waBridge_(e){
     var request=JSON.parse(body),expected=p.getProperty('WA_BRIDGE_EXPECTED_SHEET_ID');
     if(!expected||SHEET_ID!==expected||request.expectedSheetId!==expected)return waJSON_(waFail_('SHEET_MISMATCH'));
     var d=request.data||{};
+    if(request.op==='customer_cancel'){
+      if(p.getProperty('WA_BRIDGE_WRITE_ENABLED')!=='true')return waJSON_(waFail_('WRITES_DISABLED'));
+      if(SHEET_ID==='1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w'&&p.getProperty('WA_BRIDGE_ALLOW_PRODUCTION')!=='true')return waJSON_(waFail_('PRODUCTION_LOCKED'));
+      return waJSON_(waCancelOrder_(d));
+    }
     if(request.op==='catalog')return waJSON_({ok:true,products:PRODUCTS,districts:DISTRICTS,delivery:{amman:2,other:3}});
     if(request.op==='customer_order')return waJSON_(waEditableOrder_(d));
     if(request.op==='customer_orders')return waJSON_(waLookupOrders_(d));
@@ -53,6 +58,7 @@ function waBridge_(e){
       if(SHEET_ID==='1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w'&&p.getProperty('WA_BRIDGE_ALLOW_PRODUCTION')!=='true')return waJSON_(waFail_('PRODUCTION_LOCKED'));
       var x=d.quote||{},token=x.token;delete x.token;
       if(d.confirmed!==true||!waEqual_(waMAC_(JSON.stringify(x),key),token))return waJSON_(waFail_('INVALID_CONFIRMATION'));
+      if(waWasCancelled_(x.targetRequestId||x.requestId))return waJSON_(waFail_('ORDER_CANCELLED'));
       if(x.kind==='update')return waJSON_(waEditCommit_(x));
       var sheet=SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
       // A successful previous commit wins over expiry. No duplicate row on retry.
@@ -179,3 +185,52 @@ function waEditCommit_(x){
     log.getRange(n,3,1,2).setValues([['saved',JSON.stringify(result)]]);SpreadsheetApp.flush();return result;
   }catch(e){return waFail_('EDIT_UNCERTAIN');}finally{lock.releaseLock();}
 }
+
+
+// Cancellation is bound to a verified sender and stable order ID, never just a row number.
+// The durable journal makes delivery retries safe even after the original row is removed.
+function waCancelOrder_(d){
+  if(!/^9627\d{8}$/.test(String(d.sender||'')))return waFail_('INVALID_SENDER');
+  if(d.confirmed!==true||!/^wa_cancel_[a-f0-9]{32}$/.test(String(d.requestId||''))||!d.targetRequestId||!/^\d{1,8}$/.test(String(d.orderNumber||'')))return waFail_('INVALID_CONFIRMATION');
+  var lock=LockService.getScriptLock();lock.waitLock(20000);
+  try{
+    var ss=SpreadsheetApp.openById(SHEET_ID),sheet=adminOrdersSheet_(),log=ss.getSheetByName('إلغاءات واتساب'),records=log&&log.getLastRow()>1?log.getRange(2,1,log.getLastRow()-1,7).getDisplayValues():[];
+    var matches=records.map(function(r,i){return {values:r,row:i+2};}).filter(function(r){return r.values[0]===d.requestId;}),record=matches[0],n;
+    if(matches.length>1)return waFail_('REQUEST_CONFLICT');
+    if(record){
+      if(record.values[1]!==d.sender||record.values[2]!==d.targetRequestId||record.values[3]!==String(d.orderNumber))return waFail_('REQUEST_CONFLICT');
+      if(record.values[4]==='cancelled')return JSON.parse(record.values[5]);
+      n=record.row;
+    }
+    var rows=sheet.getLastRow()>1?sheet.getRange(2,1,sheet.getLastRow()-1,17).getDisplayValues():[],found=rows.map(function(r,i){return {values:r,row:i+2};}).filter(function(r){return r.values[16]===d.targetRequestId;});
+    if(found.length>1)return waFail_('MULTIPLE_ORDERS');
+    var a=found[0],phone=canonicalPhone_('0'+d.sender.slice(3));
+    if(a){
+      if(canonicalPhone_(a.values[3])!==phone||String(a.values[0])!==String(d.orderNumber))return waFail_('NOT_FOUND');
+      var state=customerEditState_(a.values);
+      if(!state||typeof state.printed!=='boolean'||typeof state.locked!=='boolean')return waFail_('CANCEL_UNCERTAIN');
+      if(state.printed||state.canCreateNew===true||['خرج للتوصيل','تم التسليم'].indexOf(state.status)!==-1)return waFail_('ORDER_LOCKED');
+      if(state.locked&&state.status!=='ملغي')return waFail_('ORDER_LOCKED');
+    }else if(!record)return waFail_('NOT_FOUND');
+    adminEnsureSupportSheets_();
+    var trash=ss.getSheetByName(ADMIN_TRASH_SHEET_NAME),archived=trash.getLastRow()>1?trash.getRange(2,1,trash.getLastRow()-1,20).getDisplayValues().some(function(r){return r[16]===d.targetRequestId&&canonicalPhone_(r[3])===phone;}):false;
+    if(!a&&!archived)return waFail_('CANCEL_UNCERTAIN');
+    if(!log){log=ss.insertSheet('إلغاءات واتساب');log.getRange(1,1,1,7).setValues([['معرف العملية','واتساب العميل','معرف الطلب','رقم الطلب','الحالة','النتيجة','التاريخ']]);log.setFrozenRows(1);}
+    if(!record){n=log.getLastRow()+1;log.getRange(n,1,1,7).setNumberFormat('@').setValues([[d.requestId,d.sender,d.targetRequestId,String(d.orderNumber),'pending','',new Date().toISOString()]]);SpreadsheetApp.flush();}
+    if(a){
+      rememberOrderNumberFloor_(a.values[0]);
+      if(!archived){var raw=sheet.getRange(a.row,1,1,17).getValues()[0],meta=adminGetMeta_(d.targetRequestId,d.orderNumber);trash.appendRow(raw.concat([new Date(),'واتساب — طلب العميل',JSON.stringify(meta)]));SpreadsheetApp.flush();}
+      sheet.deleteRow(a.row);SpreadsheetApp.flush();
+    }
+    // Stop associated work and revoke the old edit link after the parent is removed.
+    var teachers=customerEditTeachers_(d.targetRequestId),ajyal=teachers.length?ss.getSheetByName(AJYAL_SHEET):null;
+    teachers.forEach(function(t){if(t.values[5]!=='ملغي'){ajyal.getRange(t.row,6).setValue('ملغي');ajyal.getRange(t.row,9).setValue(new Date().toISOString());}});
+    var links=customerEditSheet_(false),tokenRow=customerEditFind_(links,1,d.targetRequestId);if(tokenRow)links.deleteRow(tokenRow);
+    adminRemoveMeta_(d.targetRequestId);
+    adminLog_('واتساب — طلب العميل','إلغاء الطلب وحذف صفه قبل طباعة الستكر',d.orderNumber,d.targetRequestId,a?a.row:0,a?a.values:[],[]);
+    var result={ok:true,result:'success',cancelled:true,orderNumber:String(d.orderNumber),targetRequestId:d.targetRequestId};
+    log.getRange(n,5,1,2).setValues([['cancelled',JSON.stringify(result)]]);SpreadsheetApp.flush();return result;
+  }catch(e){return waFail_('CANCEL_UNCERTAIN');}finally{lock.releaseLock();}
+}
+
+function waWasCancelled_(id){var s=SpreadsheetApp.openById(SHEET_ID).getSheetByName('إلغاءات واتساب');return !!(s&&s.getLastRow()>1&&s.getRange(2,3,s.getLastRow()-1,1).getDisplayValues().some(function(r){return r[0]===id;}));}
