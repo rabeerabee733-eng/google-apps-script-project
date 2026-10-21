@@ -94,7 +94,7 @@ var PRODUCTS = {
   },
 
   number_cards: {
-    name: 'بطاقات الأرقام',
+    name: 'بطاقات الأعداد',
     price: 10,
     splitAllowed: false,
     paperOnly: false
@@ -2828,3 +2828,4 @@ function stickerMarkDispatched_(chosen,email){
   });
   if(changed)sheet.getRange(2,1,values.length,10).setValues(values);
 }
+
