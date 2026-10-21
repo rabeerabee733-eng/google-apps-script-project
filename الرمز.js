@@ -755,14 +755,11 @@ function saveOrder_(data) {
         ajyal.length
       );
 
-    var orderNumber =
-      nextOrderNumber_(
-        sheet
-      );
-
     var row =
       sheet.getLastRow() +
       1;
+
+    var orderNumber = row;
 
     var values = [[
       orderNumber,                        // A
@@ -1950,9 +1947,9 @@ function adminCreateOrder(payload) {
     ensureHeaders_(sheet);
     var normalized = adminValidateEditable_(payload);
     var requestId = 'ADMIN-' + Utilities.getUuid();
-    var orderNumber = nextOrderNumber_(sheet);
-    rememberOrderNumberFloor_(orderNumber);
     var rowNumber = sheet.getLastRow() + 1;
+    var orderNumber = rowNumber;
+    rememberOrderNumberFloor_(orderNumber);
     var values = [[
       orderNumber,
       new Date(),
