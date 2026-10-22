@@ -8,8 +8,9 @@ function bookingNoticeRows_(s){return s.getLastRow()>1?s.getRange(2,1,s.getLastR
 function bookingNoticeId_(id){return 'booking_'+Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,String(id)).map(function(b){return ('0'+((b+256)%256).toString(16)).slice(-2);}).join('');}
 function bookingNoticeOrderRows_(){var s=adminOrdersSheet_();return s.getLastRow()>1?s.getRange(2,1,s.getLastRow()-1,17).getDisplayValues():[];}
 function bookingNoticeData_(r,url){return {name:String(r[2]),itemsText:String(r[14]),productsTotal:numberFromDisplay_(r[11]),deliveryFee:numberFromDisplay_(r[12]),total:numberFromDisplay_(r[13]),editUrl:url||''};}
-function bookingNoticeValid_(r){return !!r[16]&&!!r[2]&&!!r[14]&&/^07\d{8}$/.test(canonicalPhone_(r[3]))&&numberFromDisplay_(r[13])>0;}
-function bookingNoticeRecord_(r,status,url){var at=new Date().toISOString();return [bookingNoticeId_(r[16]),'962'+canonicalPhone_(r[3]).slice(1),String(r[16]),String(r[0]),JSON.stringify(bookingNoticeData_(r,url)),status,at,at,''];}
+// canonicalPhone_ returns nine national digits (7xxxxxxxx), without the trunk zero.
+function bookingNoticeValid_(r){return !!r[16]&&!!r[2]&&!!r[14]&&/^7\d{8}$/.test(canonicalPhone_(r[3]))&&numberFromDisplay_(r[13])>0;}
+function bookingNoticeRecord_(r,status,url){var at=new Date().toISOString();return [bookingNoticeId_(r[16]),'962'+canonicalPhone_(r[3]),String(r[16]),String(r[0]),JSON.stringify(bookingNoticeData_(r,url)),status,at,at,''];}
 // Called while saveOrder_ already owns the script lock. Keep the form's original link valid.
 function bookingNoticeQueue_(data){
  var s=bookingNoticeSheet_(),rows=bookingNoticeOrderRows_().filter(function(r){return r[16]===data.requestId;});
@@ -45,7 +46,7 @@ function bookingNotifications_(op,d){
   if(op!=='booking_notification_details')return waFail_('UNKNOWN_OPERATION');
   if(d.sender!==n[1]||d.targetRequestId!==n[2])return waFail_('NOT_FOUND');
   var found=bookingNoticeOrderRows_().filter(function(r){return r[16]===n[2];});
-  if(found.length!==1||'962'+canonicalPhone_(found[0][3]).slice(1)!==d.sender)return waFail_('NOT_FOUND');
+  if(found.length!==1||'962'+canonicalPhone_(found[0][3])!==d.sender)return waFail_('NOT_FOUND');
   var order=found[0],state=customerEditState_(order);if(state.status==='ملغي')return waFail_('NOT_FOUND');
   var previous=JSON.parse(n[4]),url=previous.editUrl||'',token=url.split('#token=')[1]||'';
   {
@@ -58,3 +59,4 @@ function bookingNotifications_(op,d){
   return {ok:true,id:n[0],sender:n[1],targetRequestId:n[2],orderNumber:String(order[0]),name:details.name,itemsText:details.itemsText,productsTotal:details.productsTotal,deliveryFee:details.deliveryFee,total:details.total,editUrl:details.editUrl};
  }finally{lock.releaseLock();}
 }
+
