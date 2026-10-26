@@ -12,7 +12,7 @@ for(const name of ['adminProducts','calculateGrand','syncAdminProductSummary','v
  const line=html.split('\n').find(l=>l.trim().startsWith('function '+name+'('));assert(line,name);vm.runInContext(line,c);
 }
 assert.deepEqual(Array.from(c.adminProducts(),p=>p.id),Object.keys(server.PRODUCTS));
-ids.forEach(id=>rows.push(row(id)));
+ids.forEach(id=>rows.push(row(id,1,0,1)));
 assert.equal(c.validateAdminProductRows(),true);assert.equal(nodes.productsTotal.value,'21.00');assert.equal(nodes.grandTotal.value,'23.00');
 assert.equal(nodes.itemsCount.value,5);assert.equal(nodes.paperCount.value,5);assert.equal(nodes.folderCount.value,0);
 assert.equal(nodes.itemsText.value.split('\n').length,5);
@@ -21,6 +21,8 @@ for(const id of ids)assert(nodes.itemsText.value.includes(server.PRODUCTS[id].na
 const sheetRow=[];sheetRow[1]='51';sheetRow[8]=5;sheetRow[9]=0;sheetRow[10]=5;sheetRow[14]=nodes.itemsText.value;
 const stickerFn=Object.keys(server).find(k=>typeof server[k]==='function'&&String(server[k]).includes('تفاصيل المنتجات لا تطابق أعمدة'));
 assert(stickerFn);assert.deepEqual(JSON.parse(JSON.stringify(server[stickerFn](sheetRow))),{itemsCount:5,folderCount:0,paperCount:5});
+for(const id of ids.slice(3)){rows.splice(0,rows.length,row(id,2,1,1));assert.equal(c.validateAdminProductRows(),true);assert.equal(nodes.productsTotal.value,'12.00');assert.equal(nodes.folderCount.value,1);assert.equal(nodes.paperCount.value,1);rows[0]=row(id,2,0,0);assert.equal(c.validateAdminProductRows(),false);}
+rows.splice(0,rows.length,...ids.map(id=>row(id,1,0,1)));
 // Catalog updates are read from the shared bootstrap, without stale hardcoded prices.
 config.products.find(p=>p.key==='english_preparation').price=8;c.syncAdminProductSummary();assert.equal(nodes.productsTotal.value,'23.00');
 config.products.find(p=>p.key===ids[0]).soldOut=true;assert.equal(c.validateAdminProductRows(),false);assert.match(message,/متاح/);
