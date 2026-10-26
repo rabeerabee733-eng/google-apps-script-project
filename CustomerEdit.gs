@@ -65,9 +65,10 @@ function customerEditParse_(row,teachers) {
       if(price!==PRODUCTS[id].price*item.qty)throw new Error();raw.push(item);
     });
     var cleaned=sanitizeItems_(raw),active=teachers.filter(function(t){return t.values[5]!=='ملغي';});
-    if(!cleaned.ok||!cleaned.items.length||serviceCount!==active.length||serviceTotal!==active.length*3)throw new Error();
+    var unitPrice=active.length?serviceTotal/active.length:2;
+    if(!cleaned.ok||!cleaned.items.length||serviceCount!==active.length||[2,3].indexOf(unitPrice)===-1||serviceTotal!==active.length*unitPrice)throw new Error();
     normalizeAjyal_({enabled:active.length>0,teachers:active.map(function(t){return {teacherName:t.values[2],phone:t.values[4],grade:t.values[9]};})},cleaned.items);
-    var totals=calculateTotals_(cleaned.items,row[5],active.length),expected=[totals.itemsCount,totals.folderCount,totals.paperCount,totals.productsTotal+totals.ajyalTotal,totals.deliveryFee,totals.grandTotal];
+    var totals=calculateTotals_(cleaned.items,row[5],active.length,unitPrice),expected=[totals.itemsCount,totals.folderCount,totals.paperCount,totals.productsTotal+totals.ajyalTotal,totals.deliveryFee,totals.grandTotal];
     expected.forEach(function(v,i){if(v!==numberFromDisplay_(row[i+8]))throw new Error();});
     return {editable:true,items:cleaned.items,totals:totals};
   } catch(ignored) {
@@ -80,7 +81,7 @@ function customerEditView_(access) {
   result.tracking=workflowPublicTracking_(row,teachers);
   result.revision=state.locked?'':customerEditRevision_(row,teachers);
   result.order={name:row[2],phone:row[3],altPhone:row[4],governorate:row[5],district:row[6],address:row[7]};
-  result.productsEditable=!state.locked&&parsed.editable;result.items=parsed.items;result.totals=parsed.totals;result.itemsText=row[14];
+  result.productsEditable=!state.locked&&parsed.editable;result.items=parsed.items;result.totals=parsed.totals;result.ajyalUnitPrice=parsed.totals.ajyalUnitPrice||2;result.itemsText=row[14];
   result.teachers=teachers.filter(function(t){return t.values[5]!=='ملغي';}).map(function(t){var a=t.values;return {id:a[0],teacherName:a[2],phone:a[4],grade:a[9],editable:a[5]==='جديد'};});
   result.catalog=Object.keys(PRODUCTS).map(function(k){var p=PRODUCTS[k];return {id:k,name:p.name,price:p.price,splitAllowed:!!p.splitAllowed,paperOnly:!!p.paperOnly,soldOut:!!p.soldOut};});
   result.districts=DISTRICTS;result.grades=AJYAL_GRADES;
@@ -119,7 +120,7 @@ function customerEditApply_(payload,access,notifyWhatsApp) {
       if(!Array.isArray(payload.items)||payload.items.length>Object.keys(PRODUCTS).length)throw new Error('بيانات المنتجات غير صحيحة.');
       payload.items.forEach(function(i){['qty','folderQty','paperQty'].forEach(function(k){if(!Number.isInteger(Number(i[k]))||Number(i[k])<0||Number(i[k])>99)throw new Error('أعداد المنتجات يجب أن تكون أعدادًا صحيحة من 0 إلى 99.');});});
       var sanitized=sanitizeItems_(payload.items);if(!sanitized.ok||!sanitized.items.length)throw new Error(sanitized.message||'اختر منتجًا واحدًا على الأقل.');items=sanitized.items;
-      plan=customerEditAjyalPlan_(teachers,payload.teachers,items,old);totals=calculateTotals_(items,cleanText_(payload.governorate,50),plan.teachers.length);
+      plan=customerEditAjyalPlan_(teachers,payload.teachers,items,old);totals=calculateTotals_(items,cleanText_(payload.governorate,50),plan.teachers.length,parsed.totals.ajyalUnitPrice);
       text=itemsText_(items)+(totals.ajyalCount?'\nخدمة أجيال — عدد المعلمين: '+totals.ajyalCount+' — المجموع: '+totals.ajyalTotal+' د.أ':'');
     } else {
       totals=parsed.totals;

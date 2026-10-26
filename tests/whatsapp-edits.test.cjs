@@ -16,3 +16,5 @@ init(false);q=quote({phone:'0781111111',notes:'قرب المسجد'});assert.equ
 init(false);getRow()[14]='منتج يدوي';getRow()[11]=47;getRow()[13]=49;q=quote({address:'عنوان يدوي'});assert.equal(c.waEditCommit_(q).result,'success');assert.equal(getRow()[14],'منتج يدوي');assert.equal(getRow()[13],49);
 init(false);q=quote({address:'تجربة انقطاع'});const apply=c.customerEditApply_;c.customerEditApply_=()=>{throw Error('write timeout');};assert.equal(c.waEditCommit_(q).code,'EDIT_UNCERTAIN');c.customerEditApply_=apply;assert.equal(c.waEditCommit_(q).code,'EDIT_UNCERTAIN');assert.notEqual(getRow()[7],'تجربة انقطاع');
 console.log('PASS: conversational updates preserve row/id/Ajyal/private notes, sender ownership, dispatch lock race, stale revision, idempotency, pending write recovery, custom orders and exactly one open order per number.');
+
+init(true,2);q=quote({address:"عنوان جديد",items:[{productId:"grade1_bag",qty:3,folderQty:1,paperQty:2}]});assert.equal(q.totals.grandTotal,34);result=c.waEditCommit_(q);assert.equal(result.result,"success");assert.equal(Number(getRow()[13]),34);

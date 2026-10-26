@@ -39,7 +39,7 @@ const front=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');vm.runI
 ctx.collectItems=()=>items;assert.deepEqual(Array.from(ctx.fullBagGrades()),['صف أول','صف أول']);
 console.log('PASS: complete-bag counts, multiple teacher records, independent WhatsApp numbers, validation, retry deduplication, authorization, 10,005-record pagination, and message text.');
 
-const priced=ctx.calculateTotals_([{qty:10,price:10,folderQty:10,paperQty:0}],'عمان',5);assert.equal(priced.ajyalTotal,15);assert.equal(priced.productsTotal,100);assert.equal(priced.grandTotal,117);assert.equal(ctx.calculateTotals_([{qty:10,price:10,folderQty:10,paperQty:0}],'عمان',0).grandTotal,102);console.log('PASS: optional 0/5 participants for 10 bags and server-calculated 3 JOD fee.');
+const priced=ctx.calculateTotals_([{qty:10,price:10,folderQty:10,paperQty:0}],'عمان',5);assert.equal(priced.ajyalTotal,10);assert.equal(priced.productsTotal,100);assert.equal(priced.grandTotal,112);assert.equal(ctx.calculateTotals_([{qty:10,price:10,folderQty:10,paperQty:0}],'عمان',0).grandTotal,102);console.log('PASS: optional 0/5 participants for 10 bags and server-calculated 2 JOD fee.');
 
 assert.equal(ctx.stickerAnchorEqual_('{\"barcode\":\"1000000\",\"order\":1}','{\"order\":1,\"barcode\":\"1000000\"}'),true);
 assert.equal(ctx.stickerAnchorEqual_('{\"barcode\":\"1000001\",\"order\":1}','{\"order\":1,\"barcode\":\"1000000\"}'),false);

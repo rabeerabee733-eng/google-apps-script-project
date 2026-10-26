@@ -1223,7 +1223,8 @@ function sanitizeItems_(
 function calculateTotals_(
   items,
   governorate,
-  ajyalCount
+  ajyalCount,
+  ajyalUnitPrice
 ) {
   var itemsCount = 0;
   var folderCount = 0;
@@ -1255,7 +1256,9 @@ function calculateTotals_(
       : 3;
 
   ajyalCount=Number(ajyalCount)||0;
-  var ajyalTotal=ajyalCount*3;
+  // Existing confirmed orders may retain their historical unit price. New bookings cost 2 JOD.
+  ajyalUnitPrice=ajyalUnitPrice===3?3:2;
+  var ajyalTotal=ajyalCount*ajyalUnitPrice;
   return {
     itemsCount:
       itemsCount,
@@ -1268,6 +1271,7 @@ function calculateTotals_(
     deliveryFee:
       deliveryFee,
     ajyalCount:ajyalCount,
+    ajyalUnitPrice:ajyalUnitPrice,
     ajyalTotal:ajyalTotal,
     grandTotal:
       productsTotal +

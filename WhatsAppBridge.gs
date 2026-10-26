@@ -146,7 +146,7 @@ function waEditableOrder_(d){
 function waPrepareEdit_(a,raw){
   var row=a.values,teachers=customerEditTeachers_(row[16]),parsed=customerEditParse_(row,teachers),order=Object.assign({},raw,{phone:row[3],altPhone:row[4]}),clean,totals;
   if(parsed.editable){clean=waCleanOrder_(order);var active=teachers.filter(function(t){return t.values[5]!=='ملغي';}).map(function(t){return {id:t.values[0],teacherName:t.values[2],phone:t.values[4],grade:t.values[9]};});
-    customerEditAjyalPlan_(teachers,active,clean.items,row);totals=calculateTotals_(clean.items,clean.order.governorate,active.length);clean.totals=totals;clean.teachers=active;
+    customerEditAjyalPlan_(teachers,active,clean.items,row);totals=calculateTotals_(clean.items,clean.order.governorate,active.length,parsed.totals.ajyalUnitPrice);clean.totals=totals;clean.teachers=active;
   }else{
     if(!Array.isArray(order.items)||order.items.length)throw Error('MANUAL_REVIEW');
     totals=parsed.totals;if(order.governorate!==row[5]){totals.deliveryFee=order.governorate==='عمان'?2:3;totals.grandTotal=totals.productsTotal+totals.deliveryFee;}
