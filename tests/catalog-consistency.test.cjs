@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const html=fs.readFileSync('index.html','utf8'),backend=fs.readFileSync('الرمز.js','utf8');
-function products(source){const start=source.indexOf('var PRODUCTS ='),end=source.indexOf('var DISTRICTS =',start);const ctx={};vm.runInNewContext(source.slice(start,end),ctx);return Array.isArray(ctx.PRODUCTS)?Object.fromEntries(ctx.PRODUCTS.map(p=>[p.id,p])):ctx.PRODUCTS;}
+function products(source){const start=source.indexOf('var PRODUCTS ='),end=source.indexOf('var DISTRICTS =',start);const ctx={};vm.runInNewContext(fs.readFileSync("ProductCatalog.gs","utf8"),ctx);vm.runInNewContext(source.slice(start,end),ctx);return Array.isArray(ctx.PRODUCTS)?Object.fromEntries(ctx.PRODUCTS.map(p=>[p.id,p])):ctx.PRODUCTS;}
 const front=products(html),back=products(backend),cards=[...html.matchAll(/class="product-card" data-product-id="([^"]+)" data-price="([^"]+)" data-split-allowed="([^"]+)" data-paper-only="([^"]+)"/g)];
 assert.deepEqual(Object.keys(front).sort(),Object.keys(back).sort());
 assert.equal(cards.length,Object.keys(front).length);assert.equal(new Set(cards.map(c=>c[1])).size,cards.length);

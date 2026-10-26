@@ -1,3 +1,6 @@
+// New booking SKUs are added before any quote, validation, admin or customer-edit read.
+function catalogNewProducts_(){return {"monthly_tests_grade1":{"name":"الاختبارات الشهرية للصف الأول","price":3,"splitAllowed":false,"paperOnly":true,"description":"اختبارات الصف الأول: 3 نماذج لكل فترة تقويمية لكل مادة، شاملة جميع المواد، بإجمالي 72 اختبارًا. منتج مستقل عن حقيبة المعلم والاختبارات التشخيصية.","aliases":["اختبارات شهرية صف الأول","امتحانات الصف الأول الشهرية"]},"monthly_tests_grade2":{"name":"الاختبارات الشهرية للصف الثاني","price":3,"splitAllowed":false,"paperOnly":true,"description":"اختبارات الصف الثاني: 3 نماذج لكل فترة تقويمية لكل مادة، شاملة جميع المواد، بإجمالي 72 اختبارًا. منتج مستقل عن حقيبة المعلم والاختبارات التشخيصية.","aliases":["اختبارات شهرية صف الثاني","امتحانات الصف الثاني الشهرية"]},"monthly_tests_grade3":{"name":"الاختبارات الشهرية للصف الثالث","price":3,"splitAllowed":false,"paperOnly":true,"description":"اختبارات الصف الثالث: 3 نماذج لكل فترة تقويمية لكل مادة، شاملة جميع المواد، بإجمالي 72 اختبارًا. منتج مستقل عن حقيبة المعلم والاختبارات التشخيصية.","aliases":["اختبارات شهرية صف الثالث","امتحانات الصف الثالث الشهرية"]},"english_preparation":{"name":"تحضير وخطط وتحليل الإنجليزية للصفوف الثلاثة الأولى","price":6,"splitAllowed":false,"paperOnly":true,"description":"تحضير وخطط فصلية وتحليل محتوى لمادة اللغة الإنجليزية للصفوف الأول والثاني والثالث معًا بسعر 6 دنانير للحزمة كاملة. الفصل الدراسي الثاني من العام الدراسي 2026/2027.","aliases":["تحضير إنجليزي","تحضير اللغة الإنجليزية","خطط وتحليل الإنجليزية"]},"kindergarten_preparation":{"name":"تحضير وخطط وتحليل رياض الأطفال (المنهاج الحكومي)","price":6,"splitAllowed":false,"paperOnly":true,"description":"تحضير وخطط وتحليل لرياض الأطفال (المنهاج الحكومي)، بسعر 6 دنانير. الفصل الدراسي الثاني من العام الدراسي 2026/2027.","aliases":["تحضير رياض الأطفال","تحضير الروضة","تحضير المنهاج الحكومي لرياض الأطفال"]}};}
+function catalogBookingSeason_(){return "الفصل الدراسي الثاني من العام الدراسي 2026/2027";}
 // Authoritative product overrides are private script properties; public reads expose only product data.
 function catalogDefaults_(){
  var bag='حقيبة المعلم: تحضير يومي، خطط فصلية، تحليل محتوى، أوراق عمل، سلالم تقدير ونموذج دفتر علامات. حقيبة استراتيجيات التعلم النشط منتج مستقل.';
@@ -11,14 +14,18 @@ function catalogDefaults_(){
  };
 }
 function catalogApply_(base){
- var defaults=catalogDefaults_(),props=typeof PropertiesService==='undefined'?null:PropertiesService.getScriptProperties();
+ var additions=catalogNewProducts_();Object.keys(additions).forEach(function(id){if(!base[id])base[id]=JSON.parse(JSON.stringify(additions[id]));});
+ var defaults=catalogDefaults_();Object.keys(additions).forEach(function(id){defaults[id]=additions[id];});
+ var props=typeof PropertiesService==='undefined'?null:PropertiesService.getScriptProperties();
  Object.keys(base).forEach(function(id){var p=base[id],d=defaults[id]||{};p.description=d.description||'';p.aliases=d.aliases||[];
   var raw=props&&props.getProperty('PRODUCT_V1_'+id);if(!raw)return;
   var v=JSON.parse(raw);if(!Number.isFinite(v.price)||v.price<=0||typeof v.description!=='string'||!Array.isArray(v.aliases))throw new Error('INVALID_PRODUCT_CONFIG');
   p.price=v.price;p.soldOut=v.soldOut===true;p.description=v.description;p.aliases=v.aliases;
- });return base;
+ });
+ Object.keys(base).forEach(function(id){var p=base[id];if(/^grade[123]_bag$|^prep_grade[123]$|^(?:english|kindergarten)_preparation$/.test(id)){p.bookingSeason=catalogBookingSeason_();if(p.description.indexOf(p.bookingSeason)===-1)p.description+=' الحجوزات القادمة: '+p.bookingSeason+'.';}});
+ var order=['grade1_bag','grade2_bag','grade3_bag','monthly_tests_grade1','monthly_tests_grade2','monthly_tests_grade3','prep_grade1','prep_grade2','prep_grade3','english_preparation','kindergarten_preparation'],sorted={};order.concat(Object.keys(base)).forEach(function(id){if(base[id])sorted[id]=base[id];});return sorted;
 }
-function catalogView_(){return {ok:true,revision:portalDigest_(JSON.stringify(PRODUCTS)),products:PRODUCTS,districts:DISTRICTS,delivery:{amman:2,other:3},canonical:true};}
+function catalogView_(){return {ok:true,revision:portalDigest_(JSON.stringify(PRODUCTS)),products:PRODUCTS,bookingSeason:catalogBookingSeason_(),districts:DISTRICTS,delivery:{amman:2,other:3},canonical:true};}
 function catalogUpdate_(d){
  var lock=LockService.getScriptLock();lock.waitLock(20000);
  try{
