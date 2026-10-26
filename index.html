@@ -1918,7 +1918,7 @@ function initializeWizard(){
   var tabs=wizardElement('div','product-tabs');tabs.setAttribute('role','group');tabs.setAttribute('aria-label','فئات المنتجات');
   [["all", "كل المنتجات"], ["bags", "حقائب المعلم"], ["monthly", "الاختبارات الشهرية"], ["prep", "التحضير اليومي"], ["english", "تحضير اللغة الإنجليزية"], ["kindergarten", "رياض الأطفال"], ["cards", "الوسائل والبطاقات التعليمية"]].forEach(function(pair){var b=wizardElement('button','product-tab',pair[1]);b.type='button';b.dataset.category=pair[0];b.onclick=function(){filterProductCategory(pair[0]);};tabs.append(b);});products.insertBefore(tabs,products.querySelector('#products-container'));
   var choices=wizardElement('div','selected-products');choices.id='wizard-selected-products';sidebar.insertBefore(choices,sidebar.querySelector('.summary-layout'));
-  var info=sidebar.querySelector('.info-box');info.querySelector('li').textContent='خدمة أجيال اختيارية، بسعر ديناران لكل معلمة.';
+  var info=sidebar.querySelector('.info-box');info.querySelector('li').textContent='خدمة أجيال اختيارية، بسعر دينارين لكل معلمة.';
   var error=sidebar.querySelector('#error-box');main.append(progress,error,layout);
   var nav=wizardElement('div','wizard-nav');var total=wizardElement('div','wizard-nav-total');total.append(wizardElement('span','','الإجمالي الحالي'),wizardElement('strong','','0 د.أ'));total.lastChild.id='wizard-footer-total';
   var controls=wizardElement('div','wizard-controls');var prev=wizardElement('button','wizard-prev','السابق');prev.id='wizard-prev';prev.type='button';prev.onclick=function(){navigateWizard(wizardStep-1);};
