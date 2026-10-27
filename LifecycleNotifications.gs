@@ -32,7 +32,7 @@ function lifecycleNotifications_(op,d){
    if(!order||duplicates[n[1]]||'962'+canonicalPhone_(order[3]).slice(1)!==n[2]||d.sender!==n[2])return waFail_('NOT_FOUND');
    var t=workflowPublicTracking_(order,teachers[n[1]]||[],context),value=JSON.parse(n[4]);
    if(n[3]==='status'&&t.status!==value.status||n[3]==='ajyal'&&(t.ajyalTotal===0||t.ajyalCompleted!==t.ajyalTotal))return waFail_('NOT_FOUND');
-   return {ok:true,id:n[0],targetRequestId:n[1],sender:n[2],name:order[2],orderNumber:order[0],status:n[3]==='ajyal'?'اكتمل رفع خطط أجيال':t.status,details:n[3]==='ajyal'?'اكتملت الخدمة لجميع المشتركين في هذا الطلب.':t.company?'شركة التوصيل: '+t.company:'يمكنك مراجعة تفاصيل الطلب من الرابط.',bookingNoticeId:bookingNoticeId_(n[1]),exportedAt:value.exportedAt||'',createdAt:n[6]};
+   return {ok:true,id:n[0],targetRequestId:n[1],sender:n[2],name:order[2],orderNumber:order[0],status:n[3]==='ajyal'?'اكتمل رفع خطط أجيال':t.status,details:n[3]==='ajyal'?'اكتملت الخدمة لجميع المشتركين في هذا الطلب.':t.company?'شركة التوصيل: '+t.company:'يمكنك مراجعة تفاصيل الطلب من الرابط.',bookingNoticeId:bookingNoticeId_(n[1]),exportedAt:value.exportedAt||'',createdAt:n[6],source:value.source||''};
   }
   if(op!=='lifecycle_poll')return waFail_('UNKNOWN_OPERATION');
   var previous={},rows=opsRead_(LIFECYCLE_STATE_,2),known={},addState=[],addOut=[],updateState=[],now=new Date().toISOString();
