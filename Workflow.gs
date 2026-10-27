@@ -79,6 +79,7 @@ function workflowExportCheck_(payload,chosen,seen,sameBatch){
   return {repeat:repeat,id:id,reason:reason,fingerprint:fingerprint};
 }
 function workflowRecordDownload_(payload,chosen,check){
+  if(typeof lifecycleQueueStickerDownloads_==='function')lifecycleQueueStickerDownloads_(payload,chosen);
   if(!check.id||check.duplicate)return;
   // Log first downloads too, so retrying the same network request is idempotent.
   opsPut_(WORKFLOW_DOWNLOAD_SHEET_,['معرف التنزيل','الدفعة','أرقام الطلبات','السبب','الوقت','الموظف','بصمة الملف'],[check.id,payload.batch,chosen.map(function(r){return r.num;}).join('، '),ajyalCell_(check.repeat?check.reason:'التنزيل الأول'),new Date().toISOString(),opsActor_(),check.fingerprint],check.id);
