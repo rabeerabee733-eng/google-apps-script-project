@@ -67,7 +67,19 @@ function customerCorrectionSubmit(payload){
     return customerEditView_(access);
   }finally{lock.releaseLock();}
 }
+var WORKFLOW_DELIVERY_DATES_='مواعيد دفعات الستكرات';
+function workflowDeliveryDate_(payload,save){
+  var value=String(payload.deliveryDate||''),known=opsRead_(WORKFLOW_DELIVERY_DATES_,3).filter(function(r){return r[0]===payload.batch;})[0];
+  if(known){if(String(known[1])!==value)throw new Error('موعد هذه الدفعة محفوظ ولا يتغير عند إعادة التنزيل.');return value;}
+  if(value){
+    var parsed=new Date(value+'T12:00:00Z'),now=new Date(),today=Utilities.formatDate(now,'Asia/Amman','yyyy-MM-dd'),max=Utilities.formatDate(new Date(now.getTime()+90*86400000),'Asia/Amman','yyyy-MM-dd');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(value)||isNaN(parsed.getTime())||parsed.toISOString().slice(0,10)!==value||value<today||value>max)throw new Error('حدد موعد توصيل صحيحًا من اليوم وحتى 90 يومًا.');
+  }
+  if(save)opsPut_(WORKFLOW_DELIVERY_DATES_,['الدفعة','موعد التوصيل','الوقت'],[payload.batch,value,new Date().toISOString()],payload.batch);
+  return value;
+}
 function workflowExportCheck_(payload,chosen,seen,sameBatch){
+  workflowDeliveryDate_(payload,false);
   var pending=workflowPending_(),unreviewed=chosen.filter(function(r){return pending[r.key];});
   if(unreviewed.length)throw new Error('راجع تعديلات العملاء قبل التنزيل النهائي: '+unreviewed.slice(0,10).map(function(r){return '#'+r.num;}).join('، ')+' — من تبويب مراجعة العملاء.');
   var repeat=chosen.some(function(r){return seen[r.key];}),id=String(payload.downloadId||''),reason=cleanText_(payload.reprintReason,250),previous=null;
@@ -79,6 +91,7 @@ function workflowExportCheck_(payload,chosen,seen,sameBatch){
   return {repeat:repeat,id:id,reason:reason,fingerprint:fingerprint};
 }
 function workflowRecordDownload_(payload,chosen,check){
+  workflowDeliveryDate_(payload,true);
   if(typeof lifecycleQueueStickerDownloads_==='function')lifecycleQueueStickerDownloads_(payload,chosen);
   if(!check.id||check.duplicate)return;
   // Log first downloads too, so retrying the same network request is idempotent.

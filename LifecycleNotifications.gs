@@ -12,9 +12,9 @@ function lifecycleQueueStickerDownloads_(payload,chosen){
  bookingNoticeOrderRows_().forEach(function(r){var id=String(r[16]);if(byId[id])duplicates[id]=true;byId[id]=r;});
  chosen.forEach(function(item){
   var id=String(item.requestId||item.key),row=byId[id],exported=first[item.key];
-  if(!row||duplicates[id]||!bookingNoticeValid_(row)||!exported||String(exported[4])!==String(payload.batch))return;
+  if(!row||duplicates[id]||(!bookingNoticeValid_(row)&&/^7\d{8}$/.test(canonicalPhone_(row[3])))||!exported||String(exported[4])!==String(payload.batch))return;
   var nid='lifecycle_'+bookingNoticeId_(id+'|status|خرج للتوصيل').slice(8);if(known[nid])return;known[nid]=true;
-  add.push([nid,id,'962'+canonicalPhone_(row[3]).slice(1),'status',JSON.stringify({status:'خرج للتوصيل',exportedAt:exported[3],source:'sticker_download'}),'pending',exported[3]]);
+  add.push([nid,id,'962'+canonicalPhone_(row[3]),'status',JSON.stringify({status:'خرج للتوصيل',exportedAt:exported[3],source:'sticker_download',batch:payload.batch,deliveryDate:payload.deliveryDate||'',name:row[2],orderNumber:row[0]}),/^7\d{8}$/.test(canonicalPhone_(row[3]))?'pending':'invalid_phone',exported[3]]);
  });
  if(add.length)sheets.outbox.getRange(sheets.outbox.getLastRow()+1,1,add.length,7).setNumberFormat('@').setValues(add);
 }
@@ -26,13 +26,18 @@ function lifecycleNotifications_(op,d){
    var ids=Array.isArray(d.ids)?d.ids.slice(0,50):[];out.forEach(function(r,i){if(r[5]==='pending'&&ids.indexOf(r[0])!==-1)sheets.outbox.getRange(i+2,6).setValue('queued');});return {ok:true};
   }
   var orders=bookingNoticeOrderRows_(),byId={},duplicates={};orders.forEach(function(r){if(byId[r[16]])duplicates[r[16]]=true;byId[r[16]]=r;});
+  // Repair only the known unsent legacy truncation, never a reassigned or acknowledged number.
+  out.forEach(function(r,i){var row=byId[r[1]];if(!row||duplicates[r[1]]||!bookingNoticeValid_(row))return;var national=canonicalPhone_(row[3]),phone='962'+national;
+   if(r[5]==='pending'&&r[2]==='962'+national.slice(1)){sheets.outbox.getRange(i+2,3).setValue(phone);r[2]=phone;}
+   if(r[5]==='invalid_phone'){sheets.outbox.getRange(i+2,3).setValue(phone);sheets.outbox.getRange(i+2,6).setValue('pending');r[2]=phone;r[5]='pending';}
+  });
   var context=lifecycleContext_(),teachers=lifecycleTeachers_();
   if(op==='lifecycle_details'){
    var found=out.filter(function(r){return r[0]===d.id;});if(found.length!==1)return waFail_('NOT_FOUND');var n=found[0],order=byId[n[1]];
-   if(!order||duplicates[n[1]]||'962'+canonicalPhone_(order[3]).slice(1)!==n[2]||d.sender!==n[2])return waFail_('NOT_FOUND');
+   if(!order||duplicates[n[1]]||'962'+canonicalPhone_(order[3])!==n[2]||d.sender!==n[2])return waFail_('NOT_FOUND');
    var t=workflowPublicTracking_(order,teachers[n[1]]||[],context),value=JSON.parse(n[4]);
    if(n[3]==='status'&&t.status!==value.status||n[3]==='ajyal'&&(t.ajyalTotal===0||t.ajyalCompleted!==t.ajyalTotal))return waFail_('NOT_FOUND');
-   return {ok:true,id:n[0],targetRequestId:n[1],sender:n[2],name:order[2],orderNumber:order[0],status:n[3]==='ajyal'?'اكتمل رفع خطط أجيال':t.status,details:n[3]==='ajyal'?'اكتملت الخدمة لجميع المشتركين في هذا الطلب.':t.company?'شركة التوصيل: '+t.company:'يمكنك مراجعة تفاصيل الطلب من الرابط.',bookingNoticeId:bookingNoticeId_(n[1]),exportedAt:value.exportedAt||'',createdAt:n[6],source:value.source||''};
+   return {ok:true,id:n[0],targetRequestId:n[1],sender:n[2],name:order[2],orderNumber:order[0],status:n[3]==='ajyal'?'اكتمل رفع خطط أجيال':t.status,details:n[3]==='ajyal'?'اكتملت الخدمة لجميع المشتركين في هذا الطلب.':t.company?'شركة التوصيل: '+t.company:'يمكنك مراجعة تفاصيل الطلب من الرابط.',bookingNoticeId:bookingNoticeId_(n[1]),exportedAt:value.exportedAt||'',createdAt:n[6],source:value.source||'',batch:value.batch||'',deliveryDate:value.deliveryDate||''};
   }
   if(op!=='lifecycle_poll')return waFail_('UNKNOWN_OPERATION');
   var previous={},rows=opsRead_(LIFECYCLE_STATE_,2),known={},addState=[],addOut=[],updateState=[],now=new Date().toISOString();
@@ -43,13 +48,14 @@ function lifecycleNotifications_(op,d){
    // The first observation is a baseline, including historical orders. No catch-up blasts.
    if(old){
     var kinds=[];if(old.value.status!==value.status&&['جاهز','خرج للتوصيل','تم التسليم'].indexOf(value.status)!==-1)kinds.push('status');if(!old.value.ajyal&&value.ajyal)kinds.push('ajyal');
-    kinds.forEach(function(kind){var nid='lifecycle_'+bookingNoticeId_(id+'|'+kind+'|'+(kind==='status'?value.status:'complete')).slice(8);if(known[nid])return;known[nid]=true;addOut.push([nid,id,'962'+canonicalPhone_(r[3]).slice(1),kind,JSON.stringify(value),'pending',now]);});
+    kinds.forEach(function(kind){var nid='lifecycle_'+bookingNoticeId_(id+'|'+kind+'|'+(kind==='status'?value.status:'complete')).slice(8);if(known[nid])return;known[nid]=true;addOut.push([nid,id,'962'+canonicalPhone_(r[3]),kind,JSON.stringify(value),'pending',now]);});
     if(JSON.stringify(old.value)!==JSON.stringify(value))updateState.push({row:old.row,value:JSON.stringify(value)});
    }else addState.push([id,JSON.stringify(value)]);
   });
   if(addOut.length)sheets.outbox.getRange(sheets.outbox.getLastRow()+1,1,addOut.length,7).setNumberFormat('@').setValues(addOut);
   updateState.forEach(function(item){sheets.state.getRange(item.row,2).setValue(item.value);});
   if(addState.length)sheets.state.getRange(sheets.state.getLastRow()+1,1,addState.length,2).setNumberFormat('@').setValues(addState);
-  return {ok:true,events:out.concat(addOut).filter(function(r){return r[5]==='pending';}).slice(0,50).map(function(r){return {id:r[0],targetRequestId:r[1],sender:r[2],kind:r[3],createdAt:r[6]};})};
+  function event(r){var v=JSON.parse(r[4]);return {id:r[0],targetRequestId:r[1],sender:r[2],kind:r[3],createdAt:r[6],source:v.source||'',batch:v.batch||'',deliveryDate:v.deliveryDate||'',exportedAt:v.exportedAt||'',orderNumber:v.orderNumber||'',name:v.name||''};}
+  return {ok:true,events:out.concat(addOut).filter(function(r){return r[5]==='pending';}).slice(0,50).map(event),issues:out.filter(function(r){return r[5]==='invalid_phone';}).map(event)};
  }finally{lock.releaseLock();}
 }
