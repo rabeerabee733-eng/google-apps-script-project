@@ -1,7 +1,10 @@
 /* Signed bridge diagnostics and recovery. No customer messages or queue mutations. */
-var RELIABILITY_VERSION_='2026-10-31.3';
+var RELIABILITY_VERSION_='2026-10-31.4';
+// Keep incomplete orders visible; only entirely empty display rows are not orders.
+// Do not filter opsRows_ globally: other callers rely on physical row positions.
+function reliabilityOrderRows_(){return opsRows_().filter(function(r){return r.some(function(v){return String(v==null?'':v).trim()!=='';});});}
 function reliabilitySnapshot_(d){
- d=d||{};var rows=opsRows_(),out=opsRead_(LIFECYCLE_OUTBOX_,7),notices=opsRead_('إشعارات الحجوزات',9),ledger=stickerExportLedger_(),ids={},numbers={},exports={},events={},bookings={};
+ d=d||{};var rows=reliabilityOrderRows_(),out=opsRead_(LIFECYCLE_OUTBOX_,7),notices=opsRead_('إشعارات الحجوزات',9),ledger=stickerExportLedger_(),ids={},numbers={},exports={},events={},bookings={};
  rows.forEach(function(r){if(r[16])ids[r[16]]=(ids[r[16]]||0)+1;numbers[r[0]]=(numbers[r[0]]||0)+1;});
  ledger.forEach(function(r){if(!exports[r[0]])exports[r[0]]=r;});out.forEach(function(r){events[r[0]]=r;});notices.forEach(function(r){bookings[r[2]]=r;});
  var revision=portalDigest_(JSON.stringify([rows,ledger]));if(d.revision&&d.revision!==revision)return waFail_('SNAPSHOT_CHANGED');
@@ -13,7 +16,7 @@ function reliabilitySnapshot_(d){
 }
 function reliabilityProduction_(){
  var groups={},unknown=[],counts={orders:0,excluded:0},packs=opsPacks_(),meta=portalStickerMeta_(),tracking=courierTracking_();
- opsRows_().forEach(function(r){var key=stickerExportKey_(r),status=(meta[r[16]]||{}).status||'',courier=(tracking[key]||{}).status||'';
+ reliabilityOrderRows_().forEach(function(r){var key=stickerExportKey_(r),status=(meta[r[16]]||{}).status||'',courier=(tracking[key]||{}).status||'';
   if(status==='ملغي'||status==='تم التسليم'||courier==='تم التسليم'||courier==='مرتجع'){counts.excluded++;return;}counts.orders++;
   var pack=packs[key],valid=pack&&pack.itemsRevision===opsItemRevision_(r),checked=valid?pack.checked||[]:[];
   opsItems_(r[14]).forEach(function(item){if(!item.product){if(!/^خدمة أجيال/.test(item.text))unknown.push({orderNumber:String(r[0]),reason:'سطر يحتاج تصنيفًا يدويًا'});return;}

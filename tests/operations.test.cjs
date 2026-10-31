@@ -31,6 +31,22 @@ c.portalStickerMeta_=()=>({});c.opsPacks_=()=>({'stable-1':{itemsRevision:c.opsI
 const snap=c.reliabilitySnapshot_({});assert(snap.ok);assert.equal(snap.identity.missing,0);assert.equal(snap.production.groups.find(x=>x.kind==='folder').completed,2);assert.equal(snap.production.groups.find(x=>x.kind==='paper').remaining,1);assert(!JSON.stringify(snap).includes('0790000001'));assert(!JSON.stringify(snap).includes('اسم وهمي'));
 currentOrders.data[2][14]='1) حقيبة الصف الأول — العدد: 2 — ورقي: 1';assert.equal(c.reliabilityProduction_().unknownCount,1);assert.equal(c.reliabilitySnapshot_({revision:snap.revision}).code,'SNAPSHOT_CHANGED');currentOrders.data[2][14]='1) حقيبة الصف الأول — العدد: 1 — ورقي: 1';
 currentOrders.data.reverse();const sorted=c.reliabilitySnapshot_({});assert(sorted.rows.some(x=>x.requestId==='stable-1'&&x.orderNumber==='1'));currentOrders.data.reverse();currentOrders.data[2][16]='stable-1';assert.equal(c.reliabilitySnapshot_({}).identity.duplicateIds,1);currentOrders.data[2][16]='';assert.equal(c.reliabilitySnapshot_({}).identity.missing,1);currentOrders.data[2][16]='stable-2';
+// Blank physical rows must not create missing-ID alerts or inflate production totals.
+// A genuine incomplete order (even a numeric zero) must still be diagnosed.
+const beforeBlankRows=c.reliabilitySnapshot_({}),savedOrderRows=clone(currentOrders.data);
+currentOrders.data.splice(2,0,Array(17).fill(''));
+for(let i=0;i<6;i++)currentOrders.data.push(Array(17).fill(i%2?' \t\n':''));
+const withBlankRows=c.reliabilitySnapshot_({revision:beforeBlankRows.revision});
+assert.equal(withBlankRows.ok,true);assert.equal(withBlankRows.total,2);assert.equal(withBlankRows.identity.missing,0);assert.equal(withBlankRows.identity.duplicateNumbers,0);
+assert.equal(withBlankRows.production.counts.orders,2);assert.equal(withBlankRows.production.counts.excluded,0);
+assert.equal(JSON.stringify(withBlankRows.production.groups),JSON.stringify(beforeBlankRows.production.groups));
+assert.equal(c.opsRows_().length,9,'physical row positions remain intact');
+const incomplete=Array(17).fill('');incomplete[2]='طلب حقيقي بلا معرّف';currentOrders.data.push(incomplete);
+const zeroOnly=Array(17).fill('');zeroOnly[8]=0;currentOrders.data.push(zeroOnly);
+const incompleteSnapshot=c.reliabilitySnapshot_({});assert.equal(incompleteSnapshot.total,4);assert.equal(incompleteSnapshot.identity.missing,2);
+assert.equal(incompleteSnapshot.rows.filter(x=>x.identityIssue==='MISSING_ID').length,2);
+assert.equal(c.reliabilitySnapshot_({revision:beforeBlankRows.revision}).code,'SNAPSHOT_CHANGED');
+currentOrders.data=clone(savedOrderRows);
 properties.PRODUCT_V1_bag=JSON.stringify({price:11,soldOut:false,description:'وصف سابق',aliases:[]});c.catalogApply_(c.PRODUCTS);const version=c.catalogView_().revision;
 const changed=c.catalogUpdate_({id:'bag',revision:version,product:{price:12,soldOut:false,description:'وصف جديد',aliases:[]}});assert(changed.ok);assert.equal(c.catalogHistory_().rows.length,1);assert.equal(c.catalogRestore_({id:c.catalogHistory_().rows[0].id,revision:changed.revision}).products.bag.price,11);assert.equal(c.catalogRestore_({id:c.catalogHistory_().rows[0].id,revision:changed.revision}).code,'STALE_CATALOG');
 const maintenance=c.reliabilityMaintenance_();assert(maintenance.ok);assert(maintenance.backup.drill.ok);const count=c.opsBackupIndex_().length;assert(c.reliabilityMaintenance_().ok);assert.equal(c.opsBackupIndex_().length,count);const manifest=c.opsBackupManifest_(maintenance.backup.id);assert(manifest.manifest.settings.PRODUCT_V1_bag);assert(!Object.hasOwn(manifest.manifest.settings,'WA_BRIDGE_SECRET'));
