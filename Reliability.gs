@@ -1,5 +1,5 @@
 /* Signed bridge diagnostics and recovery. No customer messages or queue mutations. */
-var RELIABILITY_VERSION_='2026-10-31.2';
+var RELIABILITY_VERSION_='2026-10-31.3';
 function reliabilitySnapshot_(d){
  d=d||{};var rows=opsRows_(),out=opsRead_(LIFECYCLE_OUTBOX_,7),notices=opsRead_('إشعارات الحجوزات',9),ledger=stickerExportLedger_(),ids={},numbers={},exports={},events={},bookings={};
  rows.forEach(function(r){if(r[16])ids[r[16]]=(ids[r[16]]||0)+1;numbers[r[0]]=(numbers[r[0]]||0)+1;});
