@@ -35,7 +35,13 @@ function catalogUpdate_(d){
   var p=d.product,id=d.id;if(!Object.prototype.hasOwnProperty.call(PRODUCTS,id)||!p||!Number.isFinite(p.price)||p.price<=0||p.price>10000||Math.round(p.price*1000)!==p.price*1000||typeof p.soldOut!=='boolean'||typeof p.description!=='string'||p.description.length<3||p.description.length>1500||!Array.isArray(p.aliases)||p.aliases.length>20)return waFail_('INVALID_PRODUCT');
   if(p.aliases.some(function(a){return typeof a!=='string'||!a.trim()||a.length>100;}))return waFail_('INVALID_PRODUCT');
   var value={price:p.price,soldOut:p.soldOut,description:p.description.trim(),aliases:p.aliases.map(function(a){return a.trim();})};
-  PropertiesService.getScriptProperties().setProperty('PRODUCT_V1_'+id,JSON.stringify(value));catalogApply_(PRODUCTS);
+  var props=PropertiesService.getScriptProperties(),key='PRODUCT_V1_'+id,before=JSON.stringify({price:PRODUCTS[id].price,soldOut:PRODUCTS[id].soldOut===true,description:PRODUCTS[id].description,aliases:PRODUCTS[id].aliases}),old=props.getProperty(key);
+  props.setProperty(key,JSON.stringify(value));
+  try{var history=opsSheet_('سجل اعتماد المنتجات',['المعرف','الوقت','المنتج','قبل','بعد','اعتمد بواسطة']);history.getRange(history.getLastRow()+1,1,1,6).setNumberFormat('@').setValues([[Utilities.getUuid(),new Date().toISOString(),id,before,JSON.stringify(value),'مدير كرم']]);}
+  catch(e){if(old===null)props.deleteProperty(key);else props.setProperty(key,old);throw e;}
+  catalogApply_(PRODUCTS);
   return catalogView_();
  }finally{lock.releaseLock();}
 }
+function catalogHistory_(){return {ok:true,rows:opsRead_('سجل اعتماد المنتجات',6).slice(-100).reverse().map(function(r){return {id:r[0],at:r[1],productId:r[2],before:JSON.parse(r[3]),after:JSON.parse(r[4]),actor:r[5]};})};}
+function catalogRestore_(d){var match=catalogHistory_().rows.filter(function(r){return r.id===d.id;});if(match.length!==1)return waFail_('HISTORY_NOT_FOUND');return catalogUpdate_({id:match[0].productId,product:match[0].before,revision:d.revision});}

@@ -44,6 +44,10 @@ function waBridge_(e){
     if(['edit_notifications','edit_notifications_ack'].indexOf(request.op)!==-1)return waJSON_(customerEditNotices_(request.op,d));
     if(['booking_notifications','booking_notifications_ack','booking_notification_details','booking_notifications_status'].indexOf(request.op)!==-1)return waJSON_(bookingNotifications_(request.op,d));
     if(['lifecycle_poll','lifecycle_ack','lifecycle_details'].indexOf(request.op)!==-1)return waJSON_(lifecycleNotifications_(request.op,d));
+    if(request.op==='reliability_snapshot')return waJSON_(reliabilitySnapshot_(d));
+    if(request.op==='reliability_maintenance')return waJSON_(reliabilityMaintenance_());
+    if(request.op==='catalog_history')return waJSON_(catalogHistory_());
+    if(request.op==='catalog_restore')return waJSON_(catalogRestore_(d));
     if(request.op==='catalog')return waJSON_(catalogView_());
     if(request.op==='catalog_update')return waJSON_(catalogUpdate_(d));
     if(request.op==='customer_order')return waJSON_(waEditableOrder_(d));
