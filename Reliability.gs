@@ -1,5 +1,5 @@
 /* Signed bridge diagnostics and recovery. No customer messages or queue mutations. */
-var RELIABILITY_VERSION_='2026-10-31.1';
+var RELIABILITY_VERSION_='2026-10-31.2';
 function reliabilitySnapshot_(d){
  d=d||{};var rows=opsRows_(),out=opsRead_(LIFECYCLE_OUTBOX_,7),notices=opsRead_('إشعارات الحجوزات',9),ledger=stickerExportLedger_(),ids={},numbers={},exports={},events={},bookings={};
  rows.forEach(function(r){if(r[16])ids[r[16]]=(ids[r[16]]||0)+1;numbers[r[0]]=(numbers[r[0]]||0)+1;});
@@ -29,7 +29,7 @@ function reliabilityProduction_(){
 }
 function reliabilityBackupSettings_(){
  var props=PropertiesService.getScriptProperties(),all=props.getProperties(),result={};
- Object.keys(all).filter(function(k){return /^PRODUCT_V1_/.test(k)||['STICKER_BARCODE_ANCHOR','ADMIN_ORDER_NUMBER_FLOOR','ADMIN_PORTAL_ACCOUNTS_V1','WORKFLOW_ALERT_SETTINGS_V1'].indexOf(k)!==-1;}).forEach(function(k){result[k]=all[k];});return result;
+ Object.keys(all).filter(function(k){return /^PRODUCT_(?:SEASON_)?V1_/.test(k)||['STICKER_BARCODE_ANCHOR','ADMIN_ORDER_NUMBER_FLOOR','ADMIN_PORTAL_ACCOUNTS_V1','WORKFLOW_ALERT_SETTINGS_V1'].indexOf(k)!==-1;}).forEach(function(k){result[k]=all[k];});return result;
 }
 function reliabilityBackupDrill_(id){
  var b=opsBackupManifest_(id),props=PropertiesService.getScriptProperties(),testId=props.getProperty('RELIABILITY_DRILL_SHEET_V1'),target,marker='__KARAM_RESTORE_TEST__';

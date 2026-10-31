@@ -44,6 +44,10 @@ function waBridge_(e){
     if(['edit_notifications','edit_notifications_ack'].indexOf(request.op)!==-1)return waJSON_(customerEditNotices_(request.op,d));
     if(['booking_notifications','booking_notifications_ack','booking_notification_details','booking_notifications_status'].indexOf(request.op)!==-1)return waJSON_(bookingNotifications_(request.op,d));
     if(['lifecycle_poll','lifecycle_ack','lifecycle_details'].indexOf(request.op)!==-1)return waJSON_(lifecycleNotifications_(request.op,d));
+    if(request.op==='business_customer')return waJSON_(businessCustomer_(d));
+    if(request.op==='business_orders')return waJSON_(businessOrders_(d));
+    if(request.op==='business_order')return waJSON_(businessOrder_(d));
+    if(request.op==='business_season')return waJSON_(businessSeason_(d));
     if(request.op==='reliability_snapshot')return waJSON_(reliabilitySnapshot_(d));
     if(request.op==='reliability_maintenance')return waJSON_(reliabilityMaintenance_());
     if(request.op==='catalog_history')return waJSON_(catalogHistory_());

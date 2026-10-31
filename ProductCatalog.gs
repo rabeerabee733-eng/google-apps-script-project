@@ -18,12 +18,13 @@ function catalogApply_(base){
  ['english_preparation','kindergarten_preparation'].forEach(function(id){base[id].splitAllowed=true;base[id].paperOnly=false;});
  var defaults=catalogDefaults_();Object.keys(additions).forEach(function(id){defaults[id]=additions[id];});
  var props=typeof PropertiesService==='undefined'?null:PropertiesService.getScriptProperties();
- Object.keys(base).forEach(function(id){var p=base[id],d=defaults[id]||{};p.description=d.description||'';p.aliases=d.aliases||[];
+ Object.keys(base).forEach(function(id){var p=base[id],d=defaults[id]||{};if(Object.prototype.hasOwnProperty.call(p,'_seasonOriginal'))p.soldOut=p._seasonOriginal;p.description=d.description||'';p.aliases=d.aliases||[];
   var raw=props&&props.getProperty('PRODUCT_V1_'+id);if(!raw)return;
   var v=JSON.parse(raw);if(!Number.isFinite(v.price)||v.price<=0||typeof v.description!=='string'||!Array.isArray(v.aliases))throw new Error('INVALID_PRODUCT_CONFIG');
   p.price=v.price;p.soldOut=v.soldOut===true;p.description=v.description;p.aliases=v.aliases;
  });
  Object.keys(base).forEach(function(id){var p=base[id];if(/^grade[123]_bag$|^prep_grade[123]$|^(?:english|kindergarten)_preparation$/.test(id)){p.bookingSeason=catalogBookingSeason_();if(p.description.indexOf(p.bookingSeason)===-1)p.description+=' الحجوزات القادمة: '+p.bookingSeason+'.';}});
+ if(typeof businessApplySeasons_==='function')businessApplySeasons_(base,props);
  var order=['grade1_bag','grade2_bag','grade3_bag','monthly_tests_grade1','monthly_tests_grade2','monthly_tests_grade3','prep_grade1','prep_grade2','prep_grade3','english_preparation','kindergarten_preparation'],sorted={};order.concat(Object.keys(base)).forEach(function(id){if(base[id])sorted[id]=base[id];});return sorted;
 }
 function catalogView_(){return {ok:true,revision:portalDigest_(JSON.stringify(PRODUCTS)),products:PRODUCTS,bookingSeason:catalogBookingSeason_(),districts:DISTRICTS,delivery:{amman:2,other:3},canonical:true};}
