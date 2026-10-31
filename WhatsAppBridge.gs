@@ -44,10 +44,11 @@ function waBridge_(e){
     if(['edit_notifications','edit_notifications_ack'].indexOf(request.op)!==-1)return waJSON_(customerEditNotices_(request.op,d));
     if(['booking_notifications','booking_notifications_ack','booking_notification_details','booking_notifications_status'].indexOf(request.op)!==-1)return waJSON_(bookingNotifications_(request.op,d));
     if(['lifecycle_poll','lifecycle_ack','lifecycle_details'].indexOf(request.op)!==-1)return waJSON_(lifecycleNotifications_(request.op,d));
-    if(request.op==='business_payment_sync'){
+    if(request.op==='business_payment_review')return waJSON_(businessPaymentReview_(d));
+    if(request.op==='business_payment_sync'||request.op==='business_payment_reconcile'){
       if(p.getProperty('WA_BRIDGE_WRITE_ENABLED')!=='true')return waJSON_(waFail_('WRITES_DISABLED'));
       if(SHEET_ID==='1He3MxPqQGcoOgUGEPoI1iVX6L5-U7j2TjQll2dWhr_w'&&p.getProperty('WA_BRIDGE_ALLOW_PRODUCTION')!=='true')return waJSON_(waFail_('PRODUCTION_LOCKED'));
-      return waJSON_(businessPaymentSync_(d));
+      return waJSON_(request.op==='business_payment_reconcile'?businessPaymentReconcile_(d):businessPaymentSync_(d));
     }
     if(request.op==='business_customer')return waJSON_(businessCustomer_(d));
     if(request.op==='business_orders')return waJSON_(businessOrders_(d));

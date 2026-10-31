@@ -16,12 +16,21 @@ function portalEqual_(a,b){var mismatch=a.length^b.length;for(var i=0;i<Math.max
 function adminPortalLogin(payload){
   payload=payload||{};var username=String(payload.username||'').trim().toLowerCase(),password=String(payload.password||'');
   if(!/^[a-z0-9_.-]{3,40}$/.test(username)||password.length>128)throw new Error('بيانات الدخول غير صحيحة.');
-  var lock=LockService.getScriptLock();lock.waitLock(20000);
-  try{var cache=CacheService.getScriptCache(),key='portal-attempt:'+portalDigest_(username),attempts=Number(cache.get(key)||0);if(attempts>=5)throw new Error('محاولات كثيرة. انتظر 15 دقيقة.');cache.put(key,String(attempts+1),900);
-    var a=portalAccounts_().filter(function(a){return a.username===username;})[0];
-    var hash=portalPassword_(password,a?a.salt:'unrecognized-username-salt');
-    if(!a||!a.active||!portalEqual_(hash,a.hash))throw new Error('بيانات الدخول غير صحيحة.');
-    cache.remove(key);var token=Utilities.getUuid()+Utilities.getUuid();cache.put('portal-session:'+portalDigest_(token),JSON.stringify({id:a.id,version:a.version}),21600);return {token:token,user:portalPublic_(a)};
+  var lock=LockService.getScriptLock(),cache=CacheService.getScriptCache(),a,key;lock.waitLock(20000);
+  try{
+    a=portalAccounts_().filter(function(x){return x.username===username;})[0];
+    key='portal-attempt:'+portalDigest_(a?username:'unknown-usernames');
+    var attempts=Number(cache.get(key)||0);if(attempts>=5)throw new Error('محاولات كثيرة. انتظر 15 دقيقة.');cache.put(key,String(attempts+1),900);
+  }finally{lock.releaseLock();}
+  // Password derivation must not hold the booking/export lock.
+  if(!a||!a.active)throw new Error('بيانات الدخول غير صحيحة.');
+  var hash=portalPassword_(password,a.salt);
+  if(!portalEqual_(hash,a.hash))throw new Error('بيانات الدخول غير صحيحة.');
+  lock.waitLock(20000);
+  try{
+    var current=portalAccounts_().filter(function(x){return x.id===a.id&&x.active&&x.version===a.version;})[0];
+    if(!current)throw new Error('تغير الحساب. سجل الدخول مجددًا.');
+    cache.remove(key);var token=Utilities.getUuid()+Utilities.getUuid();cache.put('portal-session:'+portalDigest_(token),JSON.stringify({id:a.id,version:a.version}),21600);return {token:token,user:portalPublic_(current)};
   }finally{lock.releaseLock();}
 }
 function portalIdentity_(token){

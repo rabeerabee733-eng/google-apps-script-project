@@ -1849,6 +1849,8 @@ function adminUpdateOrder(payload) {
     var row = adminFindRowByRequestId_(sheet, requestId, payload.rowNumber);
     var oldDisplay = sheet.getRange(row, 1, 1, 17).getDisplayValues()[0];
     if(payload.revision && payload.revision!==customerEditRevision_(oldDisplay,customerEditTeachers_(requestId)))throw new Error('تغير الطلب منذ فتحه. أعد فتح الطلب وراجع التغييرات قبل الحفظ.');
+    var beforeMeta = adminGetMeta_(requestId, oldDisplay[0]);
+    adminAssertFinancialPatch_(adminMetaPatchFromPayload_(payload), beforeMeta);
     var normalized = adminValidateEditable_(payload);
     var newValues = oldDisplay.slice(0);
 
@@ -1868,7 +1870,6 @@ function adminUpdateOrder(payload) {
     newValues[15] = normalized.notes;
 
     sheet.getRange(row, 3, 1, 14).setValues([newValues.slice(2, 16)]);
-    var beforeMeta = adminGetMeta_(requestId, oldDisplay[0]);
     var afterMeta = adminUpsertMeta_(requestId, oldDisplay[0], adminMetaPatchFromPayload_(payload), auth.email);
     SpreadsheetApp.flush();
 
@@ -1890,6 +1891,7 @@ function adminUpdateOrder(payload) {
 function adminCreateOrder(payload) {
   var auth = requireAdmin_();
   payload = payload || {};
+  adminAssertFinancialPatch_(adminMetaPatchFromPayload_(payload), {amountPaid:0,paymentStatus:'غير مدفوع'});
 
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(20000)) throw new Error('النظام مشغول الآن؛ حاول بعد لحظات.');
@@ -2393,6 +2395,13 @@ function adminGetMeta_(requestId, orderNumber) {
   return adminMetaToObject_(sheet.getRange(row, 1, 1, 10).getValues()[0], spreadsheet.getSpreadsheetTimeZone());
 }
 
+function adminAssertFinancialPatch_(patch, current) {
+  patch=patch||{};current=current||{amountPaid:0,paymentStatus:'غير مدفوع'};
+  var amountChanged=patch.amountPaid!==undefined&&patch.amountPaid!==null&&patch.amountPaid!==''&&Number(patch.amountPaid)!==Number(current.amountPaid||0);
+  var payment=cleanText_(patch.paymentStatus,50),statusChanged=!!payment&&payment!==current.paymentStatus;
+  if((amountChanged||statusChanged)&&typeof portalContext_!=='undefined'&&portalContext_&&!portalContext_.native&&(portalContext_.permissions||[]).indexOf('payments')===-1)throw new Error('تعديل المدفوع أو حالة الدفع يتطلب صلاحية المدفوعات.');
+}
+
 function adminUpsertMeta_(requestId, orderNumber, patch, email) {
   adminEnsureSupportSheets_();
   patch = patch || {};
@@ -2401,6 +2410,7 @@ function adminUpsertMeta_(requestId, orderNumber, patch, email) {
   var sheet = spreadsheet.getSheetByName(ADMIN_META_SHEET_NAME);
   var row = adminFindMetaRow_(sheet, requestId);
   var current = row ? adminMetaToObject_(sheet.getRange(row, 1, 1, 10).getValues()[0], spreadsheet.getSpreadsheetTimeZone()) : adminDefaultMeta_(requestId, orderNumber);
+  adminAssertFinancialPatch_(patch, current);
 
   var status = cleanText_(patch.status, 50) || current.status;
   var paymentStatus = cleanText_(patch.paymentStatus, 50) || current.paymentStatus;
